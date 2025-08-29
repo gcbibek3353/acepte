@@ -29,6 +29,7 @@ model User {
   summarize_written_text_answers SummarizeWrittenTextAnswer[]
 
   writeEssayBookmark    WriteEssayBookMark[]
+  summarizeWrittenTextBookmark SummarizeWrittenTextBookMark[]
 
   @@unique([email])
   @@map("user")
@@ -95,7 +96,7 @@ model WriteEssayQuestion {
 
   // Relations
   answers   WriteEssayAnswer[]
-  bookmarks Bookmark[]
+  bookmarks WriteEssayBookMark[]
 
   @@map("write_essay_question")
 }
@@ -146,7 +147,7 @@ model SummarizeWrittenTextQuestion {
 
   // Relations
   answers   SummarizeWrittenTextAnswer[]
-  // bookmarks Bookmark[]
+  summarizeWrittenTextBookmarks SummarizeWrittenTextBookMark[]
 
   @@map("summarize_written_text_question")
 }
