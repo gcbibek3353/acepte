@@ -6,4 +6,4 @@ const Essay = () => {
   )
 }
 
-export default Essay
+export default Essay;
