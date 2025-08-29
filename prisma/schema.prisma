@@ -25,6 +25,11 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  write_essay_answers WriteEssayAnswer[]
+  summarize_written_text_answers SummarizeWrittenTextAnswer[]
+
+  writeEssayBookmark    WriteEssayBookMark[]
+
   @@unique([email])
   @@map("user")
 }
@@ -72,4 +77,114 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+// Writing specific models
+
+model WriteEssayQuestion {
+  id                String     @id @default(cuid())
+  questionId        String     @unique // Your custom unique identifier
+  essayTitle       String
+  essay_description String
+  difficulty        Difficulty @default(MEDIUM)
+  min_word_limit    Int?
+  max_word_limit    Int?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  isActive          Boolean    @default(true)
+
+  // Relations
+  answers   WriteEssayAnswer[]
+  bookmarks Bookmark[]
+
+  @@map("write_essay_question")
+}
+
+model WriteEssayAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  answer     String   @db.Text // Large text field for essay content
+  wordCount  Int?
+  timeSpent  Int? // in seconds
+  score      Float? // nullable until graded
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question WriteEssayQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("write_essay_answer")
+}
+
+model WriteEssayBookMark {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question WriteEssayQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("write_essay_bookmark")
+}
+
+model SummarizeWrittenTextQuestion {
+  id             String     @id @default(cuid())
+  questionId     String     @unique // Your custom unique identifier
+  textTitle     String
+  passage        String     @db.Text // The text to be summarized
+  difficulty     Difficulty @default(MEDIUM)
+  min_word_limit Int?
+  max_word_limit Int?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  isActive       Boolean    @default(true)
+
+  // Relations
+  answers   SummarizeWrittenTextAnswer[]
+  // bookmarks Bookmark[]
+
+  @@map("summarize_written_text_question")
+}
+
+model SummarizeWrittenTextAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  answer     String   @db.Text // Large text field for summary content
+  wordCount  Int?
+  timeSpent  Int? // in seconds
+  score      Float? // nullable until graded
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question SummarizeWrittenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("summarize_written_text_answer")
+}
+
+model SummarizeWrittenTextBookMark {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question SummarizeWrittenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("summarize_written_text_bookmark")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
 }
