@@ -4,10 +4,11 @@ import prisma from "@/lib/prisma";
 
 const getWriteEssayQuestions = async () => {
     // TODO : need to implement pagination here
- }
+}
 
 const getWriteEssayQuestionById = async (id: string) => {
     try {
+        // TODO : Also include the answers associated with this question for the current user. current user should be attached by middleware or something.
         const question = prisma.writeEssayQuestion.findUnique({
             where: {
                 id: id
@@ -29,7 +30,8 @@ const postWriteEssayAnswer = async () => { }
 
 const getSummarizeWrittenTextQuestions = async () => { }
 
-const getSummarizeWrittenTextQuestionById = async (id : string) => { 
+const getSummarizeWrittenTextQuestionById = async (id: string) => {
+    // TODO : Also include the answers associated with this question for the current user. current user should be attached by middleware or something.
     try {
         const question = prisma.summarizeWrittenTextQuestion.findUnique({
             where: {

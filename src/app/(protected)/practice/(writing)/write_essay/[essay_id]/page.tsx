@@ -1,52 +1,81 @@
 "use client"
 import Header from '@/components/Practice/Header'
 import Timer from '@/components/Practice/Timer'
+import useFetch from '@/hooks/useFetch'
 import React, { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 
-const dummyTopicData = {
-  id: '483',
-  topic: 'Some people believe that university students should be required to attend classes. Others believe that going to classes should be optional for students. Which point of view do you agree with? Use specific reasons and examples to support your answer.',
-  description: "Discuss both views and give your opinion.",
-  difficulty: 'medium',
-  bookmarks: ['user1', 'user2'],
+interface QuestionData {
+  id: string
+  questionId: string
+  essayTitle: string
+  essay_description: string
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
+  min_word_limit: number
+  max_word_limit: number
+  createdAt: string
+  updatedAt: string
+  isActive: boolean
+}
+
+interface ApiResponse {
+  success: boolean
+  message: string
+  data: QuestionData
 }
 
 const page = () => {
+  const params = useParams()
+  const essayId = params.essay_id as string
+  
   const [essay, setEssay] = useState('')
   const [wordCount, setWordCount] = useState(0)
-  const timeLimit = 3 * 60 // 3 minutes in seconds
+  const timeLimit = 20 * 60 // 20 minutes in seconds
+
+  const URL = `http://localhost:3000/api/v1/practice/writing/writeEssay/${essayId}`
+  const { data, loading, error } = useFetch<ApiResponse>(URL)
+
+  // Update word count when essay changes
+  useEffect(() => {
+    const words = essay.trim().split(/\s+/).filter(word => word.length > 0)
+    setWordCount(words.length)
+  }, [essay])
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')
-    // Additional logic to disable textarea or auto-submit can be added here
   }
 
   const handleSubmit = () => {
-    // Handle essay submission
     console.log('Essay submitted:', essay)
     alert('Essay submitted successfully!')
   }
+
+  if (loading) return <div className="max-w-4xl mx-auto p-6">Loading...</div>
+  if (error) return <div className="max-w-4xl mx-auto p-6">Error: {error}</div>
+  if (!data?.success || !data?.data) return <div className="max-w-4xl mx-auto p-6">No data found</div>
+
+  const questionData = data.data
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
       {/* Header */}
       <Header
         questionType='Write Essay'
-        instruction='You will have 20 minutes to plan, write and revise an essay about the topic below. Your response will be judged on how well you develop a position, organize your ideas, present supporting details, and control the elements of standard written English. You should write 200-300 words.'
-        questionId={dummyTopicData.id}
-        title={dummyTopicData.topic}
-        description={dummyTopicData.description}
-        bookmarks={dummyTopicData.bookmarks}
-        difficulty={dummyTopicData.difficulty as 'easy' | 'medium' | 'hard'}
+        instruction={`You will have 20 minutes to plan, write and revise an essay about the topic below. Your response will be judged on how well you develop a position, organize your ideas, present supporting details, and control the elements of standard written English. You should write ${questionData.min_word_limit}-${questionData.max_word_limit} words.`}
+        questionId={questionData.questionId}
+        title={questionData.essayTitle}
+        description={questionData.essay_description}
+        bookmarks={[]}
+        difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
       />
 
       {/* Timer */}
-      <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} />
+      <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} title="Remaining time" />
 
       {/* Topic */}
       <div className="mb-6">
         <p className="text-gray-800 text-base leading-relaxed">
-          {dummyTopicData.topic}
+          {questionData.essay_description}
         </p>
       </div>
 
