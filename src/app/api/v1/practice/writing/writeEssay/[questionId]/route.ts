@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../../writing.controller";
+import { WriteEssayQuestion } from "@/generated/prisma";
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ questionId: string }> }
-) {
+): Promise<NextResponse<ApiResponse<WriteEssayQuestion | null>>> {
   try {
     const { questionId } = await params;
 
@@ -74,6 +81,7 @@ export async function POST(
 
     const body = await req.json();
     const { essay } = body;
+    const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3" // TODO : get this from middleware
 
     if (!essay) {
       return NextResponse.json(
@@ -86,7 +94,7 @@ export async function POST(
       );
     }
 
-    const evaluation = await exportFunctions.postWriteEssayAnswer(questionId , essay);
+    const evaluation = await exportFunctions.postWriteEssayAnswer(questionId, essay , userId);
 
     return NextResponse.json(
       {

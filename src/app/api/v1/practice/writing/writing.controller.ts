@@ -1,18 +1,20 @@
-import { evaluateEssay } from "@/lib/ai/google";
+import { WriteEssayQuestion } from "@/generated/prisma";
+import { evaluateWriteEssay, evalueteSummarizationWrittenText } from "@/lib/ai/google";
 import prisma from "@/lib/prisma";
 
-// TODO : define all the request and response interfaces before actually writing the functions
+// const getWriteEssayQuestions = async () : Promise<WriteEssayQuestion[] | null> => {
+//     // TODO : need to implement pagination here and also use backend logic here for filtering 
+//     await new Promise((resolve) => setTimeout(resolve, 1000));
+// }
 
-const getWriteEssayQuestions = async () => {
-    // TODO : need to implement pagination here
-}
-
-const getWriteEssayQuestionById = async (id: string) => {
+const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion | null> => {
     try {
-        // TODO : Also include the answers associated with this question for the current user. current user should be attached by middleware or something.
-        const question = prisma.writeEssayQuestion.findUnique({
+        const question: WriteEssayQuestion | null = await prisma.writeEssayQuestion.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                answers: true // we are returning all the answers of this question.
             }
         });
         if (!question) {
@@ -21,13 +23,15 @@ const getWriteEssayQuestionById = async (id: string) => {
         return question;
     } catch (error) {
         console.log(error);
-        return [];
+        return null;
     }
 }
 
-const addOrRemoveWriteEssayBookMark = async () => { }
+// const addOrRemoveWriteEssayBookMark = async (questionId : string) : Promise<WriteEssayBookMark | null> => { 
+//     // get userId attached by middleware or something
+// }
 
-const postWriteEssayAnswer = async (questionId: string, essay: string) => {
+const postWriteEssayAnswer = async (questionId: string, essay: string, userId: string) => {
     try {
         // Check if question exists
         const question = await prisma.writeEssayQuestion.findUnique({
@@ -39,38 +43,33 @@ const postWriteEssayAnswer = async (questionId: string, essay: string) => {
         }
 
         // Evaluate essay using AI
-        const evaluation = await evaluateEssay(essay);
-        
-        // Extract score from evaluation (assuming AI returns score in format like "Score: 8/10")
-        const scoreMatch = evaluation.match(/(\d+(?:\.\d+)?)\s*\/?\s*10/);
-        const score = scoreMatch ? parseFloat(scoreMatch[1]) : null;
+        const evaluation = await evaluateWriteEssay(essay, question.essay_description);
 
         // Calculate word count
         const wordCount = essay.trim().split(/\s+/).filter(word => word.length > 0).length;
 
-        // Create answer record
-        const answer = await prisma.writeEssayAnswer.create({
+        const essayAnswer = await prisma.writeEssayAnswer.create({
             data: {
-                userId: "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3", // Random ID for now
-                questionId: questionId,
+                userId,
+                questionId,
                 answer: essay,
-                wordCount: wordCount,
-                timeSpent: Math.floor(Math.random() * 1200) + 300, // Random 5-20 minutes
-                score: score
+                wordCount,
+                totalScore: evaluation.totalScore,
+                contentScore: evaluation.contentScore,
+                formScore: evaluation.formScore,
+                grammerScore: evaluation.grammarScore,
+                spellingScore: evaluation.spellingScore,
+                vocabScore: evaluation.vocabScore,
+                DSCScore: evaluation.DSCScore,
+                GLRScore: evaluation.GLRScore,
             }
-        });
+        })
 
-        return {
-            id: answer.id,
-            evaluation: evaluation,
-            score: score,
-            wordCount: wordCount,
-            timeSpent: answer.timeSpent
-        };
+        return essayAnswer;
 
     } catch (error) {
         console.error("Error in postWriteEssayAnswer:", error);
-        throw error;
+        return null;
     }
 }
 
@@ -96,12 +95,47 @@ const getSummarizeWrittenTextQuestionById = async (id: string) => {
 
 const addOrRemoveSummarizeWrittenTextBookMark = async () => { }
 
-const postSummarizeWrittenTextAnswer = async () => { }
+const postSummarizeWrittenTextAnswer = async (questionId: string, summarizedText: string, userId: string) => {
+    try {
+        // Check if question exists
+        const question = await prisma.summarizeWrittenTextQuestion.findUnique({
+            where: { id: questionId }
+        });
+
+        if (!question) {
+            throw new Error("Question not found");
+        }
+
+        // Evaluate summarized text using AI
+        const evaluation = await evalueteSummarizationWrittenText(summarizedText, question.passage);
+        // Calculate word count
+        const wordCount = summarizedText.trim().split(/\s+/).filter(word => word.length > 0).length;
+
+        const summarizeWrittenTextAnswer = await prisma.summarizeWrittenTextAnswer.create({
+            data: {
+                userId,
+                questionId,
+                answer: summarizedText,
+                wordCount,
+                totalScore: evaluation.totalScore,
+                contentScore: evaluation.contentScore,
+                formScore: evaluation.formScore,
+                grammerScore: evaluation.grammerScore,
+                vocabScore: evaluation.vocabScore,
+            }
+        })
+        return summarizeWrittenTextAnswer;
+
+    } catch (error) {
+        console.error("Error in postSummarizeWrittenTextAnswer:", error);
+        return null;
+    }
+}
 
 const exportFunctions = {
-    getWriteEssayQuestions,
+    // getWriteEssayQuestions,
     getWriteEssayQuestionById,
-    addOrRemoveWriteEssayBookMark,
+    // addOrRemoveWriteEssayBookMark,
     postWriteEssayAnswer,
     getSummarizeWrittenTextQuestions,
     getSummarizeWrittenTextQuestionById,

@@ -80,6 +80,7 @@ model Verification {
   @@map("verification")
 }
 
+
 // Writing specific models
 
 model WriteEssayQuestion {
@@ -88,8 +89,6 @@ model WriteEssayQuestion {
   essayTitle       String
   essay_description String
   difficulty        Difficulty @default(MEDIUM)
-  min_word_limit    Int?
-  max_word_limit    Int?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   isActive          Boolean    @default(true)
@@ -107,8 +106,16 @@ model WriteEssayAnswer {
   questionId String
   answer     String   @db.Text // Large text field for essay content
   wordCount  Int?
-  timeSpent  Int? // in seconds
-  score      Float? // nullable until graded
+
+  totalScore Float?
+  contentScore Float?
+  formScore Float?
+  grammerScore Float?
+  spellingScore Float?
+  vocabScore Float?
+  DSCScore Float?
+  GLRScore Float?
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -158,8 +165,12 @@ model SummarizeWrittenTextAnswer {
   questionId String
   answer     String   @db.Text // Large text field for summary content
   wordCount  Int?
-  timeSpent  Int? // in seconds
-  score      Float? // nullable until graded
+
+  totalScore Float? 
+  contentScore Float? 
+  formScore Float? 
+  grammerScore Float? 
+  vocabScore Float? 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
