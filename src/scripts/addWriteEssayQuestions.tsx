@@ -102,4 +102,4 @@ const createQuestions = async () => {
 }
 
 // Execute the function
-// createQuestions()
+createQuestions()
