@@ -27,12 +27,12 @@ interface ApiResponse {
 const page = () => {
   const params = useParams()
   const essayId = params.essay_id as string
-  
+
   const [essay, setEssay] = useState('')
   const [wordCount, setWordCount] = useState(0)
   const timeLimit = 20 * 60 // 20 minutes in seconds
 
-  const URL = `http://localhost:3000/api/v1/practice/writing/writeEssay/${essayId}`
+  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`
   const { data, loading, error } = useFetch<ApiResponse>(URL)
 
   // Update word count when essay changes
@@ -45,9 +45,30 @@ const page = () => {
     alert('Time is up! Please submit your essay.')
   }
 
-  const handleSubmit = () => {
-    console.log('Essay submitted:', essay)
-    alert('Essay submitted successfully!')
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          essay: essay,
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        alert('Essay submitted and evaluated successfully!')
+        console.log('Evaluation result:', result.data)
+      } else {
+        alert(`Error: ${result.message}`)
+      }
+    } catch (error) {
+      console.error('Error submitting essay:', error)
+      alert('Failed to submit essay. Please try again.')
+    }
   }
 
   if (loading) return <div className="max-w-4xl mx-auto p-6">Loading...</div>
