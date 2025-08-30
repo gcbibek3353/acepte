@@ -31,6 +31,21 @@ model User {
   writeEssayBookmark    WriteEssayBookMark[]
   summarizeWrittenTextBookmark SummarizeWrittenTextBookMark[]
 
+  fillBlanksDropdownAnswers       FillBlanksDropdownAnswer[]
+  fillBlanksDropdownBookmarks     FillBlanksDropdownBookmark[]
+
+  multipleChoiceMultipleAnswers   MultipleChoiceMultipleAnswer[]
+  multipleChoiceMultipleBookmarks MultipleChoiceMultipleBookmark[]
+  
+  reorderParagraphAnswers         ReorderParagraphAnswer[]
+  reorderParagraphBookmarks       ReorderParagraphBookmark[]
+  
+  fillBlanksDragDropAnswers       FillBlanksDragDropAnswer[]
+  fillBlanksDragDropBookmarks     FillBlanksDragDropBookmark[]
+  
+  multipleChoiceSingleAnswers     MultipleChoiceSingleAnswer[]
+  multipleChoiceSingleBookmarks   MultipleChoiceSingleBookmark[]
+
   @@unique([email])
   @@map("user")
 }
@@ -193,6 +208,352 @@ model SummarizeWrittenTextBookMark {
 
   @@unique([userId, questionId])
   @@map("summarize_written_text_bookmark")
+}
+
+
+// Reading specific models
+
+// Fill in the Blanks (Dropdown)
+
+model FillBlanksDropdownPassage {
+  id          String     @id @default(cuid())
+  questionId  String     @unique // Your custom unique identifier
+  title       String
+  content     String     @db.Text // The passage text with placeholders like {1}, {2} for blanks
+  difficulty  Difficulty @default(MEDIUM)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isActive    Boolean    @default(true)
+
+  // Relations
+  blanks      FillBlanksDropdownBlank[]
+  answers     FillBlanksDropdownAnswer[]
+  bookmarks   FillBlanksDropdownBookmark[]
+
+  @@map("fill_blanks_dropdown_passage")
+}
+
+model FillBlanksDropdownBlank {
+  id           String   @id @default(cuid())
+  position     Int      // Position/order of the blank in the passage
+  passageId    String
+  passage      FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  correctIndex Int      // Index of correct answer (0-based)
+  options      String[] // Array of options like: ["able", "is", "are", "we"]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("fill_blanks_dropdown_blank")
+}
+
+model FillBlanksDropdownAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  answers   Json     // Store user's selected answers as JSON: {"1": 0, "2": 1, ...}
+  totalScore Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("fill_blanks_dropdown_answer")
+}
+
+model FillBlanksDropdownBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("fill_blanks_dropdown_bookmark")
+}
+
+
+// Multiple Choice, Multiple Answers
+
+model MultipleChoiceMultiplePassage {
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  content    String     @db.Text // The reading passage text
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
+
+  // Relations
+  question  MultipleChoiceMultipleQuestion?
+  answers   MultipleChoiceMultipleAnswer[]
+  bookmarks MultipleChoiceMultipleBookmark[]
+
+  @@map("multiple_choice_multiple_passage")
+}
+
+model MultipleChoiceMultipleQuestion {
+  id        String   @id @default(cuid())
+  passageId String   @unique
+  passage   MultipleChoiceMultiplePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  prompt    String   @db.Text // The question asked (e.g., "Which are effects of air pollution?")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  options MultipleChoiceMultipleOption[]
+
+  @@map("multiple_choice_multiple_question")
+}
+
+model MultipleChoiceMultipleOption {
+  id         String  @id @default(cuid())
+  text       String  // Option text
+  isCorrect  Boolean @default(false) // Multiple can be true
+  questionId String
+  question   MultipleChoiceMultipleQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("multiple_choice_multiple_option")
+}
+
+model MultipleChoiceMultipleAnswer {
+  id              String   @id @default(cuid())
+  userId          String
+  passageId       String
+  selectedOptions String[] // Array of selected option IDs
+  totalScore      Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user    User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage MultipleChoiceMultiplePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("multiple_choice_multiple_answer")
+}
+
+model MultipleChoiceMultipleBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage MultipleChoiceMultiplePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("multiple_choice_multiple_bookmark")
+}
+
+// Reorder Paragraph
+model ReorderParagraphPassage {
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
+
+  // Relations
+  paragraphs ReorderParagraphItem[]
+  answers    ReorderParagraphAnswer[]
+  bookmarks  ReorderParagraphBookmark[]
+
+  @@map("reorder_paragraph_passage")
+}
+
+model ReorderParagraphItem {
+  id           String @id @default(cuid())
+  text         String @db.Text // Paragraph/sentence text
+  correctOrder Int    // Correct position (1 = first, 2 = second, etc.)
+  passageId    String
+  passage      ReorderParagraphPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("reorder_paragraph_item")
+}
+
+model ReorderParagraphAnswer {
+  id          String   @id @default(cuid())
+  userId      String
+  passageId   String
+  userOrder   String[] // Array of paragraph IDs in user's order
+  totalScore  Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ReorderParagraphPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("reorder_paragraph_answer")
+}
+
+model ReorderParagraphBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ReorderParagraphPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("reorder_paragraph_bookmark")
+}
+
+// Fill in the Blanks (Drag and Drop)
+model FillBlanksDragDropPassage {
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  content    String     @db.Text // Passage text with placeholders like {1}, {2}, {3}
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
+
+  // Relations
+  blanks    FillBlanksDragDropBlank[]
+  options   FillBlanksDragDropOption[]
+  answers   FillBlanksDragDropAnswer[]
+  bookmarks FillBlanksDragDropBookmark[]
+
+  @@map("fill_blanks_drag_drop_passage")
+}
+
+model FillBlanksDragDropBlank {
+  id              String @id @default(cuid())
+  position        Int    // Placeholder position (1 = first blank, 2 = second blank, etc.)
+  passageId       String
+  passage         FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  correctOptionId String @unique // Reference to the correct option
+  correctOption   FillBlanksDragDropOption  @relation("CorrectOptionForBlank", fields: [correctOptionId], references: [id])
+
+  @@map("fill_blanks_drag_drop_blank")
+}
+
+model FillBlanksDragDropOption {
+  id            String  @id @default(cuid())
+  text          String  // Word/phrase in the draggable pool
+  passageId     String
+  blankPosition Int?    // Correct position of this option (null if it's a distractor)
+  passage       FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  // Reverse relation (to know if this option is the correct one for a blank)
+  correctForBlank FillBlanksDragDropBlank? @relation("CorrectOptionForBlank")
+
+  @@map("fill_blanks_drag_drop_option")
+}
+
+model FillBlanksDragDropAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  passageId  String
+  answers    Json     // Store user's answers as JSON: {"1": "optionId1", "2": "optionId2", ...}
+  totalScore Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("fill_blanks_drag_drop_answer")
+}
+
+model FillBlanksDragDropBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("fill_blanks_drag_drop_bookmark")
+}
+
+// Multiple Choice, Single Answer
+model MultipleChoiceSinglePassage {
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  content    String     @db.Text // The passage text
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
+
+  // Relations
+  question  MultipleChoiceSingleQuestion?
+  answers   MultipleChoiceSingleAnswer[]
+  bookmarks MultipleChoiceSingleBookmark[]
+
+  @@map("multiple_choice_single_passage")
+}
+
+model MultipleChoiceSingleQuestion {
+  id        String   @id @default(cuid())
+  passageId String   @unique
+  passage   MultipleChoiceSinglePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  prompt    String   @db.Text // The actual question text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  options MultipleChoiceSingleOption[]
+
+  @@map("multiple_choice_single_question")
+}
+
+model MultipleChoiceSingleOption {
+  id         String  @id @default(cuid())
+  text       String  // Option text
+  isCorrect  Boolean @default(false) // Exactly one should be true
+  questionId String
+  question   MultipleChoiceSingleQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("multiple_choice_single_option")
+}
+
+model MultipleChoiceSingleAnswer {
+  id             String   @id @default(cuid())
+  userId         String
+  passageId      String
+  selectedOption String   // ID of the selected option
+  totalScore     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user    User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage MultipleChoiceSinglePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("multiple_choice_single_answer")
+}
+
+model MultipleChoiceSingleBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage MultipleChoiceSinglePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("multiple_choice_single_bookmark")
 }
 
 enum Difficulty {
