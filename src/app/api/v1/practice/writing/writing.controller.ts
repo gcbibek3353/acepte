@@ -1,11 +1,63 @@
-import { WriteEssayQuestion } from "@/generated/prisma";
+import { SummarizeWrittenTextAnswer, SummarizeWrittenTextBookMark, SummarizeWrittenTextQuestion, WriteEssayAnswer, WriteEssayBookMark, WriteEssayQuestion } from "@/generated/prisma";
 import { evaluateWriteEssay, evalueteSummarizationWrittenText } from "@/lib/ai/google";
 import prisma from "@/lib/prisma";
 
-// const getWriteEssayQuestions = async () : Promise<WriteEssayQuestion[] | null> => {
-//     // TODO : need to implement pagination here and also use backend logic here for filtering 
-//     await new Promise((resolve) => setTimeout(resolve, 1000));
-// }
+interface QuestionQuery {
+    page?: number;       // default 1
+    limit?: number;      // default 10
+    difficulty?: "EASY" | "MEDIUM" | "HARD";
+    answered?: boolean;
+    bookmarked?: boolean;
+}
+
+// WriteEssay related functions
+
+const getWriteEssayQuestions = async (userId: string, queryParams: QuestionQuery): Promise<WriteEssayQuestion[] | null> => {
+    try {
+        const { page = 1, limit = 10, difficulty, answered, bookmarked } = queryParams;
+
+        const skip = (page - 1) * limit;
+
+        // Build where clause
+        const whereClause: any = { isActive: true };
+
+        // Filter by difficulty
+        if (difficulty) {
+            whereClause.difficulty = difficulty;
+        }
+
+        // Filter by answered status
+        if (answered !== undefined) {
+            if (answered) {
+                whereClause.answers = { some: { userId } };
+            } else {
+                whereClause.answers = { none: { userId } };
+            }
+        }
+
+        // Filter by bookmarked status
+        if (bookmarked !== undefined) {
+            if (bookmarked) {
+                whereClause.bookmarks = { some: { userId } };
+            } else {
+                whereClause.bookmarks = { none: { userId } };
+            }
+        }
+
+        const questions = await prisma.writeEssayQuestion.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return questions;
+
+    } catch (error) {
+        console.error("Error in getWriteEssayQuestions:", error);
+        return null;
+    }
+}
 
 const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion | null> => {
     try {
@@ -27,11 +79,42 @@ const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion
     }
 }
 
-// const addOrRemoveWriteEssayBookMark = async (questionId : string) : Promise<WriteEssayBookMark | null> => { 
-//     // get userId attached by middleware or something
-// }
+const addOrRemoveWriteEssayBookMark = async (userId: string, questionId: string): Promise<WriteEssayBookMark | null> => {
+    try {
+        const existingBookmark = await prisma.writeEssayBookMark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId: userId,
+                    questionId: questionId
+                }
+            }
+        });
 
-const postWriteEssayAnswer = async (questionId: string, essay: string, userId: string) => {
+        if (existingBookmark) {
+            // Bookmark exists, remove it
+            await prisma.writeEssayBookMark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Bookmark does not exist, add it
+            const newBookmark = await prisma.writeEssayBookMark.create({
+                data: {
+                    userId: userId,
+                    questionId: questionId
+                }
+            });
+            return newBookmark; // Return the newly created bookmark
+        }
+    } catch (error) {
+        console.error("Error in addOrRemoveWriteEssayBookMark:", error);
+        return null;
+    }
+}
+
+const postWriteEssayAnswer = async (questionId: string, essay: string, userId: string): Promise<WriteEssayAnswer | null> => {
     try {
         // Check if question exists
         const question = await prisma.writeEssayQuestion.findUnique({
@@ -73,14 +156,64 @@ const postWriteEssayAnswer = async (questionId: string, essay: string, userId: s
     }
 }
 
-const getSummarizeWrittenTextQuestions = async () => { }
+// SummarizeWrittenText related functions
 
-const getSummarizeWrittenTextQuestionById = async (id: string) => {
+const getSummarizeWrittenTextQuestions = async (userId: string, queryParams: QuestionQuery): Promise<SummarizeWrittenTextQuestion[] | null> => {
+    try {
+        const { page = 1, limit = 10, difficulty, answered, bookmarked } = queryParams;
+
+        const skip = (page - 1) * limit;
+
+        // Build where clause
+        const whereClause: any = { isActive: true };
+
+        // Filter by difficulty
+        if (difficulty) {
+            whereClause.difficulty = difficulty;
+        }
+
+        // Filter by answered status
+        if (answered !== undefined) {
+            if (answered) {
+                whereClause.answers = { some: { userId } };
+            } else {
+                whereClause.answers = { none: { userId } };
+            }
+        }
+
+        // Filter by bookmarked status
+        if (bookmarked !== undefined) {
+            if (bookmarked) {
+                whereClause.bookmarks = { some: { userId } };
+            } else {
+                whereClause.bookmarks = { none: { userId } };
+            }
+        }
+
+        const questions = await prisma.summarizeWrittenTextQuestion.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return questions;
+
+    } catch (error) {
+        console.error("Error in getSummarizeWrittenTextQuestions:", error);
+        return null;
+    }
+}
+
+const getSummarizeWrittenTextQuestionById = async (id: string): Promise<SummarizeWrittenTextQuestion | null> => {
     // TODO : Also include the answers associated with this question for the current user. current user should be attached by middleware or something.
     try {
         const question = prisma.summarizeWrittenTextQuestion.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                answers: true // we are returning all the answers of this question.
             }
         });
         if (!question) {
@@ -93,9 +226,42 @@ const getSummarizeWrittenTextQuestionById = async (id: string) => {
     }
 }
 
-const addOrRemoveSummarizeWrittenTextBookMark = async () => { }
+const addOrRemoveSummarizeWrittenTextBookMark = async (userId: string, questionId: string): Promise<SummarizeWrittenTextBookMark | null> => {
+    try {
+        const existingBookmark = await prisma.summarizeWrittenTextBookMark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId: userId,
+                    questionId: questionId
+                }
+            }
+        });
 
-const postSummarizeWrittenTextAnswer = async (questionId: string, summarizedText: string, userId: string) => {
+        if (existingBookmark) {
+            // Bookmark exists, remove it
+            await prisma.summarizeWrittenTextBookMark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Bookmark does not exist, add it
+            const newBookmark = await prisma.summarizeWrittenTextBookMark.create({
+                data: {
+                    userId: userId,
+                    questionId: questionId
+                }
+            });
+            return newBookmark; // Return the newly created bookmark
+        }
+    } catch (error) {
+        console.error("Error in addOrRemoveSummarizeWrittenTextBookMark:", error);
+        return null;
+    }
+}
+
+const postSummarizeWrittenTextAnswer = async (questionId: string, summarizedText: string, userId: string): Promise<SummarizeWrittenTextAnswer | null> => {
     try {
         // Check if question exists
         const question = await prisma.summarizeWrittenTextQuestion.findUnique({
@@ -133,9 +299,9 @@ const postSummarizeWrittenTextAnswer = async (questionId: string, summarizedText
 }
 
 const exportFunctions = {
-    // getWriteEssayQuestions,
+    getWriteEssayQuestions,
     getWriteEssayQuestionById,
-    // addOrRemoveWriteEssayBookMark,
+    addOrRemoveWriteEssayBookMark,
     postWriteEssayAnswer,
     getSummarizeWrittenTextQuestions,
     getSummarizeWrittenTextQuestionById,

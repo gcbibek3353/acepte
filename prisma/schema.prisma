@@ -98,6 +98,7 @@ model Verification {
 
 // Writing specific models
 
+// Write Essay
 model WriteEssayQuestion {
   id                String     @id @default(cuid())
   questionId        String     @unique // Your custom unique identifier
@@ -154,6 +155,8 @@ model WriteEssayBookMark {
   @@unique([userId, questionId])
   @@map("write_essay_bookmark")
 }
+
+// summarize written text
 
 model SummarizeWrittenTextQuestion {
   id             String     @id @default(cuid())
