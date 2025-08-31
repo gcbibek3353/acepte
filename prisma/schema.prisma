@@ -46,6 +46,30 @@ model User {
   multipleChoiceSingleAnswers     MultipleChoiceSingleAnswer[]
   multipleChoiceSingleBookmarks   MultipleChoiceSingleBookmark[]
 
+  summarizeSpokenTextAnswers                SummarizeSpokenTextAnswer[]
+  summarizeSpokenTextBookmarks              SummarizeSpokenTextBookmark[]
+
+  listeningMCMAnswers                       ListeningMCMAnswer[]
+  listeningMCMBookmarks                     ListeningMCMBookmark[]
+  
+  listeningFillBlankAnswers                 ListeningFillBlankAnswer[]
+  listeningFillBlankBookmarks               ListeningFillBlankBookmark[]
+  
+  listeningHighlightSummaryAnswers          ListeningHighlightSummaryAnswer[]
+  listeningHighlightSummaryBookmarks        ListeningHighlightSummaryBookmark[]
+  
+  listeningMCSAnswers                       ListeningMCSAnswer[]
+  listeningMCSBookmarks                     ListeningMCSBookmark[]
+  
+  listeningSelectMissingWordAnswers         ListeningSelectMissingWordAnswer[]
+  listeningSelectMissingWordBookmarks       ListeningSelectMissingWordBookmark[]
+
+  listeningHighlightIncorrectWordsAnswers   ListeningHighlightIncorrectWordsAnswer[]
+  listeningHighlightIncorrectWordsBookmarks ListeningHighlightIncorrectWordsBookmark[]
+  
+  listeningWriteFromDictationAnswers        ListeningWriteFromDictationAnswer[]
+  listeningWriteFromDictationBookmarks      ListeningWriteFromDictationBookmark[]
+
   @@unique([email])
   @@map("user")
 }
@@ -557,6 +581,489 @@ model MultipleChoiceSingleBookmark {
 
   @@unique([userId, passageId])
   @@map("multiple_choice_single_bookmark")
+}
+
+
+// Listening specific models
+
+// Summarize Spoken Text
+model SummarizeSpokenTextQuestion {
+  id                    String     @id @default(cuid())
+  questionId            String     @unique // Your custom unique identifier
+  title                 String
+  audioTranscribedText  String     @db.Text // Transcribed text of the audio
+  audioUrl              String     // Path or URL to audio file
+  difficulty            Difficulty @default(MEDIUM)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  // Relations
+  answers               SummarizeSpokenTextAnswer[]
+  bookmarks             SummarizeSpokenTextBookmark[]
+
+  @@map("summarize_spoken_text_question")
+}
+
+model SummarizeSpokenTextAnswer {
+  id           String   @id @default(cuid())
+  userId       String
+  questionId   String
+  response     String   @db.Text // Student's written summary
+  wordCount    Int?
+
+  // Evaluation fields
+  contentScore     Float?
+  formScore        Float?
+  grammarScore     Float?
+  vocabularyScore  Float?
+  spellingScore    Float?
+  totalScore       Float?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question     SummarizeSpokenTextQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("summarize_spoken_text_answer")
+}
+
+model SummarizeSpokenTextBookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   SummarizeSpokenTextQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("summarize_spoken_text_bookmark")
+}
+
+
+// Multiple Choice, Multiple Answers (Listening)
+model ListeningMCMPassage {
+  id                   String     @id @default(cuid())
+  questionId           String     @unique
+  title                String
+  audioTranscribedText String     @db.Text
+  audioUrl             String     // Audio file link
+  difficulty           Difficulty @default(MEDIUM)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  // Relations
+  question             ListeningMCMQuestion?
+  answers              ListeningMCMAnswer[]
+  bookmarks            ListeningMCMBookmark[]
+
+  @@map("listening_mcm_passage")
+}
+
+model ListeningMCMQuestion {
+  id           String   @id @default(cuid())
+  passageId    String   @unique
+  passage      ListeningMCMPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  questionText String   @db.Text // The actual question text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  options      ListeningMCMOption[]
+
+  @@map("listening_mcm_question")
+}
+
+model ListeningMCMOption {
+  id         String  @id @default(cuid())
+  text       String  // Option text
+  isCorrect  Boolean @default(false) // Multiple can be true
+  questionId String
+  question   ListeningMCMQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("listening_mcm_option")
+}
+
+model ListeningMCMAnswer {
+  id              String   @id @default(cuid())
+  userId          String
+  passageId       String
+  selectedOptions String[] // IDs of options student selected
+  totalScore      Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningMCMPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_mcm_answer")
+}
+
+model ListeningMCMBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningMCMPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_mcm_bookmark")
+}
+
+
+// Fill In the Blank (Listening)
+model ListeningFillBlankPassage {
+  id                   String     @id @default(cuid())
+  questionId           String     @unique
+  title                String
+  audioTranscribedText String     @db.Text
+  audioUrl             String     // URL of the audio file
+  passage              String     @db.Text // The passage text with placeholders like {1}, {2}, etc.
+  difficulty           Difficulty @default(MEDIUM)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  // Relations
+  blanks               ListeningFillBlank[]
+  answers              ListeningFillBlankAnswer[]
+  bookmarks            ListeningFillBlankBookmark[]
+
+  @@map("listening_fill_blank_passage")
+}
+
+model ListeningFillBlank {
+  id          String   @id @default(cuid())
+  passageId   String
+  passage     ListeningFillBlankPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  position    Int      // Position of the blank in the passage
+  correctWord String   // Correct answer word for this blank
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("listening_fill_blank")
+}
+
+model ListeningFillBlankAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  answers   Json     // Stores user's answers { "1": "word1", "2": "word2" }
+  totalScore Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningFillBlankPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_fill_blank_answer")
+}
+
+model ListeningFillBlankBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningFillBlankPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_fill_blank_bookmark")
+}
+
+// Highlight Correct Summary (Listening)
+model ListeningHighlightSummaryPassage {
+  id        String     @id @default(cuid())
+  questionId String    @unique
+  title     String
+  audioUrl  String     // Audio file that user will listen to
+  passage   String?    @db.Text // Sometimes transcripts or hints may be shown
+  questionText String  @db.Text // The question displayed to the user
+  difficulty Difficulty @default(MEDIUM)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  options   ListeningHighlightSummaryOption[]
+  answers   ListeningHighlightSummaryAnswer[]
+  bookmarks ListeningHighlightSummaryBookmark[]
+
+  @@map("listening_highlight_summary_passage")
+}
+
+model ListeningHighlightSummaryOption {
+  id        String  @id @default(cuid())
+  text      String  @db.Text // Option text (summary option)
+  isCorrect Boolean @default(false) // Only one should be true for single correct answer
+  passageId String
+  passage   ListeningHighlightSummaryPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_highlight_summary_option")
+}
+
+model ListeningHighlightSummaryAnswer {
+  id             String   @id @default(cuid())
+  userId         String
+  passageId      String
+  selectedOption String   // ID of the selected option
+  totalScore     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user    User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningHighlightSummaryPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_highlight_summary_answer")
+}
+
+model ListeningHighlightSummaryBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningHighlightSummaryPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_highlight_summary_bookmark")
+}
+
+// Multiple Choice Single (Listening)
+model ListeningMCSPassage {
+  id        String     @id @default(cuid())
+  questionId String    @unique
+  title     String
+  audioUrl  String     // URL or file path for the audio
+  questionText String  @db.Text // The question based on the audio
+  difficulty Difficulty @default(MEDIUM)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  options   ListeningMCSOption[]
+  answers   ListeningMCSAnswer[]
+  bookmarks ListeningMCSBookmark[]
+
+  @@map("listening_mcs_passage")
+}
+
+model ListeningMCSOption {
+  id        String  @id @default(cuid())
+  text      String  // Option text
+  isCorrect Boolean @default(false) // Only 1 option will be true for single answer
+  passageId String
+  passage   ListeningMCSPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_mcs_option")
+}
+
+model ListeningMCSAnswer {
+  id             String   @id @default(cuid())
+  userId         String
+  passageId      String
+  selectedOption String   // ID of the selected option
+  totalScore     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningMCSPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_mcs_answer")
+}
+
+model ListeningMCSBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningMCSPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_mcs_bookmark")
+}
+
+// Select Missing Word (Listening)
+model ListeningSelectMissingWordPassage {
+  id          String     @id @default(cuid())
+  questionId  String     @unique
+  title       String
+  audioUrl    String     // URL or path to the audio
+  instruction String?    @db.Text // e.g., "Select the correct option to complete the recording."
+  difficulty  Difficulty @default(MEDIUM)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  options     ListeningSelectMissingWordOption[]
+  answers     ListeningSelectMissingWordAnswer[]
+  bookmarks   ListeningSelectMissingWordBookmark[]
+
+  @@map("listening_select_missing_word_passage")
+}
+
+model ListeningSelectMissingWordOption {
+  id        String  @id @default(cuid())
+  text      String
+  isCorrect Boolean @default(false) // Single-answer type → only one should be true
+  passageId String
+  passage   ListeningSelectMissingWordPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_select_missing_word_option")
+}
+
+model ListeningSelectMissingWordAnswer {
+  id             String   @id @default(cuid())
+  userId         String
+  passageId      String
+  selectedOption String   // ID of the selected option
+  totalScore     Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningSelectMissingWordPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_select_missing_word_answer")
+}
+
+model ListeningSelectMissingWordBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningSelectMissingWordPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_select_missing_word_bookmark")
+}
+
+// Highlight Incorrect Words (Listening)
+model ListeningHighlightIncorrectWordsPassage {
+  id           String     @id @default(cuid())
+  questionId   String     @unique
+  title        String
+  audioUrl     String     // URL/path to the audio file
+  passage      String     @db.Text // The full passage shown to user
+  difficulty   Difficulty @default(MEDIUM)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  incorrectWords ListeningIncorrectWord[]
+  answers        ListeningHighlightIncorrectWordsAnswer[]
+  bookmarks      ListeningHighlightIncorrectWordsBookmark[]
+
+  @@map("listening_highlight_incorrect_words_passage")
+}
+
+model ListeningIncorrectWord {
+  id        String   @id @default(cuid())
+  word      String   // Incorrect word in passage
+  position  Int      // Index/position of word in passage (helps to highlight)
+  passageId String
+  passage   ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("listening_incorrect_word")
+}
+
+model ListeningHighlightIncorrectWordsAnswer {
+  id              String   @id @default(cuid())
+  userId          String
+  passageId       String
+  selectedWords   String[] // Array of word positions or IDs selected by user
+  totalScore      Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user    User                                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_highlight_incorrect_words_answer")
+}
+
+model ListeningHighlightIncorrectWordsBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_highlight_incorrect_words_bookmark")
+}
+
+// Write From Dictation (Listening)
+model ListeningWriteFromDictationPassage {
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  audioUrl   String     // link to the audio file
+  transcript String     @db.Text // correct sentence user needs to write
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  // Relations
+  answers   ListeningWriteFromDictationAnswer[]
+  bookmarks ListeningWriteFromDictationBookmark[]
+
+  @@map("listening_write_from_dictation_passage")
+}
+
+model ListeningWriteFromDictationAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  passageId  String
+  response   String   @db.Text // User's written response
+  totalScore Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningWriteFromDictationPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@map("listening_write_from_dictation_answer")
+}
+
+model ListeningWriteFromDictationBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  passageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passage ListeningWriteFromDictationPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, passageId])
+  @@map("listening_write_from_dictation_bookmark")
 }
 
 enum Difficulty {
