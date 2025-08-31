@@ -10,7 +10,7 @@ type HeaderProps = {
     difficulty: 'easy' | 'medium' | 'hard';
 }
 
-const Header = ({ questionType, instruction, questionId, title, bookmarks, difficulty }: HeaderProps) => {
+const Header = ({ questionType, instruction, questionId, title, description, bookmarks, difficulty }: HeaderProps) => {
 
     // TODO : check if the bookmarks include the current user and implement toggle functionality
     return (
@@ -27,11 +27,10 @@ const Header = ({ questionType, instruction, questionId, title, bookmarks, diffi
                 <div className="flex items-center gap-3 flex-1">
                     <span className="text-gray-500 text-sm font-medium">#{questionId}</span>
                     <span className="text-lg font-medium text-gray-800">{title}</span>
-                    <span className={`px-2 py-1 text-xs font-medium rounded capitalize ${
-                        difficulty === 'easy' ? 'bg-green-100 text-green-700' :
-                        difficulty === 'medium' ? 'bg-orange-100 text-orange-700' :
-                        'bg-red-100 text-red-700'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded capitalize ${difficulty === 'easy' ? 'bg-green-100 text-green-700' :
+                            difficulty === 'medium' ? 'bg-orange-100 text-orange-700' :
+                                'bg-red-100 text-red-700'
+                        }`}>
                         {difficulty}
                     </span>
                 </div>
@@ -46,6 +45,13 @@ const Header = ({ questionType, instruction, questionId, title, bookmarks, diffi
                     <span className="px-3 py-1 bg-teal-500 text-white text-sm font-medium rounded">
                         Tested (410)
                     </span>
+                </div>
+
+                {/* Topic */}
+                <div className="mb-6">
+                    <p className="text-gray-800 text-base leading-relaxed">
+                        {description}
+                    </p>
                 </div>
             </div>
         </div>

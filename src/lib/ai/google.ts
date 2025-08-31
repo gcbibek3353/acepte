@@ -9,17 +9,17 @@ const google = createGoogleGenerativeAI({
 const model = google('gemini-2.5-flash');
 
 export const evaluateWriteEssay = async (essay: string , essay_description : string) => {
-    const evaluationPrompt = `You are an expert essay evaluator. Evaluate the following essay across multiple dimensions and provide only a JSON object as output with floating-point scores. Do not include explanations, commentary, or text outside the JSON. 
+    const evaluationPrompt = `You are an expert essay evaluator. Evaluate the following essay across multiple dimensions and provide only a JSON object as output with floating-point scores between 0.0 and 2.0 for each dimension. Do not include explanations, commentary, or text outside the JSON. 
 
-Scoring dimensions:
-- totalScore: Overall quality of the essay (sum of all sub-scores).
-- contentScore: Depth, relevance, and originality of ideas.
-- formScore: Organization, coherence, structure, and logical flow.
-- grammarScore: Correct use of grammar and syntax.
-- spellingScore: Correctness of spelling and typographical accuracy.
-- vocabScore: Range, precision, and appropriateness of vocabulary.
-- DSCScore: Development, Support, and Coherence (how well arguments are developed and supported).
-- GLRScore: Grammatical Language Range (variety and complexity of grammatical structures used correctly).
+Scoring dimensions (each scored from 0.0 to 2.0):
+- totalScore: Overall quality of the essay (sum of all sub-scores, max 16.0).
+- contentScore: Depth, relevance, and originality of ideas (0.0-2.0).
+- formScore: Organization, coherence, structure, and logical flow (0.0-2.0).
+- grammarScore: Correct use of grammar and syntax (0.0-2.0).
+- spellingScore: Correctness of spelling and typographical accuracy (0.0-2.0).
+- vocabScore: Range, precision, and appropriateness of vocabulary (0.0-2.0).
+- DSCScore: Development, Support, and Coherence (0.0-2.0).
+- GLRScore: Grammatical Language Range (0.0-2.0).
 
 Essay Title : 
 <<<

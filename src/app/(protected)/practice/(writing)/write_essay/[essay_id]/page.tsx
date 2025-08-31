@@ -4,6 +4,25 @@ import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import AnswersComponent from '@/components/Practice/Answers'
+
+interface AnswerData {
+  id: string
+  userId: string
+  questionId: string
+  answer: string
+  wordCount: number
+  totalScore: number | null
+  contentScore: number | null
+  formScore: number | null
+  grammerScore: number | null
+  spellingScore: number | null
+  vocabScore: number | null
+  DSCScore: number | null
+  GLRScore: number | null
+  createdAt: string
+  updatedAt: string
+}
 
 interface QuestionData {
   id: string
@@ -16,6 +35,7 @@ interface QuestionData {
   createdAt: string
   updatedAt: string
   isActive: boolean
+  answers: AnswerData[]
 }
 
 interface ApiResponse {
@@ -24,7 +44,7 @@ interface ApiResponse {
   data: QuestionData
 }
 
-const page = () => {
+const Page = () => {
   const params = useParams()
   const essayId = params.essay_id as string
 
@@ -62,6 +82,7 @@ const page = () => {
       if (result.success) {
         alert('Essay submitted and evaluated successfully!')
         console.log('Evaluation result:', result.data)
+        setEssay('')
       } else {
         alert(`Error: ${result.message}`)
       }
@@ -93,13 +114,6 @@ const page = () => {
       {/* Timer */}
       <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} title="Remaining time" />
 
-      {/* Topic */}
-      <div className="mb-6">
-        <p className="text-gray-800 text-base leading-relaxed">
-          {questionData.essay_description}
-        </p>
-      </div>
-
       {/* Essay Textarea */}
       <div className="mb-4">
         <textarea
@@ -122,8 +136,10 @@ const page = () => {
           Submit Essay
         </button>
       </div>
+      <AnswersComponent answers={questionData.answers} />
+
     </div>
   )
 }
 
-export default page
+export default Page

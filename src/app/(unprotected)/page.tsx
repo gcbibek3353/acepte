@@ -12,7 +12,7 @@ export default function Home() {
       <br />
       <br />
       <br />
-      <Timer countDownTime={120} callbackFn={() => alert('Time is up!')} />
+      {/* <Timer countDownTime={120} callbackFn={() => alert('Time is up!')} /> */}
       <br />
       <br />
       <br />
