@@ -26,9 +26,9 @@ model User {
   accounts      Account[]
 
   write_essay_answers WriteEssayAnswer[]
-  summarize_written_text_answers SummarizeWrittenTextAnswer[]
-
   writeEssayBookmark    WriteEssayBookMark[]
+
+  summarize_written_text_answers SummarizeWrittenTextAnswer[]
   summarizeWrittenTextBookmark SummarizeWrittenTextBookMark[]
 
   fillBlanksDropdownAnswers       FillBlanksDropdownAnswer[]
@@ -94,6 +94,8 @@ model Verification {
 
   @@map("verification")
 }
+
+
 
 
 // Writing specific models
@@ -214,6 +216,9 @@ model SummarizeWrittenTextBookMark {
 }
 
 
+
+
+
 // Reading specific models
 
 // Fill in the Blanks (Dropdown)
@@ -278,7 +283,6 @@ model FillBlanksDropdownBookmark {
   @@unique([userId, passageId])
   @@map("fill_blanks_dropdown_bookmark")
 }
-
 
 // Multiple Choice, Multiple Answers
 
