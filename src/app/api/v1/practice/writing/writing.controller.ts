@@ -206,7 +206,7 @@ const getSummarizeWrittenTextQuestions = async (userId: string, queryParams: Que
 }
 
 const getSummarizeWrittenTextQuestionById = async (id: string): Promise<SummarizeWrittenTextQuestion | null> => {
-    // TODO : Also include the answers associated with this question for the current user. current user should be attached by middleware or something.
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = prisma.summarizeWrittenTextQuestion.findUnique({
             where: {
@@ -222,7 +222,7 @@ const getSummarizeWrittenTextQuestionById = async (id: string): Promise<Summariz
         return question;
     } catch (error) {
         console.log(error);
-        return [];
+        return null;
     }
 }
 

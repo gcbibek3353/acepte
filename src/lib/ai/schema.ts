@@ -1,5 +1,7 @@
 import z from "zod";
 
+// Writing specific schemas and types
+
 export const writeEssayAnswerScoreSchema = z.object({
   totalScore: z.number().min(0).max(15),
   contentScore: z.number().min(0).max(3),
@@ -22,3 +24,16 @@ export const SummarizeWrittenTextAnswerScoreSchema = z.object({
 });
 
 export type SummarizeWrittenTextAnswerScore = z.infer<typeof SummarizeWrittenTextAnswerScoreSchema>;
+
+// Listening specific schemas and types
+
+export const SummarizeSpokenTextAnswerScoreSchema = z.object({
+  contentScore : z.number().min(0).max(2),
+  formScore : z.number().min(0).max(2),
+  grammarScore : z.number().min(0).max(2),
+  spellingScore : z.number().min(0).max(2),
+  vocabularyScore : z.number().min(0).max(2),
+  totalScore : z.number().min(0).max(10)
+});
+
+export type SummarizeSpokenTextAnswerScore = z.infer<typeof SummarizeSpokenTextAnswerScoreSchema>;

@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
-import { SummarizeWrittenTextAnswerScoreSchema, writeEssayAnswerScoreSchema } from './schema';
+import { SummarizeSpokenTextAnswerScoreSchema, SummarizeWrittenTextAnswerScoreSchema, writeEssayAnswerScoreSchema } from './schema';
 
 const google = createGoogleGenerativeAI({
     // custom settings if needed
@@ -8,7 +8,11 @@ const google = createGoogleGenerativeAI({
 
 const model = google('gemini-2.5-flash');
 
-export const evaluateWriteEssay = async (essay: string , essay_description : string) => {
+
+// TODO : we need similar AI calling functions with good prompt engineering for other tasks as well.
+
+// Writing specific AI calls 
+export const evaluateWriteEssay = async (essay: string, essay_description: string) => {
     const evaluationPrompt = `You are an expert essay evaluator. Evaluate the following essay across multiple dimensions and provide only a JSON object as output with floating-point scores between 0.0 and 2.0 for each dimension. Do not include explanations, commentary, or text outside the JSON. 
 
 Scoring dimensions (each scored from 0.0 to 2.0):
@@ -67,4 +71,34 @@ ${summarizedText}
     });
     return evaluation;
 }
-// we need similar AI calling functions with good prompt engineering for other tasks as well.
+
+// Listening specific AI calls
+
+export const evaluateSummarizeSpokenTextAnswer = async (summarizedText: string, originalText: string) => {
+    const evaluationPrompt = `You are an expert text summarization evaluator. Evaluate the following summarized text against the original text across multiple dimensions and provide only a JSON object as output with floating-point scores between 0.0 and 2.0 for each dimension. Do not include explanations, commentary, or text outside the JSON.
+
+Scoring dimensions (each scored from 0.0 to 2.0):
+- contentScore: Accuracy and completeness of information from the original text (0.0-2.0).
+- formScore: Organization, coherence, structure, and logical flow (0.0-2.0).
+- grammarScore: Correct use of grammar and syntax (0.0-2.0).
+- vocabularyScore: Range, precision, and appropriateness of vocabulary (0.0-2.0).
+- spellingScore: Correctness of spelling and typographical accuracy (0.0-2.0).
+- totalScore: Overall quality of the summary (sum of all sub-scores, max 10.0).
+
+Original text:
+<<<
+${originalText}
+>>>
+
+Summarized text to evaluate:
+<<<
+${summarizedText}
+>>>`;
+
+    const { object: evaluation } = await generateObject({
+        model,
+        schema: SummarizeSpokenTextAnswerScoreSchema,
+        prompt: evaluationPrompt,
+    });
+    return evaluation;
+}
