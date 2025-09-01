@@ -26,49 +26,49 @@ model User {
   accounts      Account[]
 
   write_essay_answers WriteEssayAnswer[]
-  writeEssayBookmark    WriteEssayBookMark[]
+  writeEssayBookmark  WriteEssayBookMark[]
 
   summarize_written_text_answers SummarizeWrittenTextAnswer[]
-  summarizeWrittenTextBookmark SummarizeWrittenTextBookMark[]
+  summarizeWrittenTextBookmark   SummarizeWrittenTextBookMark[]
 
-  fillBlanksDropdownAnswers       FillBlanksDropdownAnswer[]
-  fillBlanksDropdownBookmarks     FillBlanksDropdownBookmark[]
+  fillBlanksDropdownAnswers   FillBlanksDropdownAnswer[]
+  fillBlanksDropdownBookmarks FillBlanksDropdownBookmark[]
 
   multipleChoiceMultipleAnswers   MultipleChoiceMultipleAnswer[]
   multipleChoiceMultipleBookmarks MultipleChoiceMultipleBookmark[]
-  
-  reorderParagraphAnswers         ReorderParagraphAnswer[]
-  reorderParagraphBookmarks       ReorderParagraphBookmark[]
-  
-  fillBlanksDragDropAnswers       FillBlanksDragDropAnswer[]
-  fillBlanksDragDropBookmarks     FillBlanksDragDropBookmark[]
-  
-  multipleChoiceSingleAnswers     MultipleChoiceSingleAnswer[]
-  multipleChoiceSingleBookmarks   MultipleChoiceSingleBookmark[]
 
-  summarizeSpokenTextAnswers                SummarizeSpokenTextAnswer[]
-  summarizeSpokenTextBookmarks              SummarizeSpokenTextBookmark[]
+  reorderParagraphAnswers   ReorderParagraphAnswer[]
+  reorderParagraphBookmarks ReorderParagraphBookmark[]
 
-  listeningMCMAnswers                       ListeningMCMAnswer[]
-  listeningMCMBookmarks                     ListeningMCMBookmark[]
-  
-  listeningFillBlankAnswers                 ListeningFillBlankAnswer[]
-  listeningFillBlankBookmarks               ListeningFillBlankBookmark[]
-  
-  listeningHighlightSummaryAnswers          ListeningHighlightSummaryAnswer[]
-  listeningHighlightSummaryBookmarks        ListeningHighlightSummaryBookmark[]
-  
-  listeningMCSAnswers                       ListeningMCSAnswer[]
-  listeningMCSBookmarks                     ListeningMCSBookmark[]
-  
-  listeningSelectMissingWordAnswers         ListeningSelectMissingWordAnswer[]
-  listeningSelectMissingWordBookmarks       ListeningSelectMissingWordBookmark[]
+  fillBlanksDragDropAnswers   FillBlanksDragDropAnswer[]
+  fillBlanksDragDropBookmarks FillBlanksDragDropBookmark[]
+
+  multipleChoiceSingleAnswers   MultipleChoiceSingleAnswer[]
+  multipleChoiceSingleBookmarks MultipleChoiceSingleBookmark[]
+
+  summarizeSpokenTextAnswers   SummarizeSpokenTextAnswer[]
+  summarizeSpokenTextBookmarks SummarizeSpokenTextBookmark[]
+
+  listeningMCMAnswers   ListeningMCMAnswer[]
+  listeningMCMBookmarks ListeningMCMBookmark[]
+
+  listeningFillBlankAnswers   ListeningFillBlankAnswer[]
+  listeningFillBlankBookmarks ListeningFillBlankBookmark[]
+
+  listeningHighlightSummaryAnswers   ListeningHighlightSummaryAnswer[]
+  listeningHighlightSummaryBookmarks ListeningHighlightSummaryBookmark[]
+
+  listeningMCSAnswers   ListeningMCSAnswer[]
+  listeningMCSBookmarks ListeningMCSBookmark[]
+
+  listeningSelectMissingWordAnswers   ListeningSelectMissingWordAnswer[]
+  listeningSelectMissingWordBookmarks ListeningSelectMissingWordBookmark[]
 
   listeningHighlightIncorrectWordsAnswers   ListeningHighlightIncorrectWordsAnswer[]
   listeningHighlightIncorrectWordsBookmarks ListeningHighlightIncorrectWordsBookmark[]
-  
-  listeningWriteFromDictationAnswers        ListeningWriteFromDictationAnswer[]
-  listeningWriteFromDictationBookmarks      ListeningWriteFromDictationBookmark[]
+
+  listeningWriteFromDictationAnswers   ListeningWriteFromDictationAnswer[]
+  listeningWriteFromDictationBookmarks ListeningWriteFromDictationBookmark[]
 
   @@unique([email])
   @@map("user")
@@ -119,16 +119,13 @@ model Verification {
   @@map("verification")
 }
 
-
-
-
 // Writing specific models
 
 // Write Essay
 model WriteEssayQuestion {
   id                String     @id @default(cuid())
   questionId        String     @unique // Your custom unique identifier
-  essayTitle       String
+  essayTitle        String
   essay_description String
   difficulty        Difficulty @default(MEDIUM)
   createdAt         DateTime   @default(now())
@@ -143,23 +140,23 @@ model WriteEssayQuestion {
 }
 
 model WriteEssayAnswer {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
   questionId String
-  answer     String   @db.Text // Large text field for essay content
+  answer     String @db.Text // Large text field for essay content
   wordCount  Int?
 
-  totalScore Float?
-  contentScore Float?
-  formScore Float?
-  grammerScore Float?
+  totalScore    Float?
+  contentScore  Float?
+  formScore     Float?
+  grammerScore  Float?
   spellingScore Float?
-  vocabScore Float?
-  DSCScore Float?
-  GLRScore Float?
+  vocabScore    Float?
+  DSCScore      Float?
+  GLRScore      Float?
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -187,7 +184,7 @@ model WriteEssayBookMark {
 model SummarizeWrittenTextQuestion {
   id             String     @id @default(cuid())
   questionId     String     @unique // Your custom unique identifier
-  textTitle     String
+  textTitle      String
   passage        String     @db.Text // The text to be summarized
   difficulty     Difficulty @default(MEDIUM)
   min_word_limit Int?
@@ -197,29 +194,29 @@ model SummarizeWrittenTextQuestion {
   isActive       Boolean    @default(true)
 
   // Relations
-  answers   SummarizeWrittenTextAnswer[]
+  answers                       SummarizeWrittenTextAnswer[]
   summarizeWrittenTextBookmarks SummarizeWrittenTextBookMark[]
 
   @@map("summarize_written_text_question")
 }
 
 model SummarizeWrittenTextAnswer {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
   questionId String
-  answer     String   @db.Text // Large text field for summary content
+  answer     String @db.Text // Large text field for summary content
   wordCount  Int?
 
-  totalScore Float? 
-  contentScore Float? 
-  formScore Float? 
-  grammerScore Float? 
-  vocabScore Float? 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  totalScore   Float?
+  contentScore Float?
+  formScore    Float?
+  grammerScore Float?
+  vocabScore   Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SummarizeWrittenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("summarize_written_text_answer")
@@ -232,60 +229,56 @@ model SummarizeWrittenTextBookMark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SummarizeWrittenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
   @@map("summarize_written_text_bookmark")
 }
 
-
-
-
-
 // Reading specific models
 
 // Fill in the Blanks (Dropdown)
 
 model FillBlanksDropdownPassage {
-  id          String     @id @default(cuid())
-  questionId  String     @unique // Your custom unique identifier
-  title       String
-  content     String     @db.Text // The passage text with placeholders like {1}, {2} for blanks
-  difficulty  Difficulty @default(MEDIUM)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  isActive    Boolean    @default(true)
+  id         String     @id @default(cuid())
+  questionId String     @unique // Your custom unique identifier
+  title      String
+  content    String     @db.Text // The passage text with placeholders like {1}, {2} for blanks
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isActive   Boolean    @default(true)
 
   // Relations
-  blanks      FillBlanksDropdownBlank[]
-  answers     FillBlanksDropdownAnswer[]
-  bookmarks   FillBlanksDropdownBookmark[]
+  blanks    FillBlanksDropdownBlank[]
+  answers   FillBlanksDropdownAnswer[]
+  bookmarks FillBlanksDropdownBookmark[]
 
   @@map("fill_blanks_dropdown_passage")
 }
 
 model FillBlanksDropdownBlank {
-  id           String   @id @default(cuid())
-  position     Int      // Position/order of the blank in the passage
+  id           String                    @id @default(cuid())
+  position     Int // Position/order of the blank in the passage
   passageId    String
   passage      FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  correctIndex Int      // Index of correct answer (0-based)
+  correctIndex Int // Index of correct answer (0-based)
   options      String[] // Array of options like: ["able", "is", "are", "we"]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
 
   @@map("fill_blanks_dropdown_blank")
 }
 
 model FillBlanksDropdownAnswer {
-  id        String   @id @default(cuid())
-  userId    String
-  passageId String
-  answers   Json     // Store user's selected answers as JSON: {"1": 0, "2": 1, ...}
+  id         String   @id @default(cuid())
+  userId     String
+  passageId  String
+  answers    Json // Store user's selected answers as JSON: {"1": 0, "2": 1, ...}
   totalScore Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -311,43 +304,30 @@ model FillBlanksDropdownBookmark {
 // Multiple Choice, Multiple Answers
 
 model MultipleChoiceMultiplePassage {
-  id         String     @id @default(cuid())
-  questionId String     @unique
-  title      String
-  content    String     @db.Text // The reading passage text
-  difficulty Difficulty @default(MEDIUM)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  isActive   Boolean    @default(true)
+  id           String     @id @default(cuid())
+  questionId   String     @unique
+  title        String
+  content      String     @db.Text // The reading passage text
+  questionText String // actual question
+  difficulty   Difficulty @default(MEDIUM)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  isActive     Boolean    @default(true)
 
   // Relations
-  question  MultipleChoiceMultipleQuestion?
+  options   MultipleChoiceMultipleOption[]
   answers   MultipleChoiceMultipleAnswer[]
   bookmarks MultipleChoiceMultipleBookmark[]
 
   @@map("multiple_choice_multiple_passage")
 }
 
-model MultipleChoiceMultipleQuestion {
-  id        String   @id @default(cuid())
-  passageId String   @unique
-  passage   MultipleChoiceMultiplePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  prompt    String   @db.Text // The question asked (e.g., "Which are effects of air pollution?")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  options MultipleChoiceMultipleOption[]
-
-  @@map("multiple_choice_multiple_question")
-}
-
 model MultipleChoiceMultipleOption {
-  id         String  @id @default(cuid())
-  text       String  // Option text
-  isCorrect  Boolean @default(false) // Multiple can be true
-  questionId String
-  question   MultipleChoiceMultipleQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id        String                        @id @default(cuid())
+  text      String // Option text
+  isCorrect Boolean                       @default(false) // Multiple can be true
+  passageId String
+  passage   MultipleChoiceMultiplePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
   @@map("multiple_choice_multiple_option")
 }
@@ -401,9 +381,9 @@ model ReorderParagraphPassage {
 }
 
 model ReorderParagraphItem {
-  id           String @id @default(cuid())
-  text         String @db.Text // Paragraph/sentence text
-  correctOrder Int    // Correct position (1 = first, 2 = second, etc.)
+  id           String                  @id @default(cuid())
+  text         String                  @db.Text // Paragraph/sentence text
+  correctOrder Int // Correct position (1 = first, 2 = second, etc.)
   passageId    String
   passage      ReorderParagraphPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
@@ -411,13 +391,13 @@ model ReorderParagraphItem {
 }
 
 model ReorderParagraphAnswer {
-  id          String   @id @default(cuid())
-  userId      String
-  passageId   String
-  userOrder   String[] // Array of paragraph IDs in user's order
-  totalScore  Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  passageId  String
+  userOrder  String[] // Array of paragraph IDs in user's order
+  totalScore Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   user    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -461,21 +441,21 @@ model FillBlanksDragDropPassage {
 }
 
 model FillBlanksDragDropBlank {
-  id              String @id @default(cuid())
-  position        Int    // Placeholder position (1 = first blank, 2 = second blank, etc.)
+  id              String                    @id @default(cuid())
+  position        Int // Placeholder position (1 = first blank, 2 = second blank, etc.)
   passageId       String
   passage         FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  correctOptionId String @unique // Reference to the correct option
+  correctOptionId String                    @unique // Reference to the correct option
   correctOption   FillBlanksDragDropOption  @relation("CorrectOptionForBlank", fields: [correctOptionId], references: [id])
 
   @@map("fill_blanks_drag_drop_blank")
 }
 
 model FillBlanksDragDropOption {
-  id            String  @id @default(cuid())
-  text          String  // Word/phrase in the draggable pool
+  id            String                    @id @default(cuid())
+  text          String // Word/phrase in the draggable pool
   passageId     String
-  blankPosition Int?    // Correct position of this option (null if it's a distractor)
+  blankPosition Int? // Correct position of this option (null if it's a distractor)
   passage       FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
   // Reverse relation (to know if this option is the correct one for a blank)
@@ -488,7 +468,7 @@ model FillBlanksDragDropAnswer {
   id         String   @id @default(cuid())
   userId     String
   passageId  String
-  answers    Json     // Store user's answers as JSON: {"1": "optionId1", "2": "optionId2", ...}
+  answers    Json // Store user's answers as JSON: {"1": "optionId1", "2": "optionId2", ...}
   totalScore Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -516,55 +496,33 @@ model FillBlanksDragDropBookmark {
 
 // Multiple Choice, Single Answer
 model MultipleChoiceSinglePassage {
-  id         String     @id @default(cuid())
-  questionId String     @unique
-  title      String
-  content    String     @db.Text // The passage text
-  difficulty Difficulty @default(MEDIUM)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  isActive   Boolean    @default(true)
+  id                 String     @id @default(cuid())
+  questionId         String     @unique
+  title              String
+  content            String     @db.Text // The passage text
+  questionText       String // actual question
+  options            String[] // Array of options like: ["Option A", "Option B", "Option C", "Option D"]
+  correctOptionIndex Int // Index of the correct option (0-based)
+  difficulty         Difficulty @default(MEDIUM)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  isActive           Boolean    @default(true)
 
   // Relations
-  question  MultipleChoiceSingleQuestion?
   answers   MultipleChoiceSingleAnswer[]
   bookmarks MultipleChoiceSingleBookmark[]
 
   @@map("multiple_choice_single_passage")
 }
 
-model MultipleChoiceSingleQuestion {
-  id        String   @id @default(cuid())
-  passageId String   @unique
-  passage   MultipleChoiceSinglePassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  prompt    String   @db.Text // The actual question text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  options MultipleChoiceSingleOption[]
-
-  @@map("multiple_choice_single_question")
-}
-
-model MultipleChoiceSingleOption {
-  id         String  @id @default(cuid())
-  text       String  // Option text
-  isCorrect  Boolean @default(false) // Exactly one should be true
-  questionId String
-  question   MultipleChoiceSingleQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@map("multiple_choice_single_option")
-}
-
 model MultipleChoiceSingleAnswer {
-  id             String   @id @default(cuid())
-  userId         String
-  passageId      String
-  selectedOption String   // ID of the selected option
-  totalScore     Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String
+  passageId           String
+  selectedOptionIndex Int // ID of the selected option
+  totalScore          Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Relations
   user    User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -587,55 +545,47 @@ model MultipleChoiceSingleBookmark {
   @@map("multiple_choice_single_bookmark")
 }
 
-
-
-
-
 // Listening specific models
-
-
-
-
 
 // Summarize Spoken Text
 model SummarizeSpokenTextQuestion {
-  id                    String     @id @default(cuid())
-  questionId            String     @unique // Your custom unique identifier
-  title                 String
-  audioTranscribedText  String     @db.Text // Transcribed text of the audio
-  audioUrl              String     // Path or URL to audio file
-  difficulty            Difficulty @default(MEDIUM)
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
+  id                   String     @id @default(cuid())
+  questionId           String     @unique // Your custom unique identifier
+  title                String
+  audioTranscribedText String     @db.Text // Transcribed text of the audio
+  audioUrl             String // Path or URL to audio file
+  difficulty           Difficulty @default(MEDIUM)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   // Relations
-  answers               SummarizeSpokenTextAnswer[]
-  bookmarks             SummarizeSpokenTextBookmark[]
+  answers   SummarizeSpokenTextAnswer[]
+  bookmarks SummarizeSpokenTextBookmark[]
 
   @@map("summarize_spoken_text_question")
 }
 
 model SummarizeSpokenTextAnswer {
-  id           String   @id @default(cuid())
-  userId       String
-  questionId   String
-  response     String   @db.Text // Student's written summary
-  wordCount    Int?
+  id         String @id @default(cuid())
+  userId     String
+  questionId String
+  response   String @db.Text // Student's written summary
+  wordCount  Int?
 
   // Evaluation fields
-  contentScore     Float?
-  formScore        Float?
-  grammarScore     Float?
-  vocabularyScore  Float?
-  spellingScore    Float?
-  totalScore       Float?
+  contentScore    Float?
+  formScore       Float?
+  grammarScore    Float?
+  vocabularyScore Float?
+  spellingScore   Float?
+  totalScore      Float?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  question     SummarizeSpokenTextQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question SummarizeSpokenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("summarize_spoken_text_answer")
 }
@@ -647,13 +597,12 @@ model SummarizeSpokenTextBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  question   SummarizeSpokenTextQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question SummarizeSpokenTextQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
   @@map("summarize_spoken_text_bookmark")
 }
-
 
 // Multiple Choice, Multiple Answers (Listening)
 model ListeningMCMPassage {
@@ -661,39 +610,26 @@ model ListeningMCMPassage {
   questionId           String     @unique
   title                String
   audioTranscribedText String     @db.Text
-  audioUrl             String     // Audio file link
+  audioUrl             String // Audio file link
+  questionText         String // actual question
   difficulty           Difficulty @default(MEDIUM)
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
   // Relations
-  question             ListeningMCMQuestion?
-  answers              ListeningMCMAnswer[]
-  bookmarks            ListeningMCMBookmark[]
+  options   ListeningMCMOption[]
+  answers   ListeningMCMAnswer[]
+  bookmarks ListeningMCMBookmark[]
 
   @@map("listening_mcm_passage")
 }
 
-model ListeningMCMQuestion {
-  id           String   @id @default(cuid())
-  passageId    String   @unique
-  passage      ListeningMCMPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  questionText String   @db.Text // The actual question text
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  options      ListeningMCMOption[]
-
-  @@map("listening_mcm_question")
-}
-
 model ListeningMCMOption {
-  id         String  @id @default(cuid())
-  text       String  // Option text
-  isCorrect  Boolean @default(false) // Multiple can be true
-  questionId String
-  question   ListeningMCMQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id        String              @id @default(cuid())
+  text      String // Option text
+  isCorrect Boolean             @default(false) // Multiple can be true
+  passageId String
+  passage   ListeningMCMPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
   @@map("listening_mcm_option")
 }
@@ -728,47 +664,46 @@ model ListeningMCMBookmark {
   @@map("listening_mcm_bookmark")
 }
 
-
 // Fill In the Blank (Listening)
 model ListeningFillBlankPassage {
   id                   String     @id @default(cuid())
   questionId           String     @unique
   title                String
   audioTranscribedText String     @db.Text
-  audioUrl             String     // URL of the audio file
+  audioUrl             String // URL of the audio file
   passage              String     @db.Text // The passage text with placeholders like {1}, {2}, etc.
   difficulty           Difficulty @default(MEDIUM)
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
   // Relations
-  blanks               ListeningFillBlank[]
-  answers              ListeningFillBlankAnswer[]
-  bookmarks            ListeningFillBlankBookmark[]
+  blanks    ListeningFillBlank[]
+  answers   ListeningFillBlankAnswer[]
+  bookmarks ListeningFillBlankBookmark[]
 
   @@map("listening_fill_blank_passage")
 }
 
 model ListeningFillBlank {
-  id          String   @id @default(cuid())
+  id          String                    @id @default(cuid())
   passageId   String
   passage     ListeningFillBlankPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  position    Int      // Position of the blank in the passage
-  correctWord String   // Correct answer word for this blank
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  position    Int // Position of the blank in the passage
+  correctWord String // Correct answer word for this blank || always trim and lowercase before storing
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
 
   @@map("listening_fill_blank")
 }
 
 model ListeningFillBlankAnswer {
-  id        String   @id @default(cuid())
-  userId    String
-  passageId String
-  answers   Json     // Stores user's answers { "1": "word1", "2": "word2" }
+  id         String   @id @default(cuid())
+  userId     String
+  passageId  String
+  answers    Json // Stores user's answers { "1": "word1", "2": "word2" }
   totalScore Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   user    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -793,15 +728,15 @@ model ListeningFillBlankBookmark {
 
 // Highlight Correct Summary (Listening)
 model ListeningHighlightSummaryPassage {
-  id        String     @id @default(cuid())
-  questionId String    @unique
-  title     String
-  audioUrl  String     // Audio file that user will listen to
-  passage   String?    @db.Text // Sometimes transcripts or hints may be shown
-  questionText String  @db.Text // The question displayed to the user
-  difficulty Difficulty @default(MEDIUM)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           String     @id @default(cuid())
+  questionId   String     @unique
+  title        String
+  audioUrl     String // Audio file that user will listen to
+  passage      String?    @db.Text // Sometimes transcripts or hints may be shown
+  questionText String     @db.Text // The question displayed to the user
+  difficulty   Difficulty @default(MEDIUM)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   // Relations
   options   ListeningHighlightSummaryOption[]
@@ -812,9 +747,9 @@ model ListeningHighlightSummaryPassage {
 }
 
 model ListeningHighlightSummaryOption {
-  id        String  @id @default(cuid())
-  text      String  @db.Text // Option text (summary option)
-  isCorrect Boolean @default(false) // Only one should be true for single correct answer
+  id        String                           @id @default(cuid())
+  text      String                           @db.Text // Option text (summary option)
+  isCorrect Boolean                          @default(false) // Only one should be true for single correct answer
   passageId String
   passage   ListeningHighlightSummaryPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
@@ -825,7 +760,7 @@ model ListeningHighlightSummaryAnswer {
   id             String   @id @default(cuid())
   userId         String
   passageId      String
-  selectedOption String   // ID of the selected option
+  selectedOption String // ID of the selected option
   totalScore     Float?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -853,41 +788,32 @@ model ListeningHighlightSummaryBookmark {
 
 // Multiple Choice Single (Listening)
 model ListeningMCSPassage {
-  id        String     @id @default(cuid())
-  questionId String    @unique
-  title     String
-  audioUrl  String     // URL or file path for the audio
-  questionText String  @db.Text // The question based on the audio
-  difficulty Difficulty @default(MEDIUM)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id                 String     @id @default(cuid())
+  questionId         String     @unique
+  title              String
+  audioUrl           String // URL or file path for the audio
+  questionText       String     @db.Text // The question based on the audio
+  options            String[] // Array of options like: ["Option A", "Option B", "Option C", "Option D"]
+  correctOptionIndex Int // Index of the correct option (0-based)
+  difficulty         Difficulty @default(MEDIUM)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
   // Relations
-  options   ListeningMCSOption[]
   answers   ListeningMCSAnswer[]
   bookmarks ListeningMCSBookmark[]
 
   @@map("listening_mcs_passage")
 }
 
-model ListeningMCSOption {
-  id        String  @id @default(cuid())
-  text      String  // Option text
-  isCorrect Boolean @default(false) // Only 1 option will be true for single answer
-  passageId String
-  passage   ListeningMCSPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-
-  @@map("listening_mcs_option")
-}
-
 model ListeningMCSAnswer {
-  id             String   @id @default(cuid())
-  userId         String
-  passageId      String
-  selectedOption String   // ID of the selected option
-  totalScore     Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String
+  passageId           String
+  selectedOptionIndex Int // Index of the selected option
+  totalScore          Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Relations
   user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -912,41 +838,32 @@ model ListeningMCSBookmark {
 
 // Select Missing Word (Listening)
 model ListeningSelectMissingWordPassage {
-  id          String     @id @default(cuid())
-  questionId  String     @unique
-  title       String
-  audioUrl    String     // URL or path to the audio
-  instruction String?    @db.Text // e.g., "Select the correct option to complete the recording."
-  difficulty  Difficulty @default(MEDIUM)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                 String     @id @default(cuid())
+  questionId         String     @unique
+  title              String
+  audioUrl           String // URL or path to the audio
+  instruction        String?    @db.Text // e.g., "Select the correct option to complete the recording."
+  options            String[] // Array of options like: ["word1", "word2", "word3", "word4"]
+  correctOptionIndex Int // Index of the correct option (0-based)
+  difficulty         Difficulty @default(MEDIUM)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
   // Relations
-  options     ListeningSelectMissingWordOption[]
-  answers     ListeningSelectMissingWordAnswer[]
-  bookmarks   ListeningSelectMissingWordBookmark[]
+  answers   ListeningSelectMissingWordAnswer[]
+  bookmarks ListeningSelectMissingWordBookmark[]
 
   @@map("listening_select_missing_word_passage")
 }
 
-model ListeningSelectMissingWordOption {
-  id        String  @id @default(cuid())
-  text      String
-  isCorrect Boolean @default(false) // Single-answer type → only one should be true
-  passageId String
-  passage   ListeningSelectMissingWordPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-
-  @@map("listening_select_missing_word_option")
-}
-
 model ListeningSelectMissingWordAnswer {
-  id             String   @id @default(cuid())
-  userId         String
-  passageId      String
-  selectedOption String   // ID of the selected option
-  totalScore     Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String
+  passageId           String
+  selectedOptionIndex Int // Index of the option selected by user
+  totalScore          Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Relations
   user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -971,14 +888,14 @@ model ListeningSelectMissingWordBookmark {
 
 // Highlight Incorrect Words (Listening)
 model ListeningHighlightIncorrectWordsPassage {
-  id           String     @id @default(cuid())
-  questionId   String     @unique
-  title        String
-  audioUrl     String     // URL/path to the audio file
-  passage      String     @db.Text // The full passage shown to user
-  difficulty   Difficulty @default(MEDIUM)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id         String     @id @default(cuid())
+  questionId String     @unique
+  title      String
+  audioUrl   String // URL/path to the audio file
+  passage    String     @db.Text // The full passage shown to user
+  difficulty Difficulty @default(MEDIUM)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   // Relations
   incorrectWords ListeningIncorrectWord[]
@@ -989,24 +906,24 @@ model ListeningHighlightIncorrectWordsPassage {
 }
 
 model ListeningIncorrectWord {
-  id        String   @id @default(cuid())
-  word      String   // Incorrect word in passage
-  position  Int      // Index/position of word in passage (helps to highlight)
+  id        String                                  @id @default(cuid())
+  word      String // Incorrect word in passage
+  position  Int // Index/position of word in passage (helps to highlight)
   passageId String
   passage   ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  createdAt DateTime                                @default(now())
 
   @@map("listening_incorrect_word")
 }
 
 model ListeningHighlightIncorrectWordsAnswer {
-  id              String   @id @default(cuid())
-  userId          String
-  passageId       String
-  selectedWords   String[] // Array of word positions or IDs selected by user
-  totalScore      Float?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userId        String
+  passageId     String
+  selectedWords String[] // Array of word positions or IDs selected by user
+  totalScore    Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relations
   user    User                                    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1034,7 +951,7 @@ model ListeningWriteFromDictationPassage {
   id         String     @id @default(cuid())
   questionId String     @unique
   title      String
-  audioUrl   String     // link to the audio file
+  audioUrl   String // link to the audio file
   transcript String     @db.Text // correct sentence user needs to write
   difficulty Difficulty @default(MEDIUM)
   createdAt  DateTime   @default(now())
@@ -1057,7 +974,7 @@ model ListeningWriteFromDictationAnswer {
   updatedAt  DateTime @updatedAt
 
   // Relations
-  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User                               @relation(fields: [userId], references: [id], onDelete: Cascade)
   passage ListeningWriteFromDictationPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
   @@map("listening_write_from_dictation_answer")
@@ -1070,7 +987,7 @@ model ListeningWriteFromDictationBookmark {
   createdAt DateTime @default(now())
 
   // Relations
-  user    User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User                               @relation(fields: [userId], references: [id], onDelete: Cascade)
   passage ListeningWriteFromDictationPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
 
   @@unique([userId, passageId])
