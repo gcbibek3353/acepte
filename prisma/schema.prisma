@@ -728,42 +728,33 @@ model ListeningFillBlankBookmark {
 
 // Highlight Correct Summary (Listening)
 model ListeningHighlightSummaryPassage {
-  id           String     @id @default(cuid())
-  questionId   String     @unique
-  title        String
-  audioUrl     String // Audio file that user will listen to
-  passage      String?    @db.Text // Sometimes transcripts or hints may be shown
-  questionText String     @db.Text // The question displayed to the user
-  difficulty   Difficulty @default(MEDIUM)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                 String     @id @default(cuid())
+  questionId         String     @unique
+  title              String
+  audioUrl           String // Audio file that user will listen to
+  passage            String?    @db.Text // Sometimes transcripts or hints may be shown
+  questionText       String     @db.Text // The question displayed to the user
+  options            String[] // Array of correct summary options
+  correctOptionIndex Int // Index of the correct option (0-based)
+  difficulty         Difficulty @default(MEDIUM)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
   // Relations
-  options   ListeningHighlightSummaryOption[]
   answers   ListeningHighlightSummaryAnswer[]
   bookmarks ListeningHighlightSummaryBookmark[]
 
   @@map("listening_highlight_summary_passage")
 }
 
-model ListeningHighlightSummaryOption {
-  id        String                           @id @default(cuid())
-  text      String                           @db.Text // Option text (summary option)
-  isCorrect Boolean                          @default(false) // Only one should be true for single correct answer
-  passageId String
-  passage   ListeningHighlightSummaryPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-
-  @@map("listening_highlight_summary_option")
-}
-
 model ListeningHighlightSummaryAnswer {
-  id             String   @id @default(cuid())
-  userId         String
-  passageId      String
-  selectedOption String // ID of the selected option
-  totalScore     Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String
+  passageId           String
+  selectedOptionIndex Int //index of correct option selected by user
+  totalScore          Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Relations
   user    User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
