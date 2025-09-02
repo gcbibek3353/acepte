@@ -116,19 +116,19 @@ The geopolitical implications of the energy transition are significant. Countrie
 const createMcmQuestions = async () => {
   try {
     console.log("Starting to add Multiple Choice Multiple Answer questions to the database...")
-    
+
     for (const questionData of questions) {
       // Check if passage already exists
       const existingPassage = await prisma.multipleChoiceMultiplePassage.findUnique({
         where: { questionId: questionData.questionId }
       })
-      
+
       if (existingPassage) {
         console.log(`Question ${questionData.questionId} already exists, skipping...`)
         continue
       }
-      
-      // Create passage with question and options in a transaction
+
+      // Create passage and options in a transaction
       const result = await prisma.$transaction(async (tx) => {
         // Create the passage
         const passage = await tx.multipleChoiceMultiplePassage.create({
@@ -136,50 +136,41 @@ const createMcmQuestions = async () => {
             questionId: questionData.questionId,
             title: questionData.title,
             content: questionData.content,
-            difficulty: questionData.difficulty
+            questionText: questionData.prompt,
+            difficulty: questionData.difficulty,
           }
         })
-        
-        // Create the question
-        const question = await tx.multipleChoiceMultipleQuestion.create({
-          data: {
-            passageId: passage.id,
-            prompt: questionData.prompt
-          }
-        })
-        
-        // Create the options
+
+        // Create the options (passageId is the relation key)
         const options = await Promise.all(
           questionData.options.map(option =>
             tx.multipleChoiceMultipleOption.create({
               data: {
-                questionId: question.id,
+                passageId: passage.id,
                 text: option.text,
                 isCorrect: option.isCorrect
               }
             })
           )
         )
-        
-        return { passage, question, options }
+
+        return { passage, options }
       })
-      
+
       const correctAnswers = result.options.filter(option => option.isCorrect).length
       console.log(`✅ Created question: ${questionData.questionId} - ${questionData.title} (${correctAnswers} correct answers)`)
     }
-    
+
     console.log("✅ All Multiple Choice Multiple Answer questions have been processed successfully!")
-    
+
     // Display summary
     const totalPassages = await prisma.multipleChoiceMultiplePassage.count()
-    const totalQuestions = await prisma.multipleChoiceMultipleQuestion.count()
     const totalOptions = await prisma.multipleChoiceMultipleOption.count()
-    
+
     console.log(`📊 Summary:`)
     console.log(`   - Total passages: ${totalPassages}`)
-    console.log(`   - Total questions: ${totalQuestions}`)
     console.log(`   - Total options: ${totalOptions}`)
-    
+
   } catch (error) {
     console.error("❌ Error creating Multiple Choice Multiple Answer questions:", error)
   } finally {

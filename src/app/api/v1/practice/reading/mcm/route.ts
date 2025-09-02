@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const difficulty = searchParams.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD' | null
-    
+
     const skip = (page - 1) * limit
 
     // Build where clause
@@ -33,21 +33,18 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         questionId: true,
+        questionText: true,
         title: true,
         difficulty: true,
         createdAt: true,
         updatedAt: true,
-        question: {
+        options: {
           select: {
-            prompt: true,
-            options: {
-              select: {
-                id: true,
-                text: true
-                // Don't include isCorrect to prevent cheating
-              }
-            }
+            id: true,
+            text: true
+            // Don't include isCorrect to prevent cheating
           }
+
         }
       },
       orderBy: {
@@ -68,8 +65,8 @@ export async function GET(request: NextRequest) {
           questionId: passage.questionId,
           title: passage.title,
           difficulty: passage.difficulty,
-          prompt: passage.question?.prompt || '',
-          optionsCount: passage.question?.options.length || 0,
+          prompt: passage.questionText || '',
+          optionsCount: passage.options.length || 0,
           createdAt: passage.createdAt,
           updatedAt: passage.updatedAt
         })),
