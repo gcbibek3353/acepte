@@ -1,6 +1,7 @@
-import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
+import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, ListeningSelectMissingWordAnswer, ListeningSelectMissingWordBookmark, ListeningSelectMissingWordPassage, ListeningWriteFromDictationAnswer, ListeningWriteFromDictationBookmark, ListeningWriteFromDictationPassage, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
 import { evaluateSummarizeSpokenTextAnswer } from "@/lib/ai/google";
 import prisma from "@/lib/prisma";
+import { tr } from "zod/locales";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -686,12 +687,400 @@ const postMCSAnswer = async (userId: string, questionId: string, answerIndex: nu
 }
 
 
+
+
 // select missing word realted functions
+const getSMWQuestions = async (userId: string, queryParams: QuestionQuery): Promise<ListeningSelectMissingWordPassage[] | null> => {
+    try {
+        const { page = 1, limit = 10, difficulty, answered, bookmarked } = queryParams;
+        const skip = (page - 1) * limit;
+
+        const whereClause: any = {};
+
+        if (difficulty) {
+            whereClause.difficulty = difficulty;
+        }
+
+        if (answered !== undefined) {
+            if (answered) {
+                whereClause.ListeningSelectMissingWordAnswers = { some: { userId } };
+            } else {
+                whereClause.ListeningSelectMissingWordAnswers = { none: { userId } };
+            }
+        }
+        if (bookmarked !== undefined) {
+            if (bookmarked) {
+                whereClause.ListeningSelectMissingWordBookmarks = { some: { userId } };
+            } else {
+                whereClause.ListeningSelectMissingWordBookmarks = { none: { userId } };
+            }
+        }
+
+        const questions = await prisma.listeningSelectMissingWordPassage.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return questions;
+    } catch (error) {
+        console.error("Error fetching SMW questions:", error);
+        return null;
+    }
+}
+
+const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMissingWordPassage | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.listeningSelectMissingWordPassage.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+const addOrRemoveSMWBookmark = async (userId: string, passageId: string): Promise<ListeningSelectMissingWordBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.listeningSelectMissingWordBookmark.findUnique({
+            where: {
+                userId_passageId: {
+                    userId,
+                    passageId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.listeningSelectMissingWordBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.listeningSelectMissingWordBookmark.create({
+                data: {
+                    userId,
+                    passageId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
+const postSMWAnswer = async (userId: string, questionId: string, answerIndex: number): Promise<ListeningSelectMissingWordAnswer | null> => {
+    try {
+        const question = await prisma.listeningSelectMissingWordPassage.findUnique({
+            where: { id: questionId },
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        let score = 0;
+        if (question.correctOptionIndex === answerIndex) score = 1;
+
+        const SMWAnswer = await prisma.listeningSelectMissingWordAnswer.create({
+            data: {
+                userId,
+                passageId: questionId,
+                selectedOptionIndex: answerIndex,
+                totalScore: score,
+            }
+        });
+        return SMWAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
+
+
+
 // Highlight incorrect words related functions
+const getHIWQuestions = async (userId: string, queryParams: QuestionQuery): Promise<ListeningHighlightIncorrectWordsPassage[] | null> => {
+    try {
+        const { page = 1, limit = 10, difficulty, answered, bookmarked } = queryParams;
+        const skip = (page - 1) * limit;
+
+        const whereClause: any = {};
+
+        if (difficulty) {
+            whereClause.difficulty = difficulty;
+        }
+
+        if (answered !== undefined) {
+            if (answered) {
+                whereClause.ListeningHighlightIncorrectWordsAnswers = { some: { userId } };
+            } else {
+                whereClause.ListeningHighlightIncorrectWordsAnswers = { none: { userId } };
+            }
+        }
+
+        if (bookmarked !== undefined) {
+            if (bookmarked) {
+                whereClause.ListeningHighlightIncorrectWordsBookmarks = { some: { userId } };
+            } else {
+                whereClause.ListeningHighlightIncorrectWordsBookmarks = { none: { userId } };
+            }
+        }
+
+        const questions = await prisma.listeningHighlightIncorrectWordsPassage.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return questions;
+    } catch (error) {
+        console.error("Error fetching HIW questions:", error);
+        return null;
+    }
+}
+
+const getHIWQuestionById = async (questionId: string): Promise<ListeningHighlightIncorrectWordsPassage | null> => {
+    try {
+        // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+        const question = await prisma.listeningHighlightIncorrectWordsPassage.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+const addOrRemoveHIWBookmark = async (userId: string, passageId: string): Promise<ListeningHighlightIncorrectWordsBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.listeningHighlightIncorrectWordsBookmark.findUnique({
+            where: {
+                userId_passageId: {
+                    userId,
+                    passageId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.listeningHighlightIncorrectWordsBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.listeningHighlightIncorrectWordsBookmark.create({
+                data: {
+                    userId,
+                    passageId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
+const postHIWAnswer = async (userId: string, questionId: string, answer: {
+    word: string;
+    position: number;
+}[]): Promise<ListeningHighlightIncorrectWordsAnswer | null> => {
+    try {
+        const question = await prisma.listeningHighlightIncorrectWordsPassage.findUnique({
+            where: { id: questionId },
+            include: { incorrectWords: true }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        // Get all incorrect words with their positions
+        const incorrectWords = question.incorrectWords.map(iw => ({
+            word: iw.word,
+            position: iw.position
+        }));
+
+        let score = 0;
+
+        // Check each user answer
+        for (const userAnswer of answer) {
+            const isCorrectSelection = incorrectWords.some(
+                iw => iw.word === userAnswer.word && iw.position === userAnswer.position
+            );
+
+            if (isCorrectSelection) {
+                score += 1;
+            } else {
+                score -= 1;
+            }
+        }
+
+        // Ensure score doesn't go below 0
+        if (score < 0) {
+            score = 0;
+        }
+
+        // Save the answer
+        const savedAnswer = await prisma.listeningHighlightIncorrectWordsAnswer.create({
+            data: {
+                userId,
+                passageId: questionId,
+                selectedWords: answer, // Assuming this field stores the user's selections
+                totalScore : score,
+            }
+        });
+
+        return savedAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
+
+
 // write from dictation related functions
+const getWFDQuestions = async (userId: string, queryParams: QuestionQuery): Promise<ListeningWriteFromDictationPassage[] | null> => {
+    try {
+        const { page = 1, limit = 10, difficulty, answered, bookmarked } = queryParams;
+        const skip = (page - 1) * limit;
 
+        const whereClause: any = {};
 
-// other functions will come down here 
+        if (difficulty) {
+            whereClause.difficulty = difficulty;
+        }
+
+        if (answered !== undefined) {
+            if (answered) {
+                whereClause.ListeningWriteFromDictationAnswers = { some: { userId } };
+            } else {
+                whereClause.ListeningWriteFromDictationAnswers = { none: { userId } };
+            }
+        }
+
+        if (bookmarked !== undefined) {
+            if (bookmarked) {
+                whereClause.ListeningWriteFromDictationBookmarks = { some: { userId } };
+            } else {
+                whereClause.ListeningWriteFromDictationBookmarks = { none: { userId } };
+            }
+        }
+
+        const questions = await prisma.listeningWriteFromDictationPassage.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return questions;
+    } catch (error) {
+        console.error("Error fetching WFD questions:", error);
+        return null;
+    }
+}
+
+const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFromDictationPassage | null> => {
+    try {
+        // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+        const question = await prisma.listeningWriteFromDictationPassage.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+const addOrRemoveWFDBookmark = async (userId: string, passageId: string): Promise<ListeningWriteFromDictationBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.listeningWriteFromDictationBookmark.findUnique({
+            where: {
+                userId_passageId: {
+                    userId,
+                    passageId
+                }
+            }
+        });
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.listeningWriteFromDictationBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.listeningWriteFromDictationBookmark.create({
+                data: {
+                    userId,
+                    passageId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
+
+const postWfDAnswer = async (userId: string, questionId: string, answer: string): Promise<ListeningWriteFromDictationAnswer | null> => {
+    try {
+        const question = await prisma.listeningWriteFromDictationPassage.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const transcriptWords = question.transcript.trim().split(/\s+/).filter(word => word.length > 0);
+        const answerWords = answer.trim().split(/\s+/).filter(word => word.length > 0);
+        let score = 0;
+        transcriptWords.forEach((word, index) => {
+            if (answerWords[index] && word.toLowerCase() === answerWords[index].toLowerCase()) {
+                score += 1;
+            }
+        });
+
+        const wfdAnswer = await prisma.listeningWriteFromDictationAnswer.create({
+            data: {
+                userId,
+                passageId: questionId,
+                response: answer,
+                totalScore: score,
+            }
+        });
+        return wfdAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
+
 
 const listeningController = {
     getSummarizeSpokenTextQuestions,
@@ -718,5 +1107,20 @@ const listeningController = {
     getMCSQuestionById,
     addOrRemoveMCSBookmark,
     postMCSAnswer,
+
+    getSMWQuestions,
+    getSMWQuestionById,
+    addOrRemoveSMWBookmark,
+    postSMWAnswer,
+
+    getHIWQuestions,
+    getHIWQuestionById,
+    addOrRemoveHIWBookmark,
+    postHIWAnswer,
+
+    getWFDQuestions,
+    getWFDQuestionById,
+    addOrRemoveWFDBookmark,
+    postWfDAnswer,
 }
 export default listeningController;

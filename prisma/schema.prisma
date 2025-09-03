@@ -897,12 +897,12 @@ model ListeningHighlightIncorrectWordsPassage {
 }
 
 model ListeningIncorrectWord {
-  id        String                                  @id @default(cuid())
-  word      String // Incorrect word in passage
-  position  Int // Index/position of word in passage (helps to highlight)
-  passageId String
-  passage   ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  createdAt DateTime                                @default(now())
+  id          String                                  @id @default(cuid())
+  word        String // Incorrect word in passage
+  position    Int // Index/position of word in passage (helps to highlight)
+  passageId   String
+  passage     ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  createdAt   DateTime                                @default(now())
 
   @@map("listening_incorrect_word")
 }
@@ -911,7 +911,7 @@ model ListeningHighlightIncorrectWordsAnswer {
   id            String   @id @default(cuid())
   userId        String
   passageId     String
-  selectedWords String[] // Array of word positions or IDs selected by user
+  selectedWords Json // [{"word" : "school" , "position" : 4},{}]
   totalScore    Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

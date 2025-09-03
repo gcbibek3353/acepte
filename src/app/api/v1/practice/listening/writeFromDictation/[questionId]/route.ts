@@ -1,0 +1,113 @@
+import { NextRequest, NextResponse } from "next/server";
+import listeningController from "../../listening.controller";
+import { ListeningWriteFromDictationPassage } from "@/generated/prisma";
+
+interface ApiResponse<T> {
+    success: boolean;
+    message: string;
+    data: T | null;
+}
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ questionId: string }> }
+): Promise<NextResponse<ApiResponse<ListeningWriteFromDictationPassage | null>>> {
+    try {
+        const { questionId } = await params;
+        if (!questionId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Failed to get the question Id",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+
+        const question = await listeningController.getWFDQuestionById(questionId);
+
+        if (!question) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Failed to get the question",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Question fetched successfully",
+                data: question
+            },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error("Error fetching WFD question:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Internal server error",
+                data: null
+            },
+            { status: 500 }
+        );
+    }
+}
+
+export async function POST(
+    req: NextRequest,
+    { params }: { params: Promise<{ questionId: string }> }
+) {
+    try {
+        const { questionId } = await params;
+        if (!questionId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Failed to get the question Id",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+
+        const body = await req.json();
+        const { answer } = body;
+        const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3"; // Replace with actual user ID retrieval logic
+        if (!answer) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Answer is required",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+
+        const result = await listeningController.postWfDAnswer(userId, questionId, answer);
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Answer checked successfully",
+                data: result
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error checking WFD answer:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Internal server error",
+                data: null
+            },
+            { status: 500 }
+        );
+    }
+}
