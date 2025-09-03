@@ -22,17 +22,14 @@ export async function GET(
         isActive: true
       },
       include: {
-        question: {
-          include: {
-            options: {
-              select: {
-                id: true,
-                text: true,
-                // Don't include isCorrect in the response to prevent cheating
-              }
-            }
+        options: {
+          select: {
+            id: true,
+            text: true,
+            // Don't include isCorrect in the response to prevent cheating
           }
         }
+
       }
     })
 
@@ -43,15 +40,8 @@ export async function GET(
       }, { status: 404 })
     }
 
-    if (!passage.question) {
-      return NextResponse.json({
-        success: false,
-        message: 'Question data is incomplete'
-      }, { status: 404 })
-    }
-
     // Ensure we have exactly 5 options
-    if (passage.question.options.length !== 5) {
+    if (passage.options.length !== 5) {
       return NextResponse.json({
         success: false,
         message: 'Invalid question format - must have exactly 5 options'
@@ -67,8 +57,8 @@ export async function GET(
         title: passage.title,
         content: passage.content,
         difficulty: passage.difficulty,
-        prompt: passage.question.prompt,
-        options: passage.question.options,
+        prompt: passage.questionText,
+        options: passage.options,
         createdAt: passage.createdAt,
         updatedAt: passage.updatedAt
       }
@@ -113,15 +103,11 @@ export async function POST(
         isActive: true
       },
       include: {
-        question: {
-          include: {
-            options: true
-          }
-        }
+        options: true
       }
     })
 
-    if (!passage || !passage.question) {
+    if (!passage) {
       return NextResponse.json({
         success: false,
         message: 'Question not found'
@@ -129,16 +115,16 @@ export async function POST(
     }
 
     // Get correct option IDs
-    const correctOptionIds = passage.question.options
+    const correctOptionIds = passage.options
       .filter(option => option.isCorrect)
       .map(option => option.id)
 
     // Calculate score
     const totalCorrect = correctOptionIds.length
-    const userCorrect = selectedOptions.filter(optionId => 
+    const userCorrect = selectedOptions.filter(optionId =>
       correctOptionIds.includes(optionId)
     ).length
-    const userIncorrect = selectedOptions.filter(optionId => 
+    const userIncorrect = selectedOptions.filter(optionId =>
       !correctOptionIds.includes(optionId)
     ).length
 
@@ -158,12 +144,12 @@ export async function POST(
     })
 
     // Prepare detailed results
-    const results = passage.question.options.map(option => ({
+    const results = passage.options.map(option => ({
       id: option.id,
       text: option.text,
       isCorrect: option.isCorrect,
       wasSelected: selectedOptions.includes(option.id),
-      status: option.isCorrect 
+      status: option.isCorrect
         ? (selectedOptions.includes(option.id) ? 'correct_selected' : 'correct_not_selected')
         : (selectedOptions.includes(option.id) ? 'incorrect_selected' : 'incorrect_not_selected')
     }))

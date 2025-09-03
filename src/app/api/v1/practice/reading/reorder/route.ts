@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const difficulty = searchParams.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD' | null
-
+    
     const skip = (page - 1) * limit
 
     // Build where clause
@@ -23,28 +23,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count for pagination
-    const totalCount = await prisma.multipleChoiceMultiplePassage.count({
+    const totalCount = await prisma.reorderParagraphPassage.count({
       where: whereClause
     })
 
     // Fetch passages
-    const passages = await prisma.multipleChoiceMultiplePassage.findMany({
+    const passages = await prisma.reorderParagraphPassage.findMany({
       where: whereClause,
       select: {
         id: true,
         questionId: true,
-        questionText: true,
         title: true,
         difficulty: true,
         createdAt: true,
         updatedAt: true,
-        options: {
+        paragraphs: {
           select: {
             id: true,
             text: true
-            // Don't include isCorrect to prevent cheating
+            // Don't include correctOrder to prevent cheating
           }
-
         }
       },
       orderBy: {
@@ -58,15 +56,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Questions retrieved successfully',
+      message: 'Reorder questions retrieved successfully',
       data: {
         questions: passages.map(passage => ({
           id: passage.id,
           questionId: passage.questionId,
           title: passage.title,
           difficulty: passage.difficulty,
-          prompt: passage.questionText || '',
-          optionsCount: passage.options.length || 0,
+          paragraphCount: passage.paragraphs.length,
           createdAt: passage.createdAt,
           updatedAt: passage.updatedAt
         })),
@@ -81,7 +78,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error fetching MCM questions:', error)
+    console.error('Error fetching reorder questions:', error)
     return NextResponse.json({
       success: false,
       message: 'Internal server error'

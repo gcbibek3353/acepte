@@ -125,7 +125,7 @@ const McmPracticePage = () => {
     setIsSubmitting(true)
     try {
       // Get user ID (you might need to get this from your auth context)
-      const userId = "Va4MvXhzjTlS6bQINdJYMA39GWtzpx95" // Replace with dynamic user ID from your auth system
+      const userId = "CCjR4GVQ0Cy7pccK5zR4Izj5UV2dXFtV" // User1 id, Replace with dynamic user ID from your auth system
 
       const response = await fetch(`/api/v1/practice/reading/mcm/${questionId}`, {
         method: 'POST',
