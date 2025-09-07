@@ -2,9 +2,11 @@
 import Header from '@/components/Practice/Header'
 import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'next/navigation'
 import AnswersComponent from '@/components/Practice/Answers'
+import { authClient } from '@/lib/auth-client'
+import { userContext } from '@/app/(protected)/layout'
 
 interface AnswerData {
   id: string
@@ -23,6 +25,12 @@ interface AnswerData {
   createdAt: string
   updatedAt: string
 }
+interface BookMarkData {
+  id: string
+  userId: string
+  questionId: string
+  createdAt: string
+}
 
 interface QuestionData {
   id: string
@@ -36,6 +44,7 @@ interface QuestionData {
   updatedAt: string
   isActive: boolean
   answers: AnswerData[]
+  bookmarks: BookMarkData[]
 }
 
 interface ApiResponse {
@@ -47,6 +56,10 @@ interface ApiResponse {
 const Page = () => {
   const params = useParams()
   const essayId = params.essay_id as string
+
+  const user = useContext(userContext);
+  console.log(user);
+  
 
   const [essay, setEssay] = useState('')
   const [wordCount, setWordCount] = useState(0)
@@ -104,10 +117,11 @@ const Page = () => {
       <Header
         questionType='Write Essay'
         instruction={`You will have 20 minutes to plan, write and revise an essay about the topic below. Your response will be judged on how well you develop a position, organize your ideas, present supporting details, and control the elements of standard written English. You should write ${questionData.min_word_limit}-${questionData.max_word_limit} words.`}
-        questionId={questionData.questionId}
+        questionId={questionData.id}
+        questionUniqueId={questionData.questionId}
         title={questionData.essayTitle}
         description={questionData.essay_description}
-        bookmarks={[]}
+        bookmarks={questionData.bookmarks}
         difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
       />
 

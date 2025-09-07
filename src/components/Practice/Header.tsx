@@ -1,18 +1,59 @@
-import React from 'react'
+import { userContext } from '@/app/(protected)/layout'
+import React, { useContext, useEffect } from 'react'
+
+interface BookMarkData {
+    id: string
+    userId: string
+    questionId: string
+    createdAt: string
+}
 
 type HeaderProps = {
     questionType: string;
     instruction: string;
+    questionUniqueId: string;
     questionId: string;
     title: string;
     description: string;
-    bookmarks: string[];
+    bookmarks: BookMarkData[];
     difficulty: 'easy' | 'medium' | 'hard';
 }
 
-const Header = ({ questionType, instruction, questionId, title, description, bookmarks, difficulty }: HeaderProps) => {
+const Header = ({ questionType, instruction, questionId,questionUniqueId, title, description, bookmarks, difficulty }: HeaderProps) => {
+    const [isBookmarked, setIsBookmarked] = React.useState(false);
+    const user = useContext(userContext);
 
-    // TODO : check if the bookmarks include the current user and implement toggle functionality
+    // Check if current user has bookmarked this question
+    useEffect(() => {
+        if (user?.id) {
+            const isUserBookmarked = bookmarks.some(bookmark => bookmark.userId === user.id);
+            setIsBookmarked(isUserBookmarked);
+        }
+    }, [bookmarks, user?.id]);
+
+    const addBookmarkHandler = async () => {
+        try {
+            console.log('Bookmarking question:', questionId);
+            
+            const res = await fetch(`/api/v1/practice/writing/writeEssay/${questionId}/bookmark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert(data.data.message)
+                setIsBookmarked(!isBookmarked);
+            } else {
+                console.error('Failed to toggle bookmark');
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     return (
         <div className="border-b border-gray-200 pb-6 mb-6">
             {/* Top section with question type and instruction */}
@@ -25,11 +66,11 @@ const Header = ({ questionType, instruction, questionId, title, description, boo
             <div className="flex justify-between items-start">
                 {/* Left side - Question details */}
                 <div className="flex items-center gap-3 flex-1">
-                    <span className="text-gray-500 text-sm font-medium">#{questionId}</span>
+                    <span className="text-gray-500 text-sm font-medium">#{questionUniqueId}</span>
                     <span className="text-lg font-medium text-gray-800">{title}</span>
                     <span className={`px-2 py-1 text-xs font-medium rounded capitalize ${difficulty === 'easy' ? 'bg-green-100 text-green-700' :
-                            difficulty === 'medium' ? 'bg-orange-100 text-orange-700' :
-                                'bg-red-100 text-red-700'
+                        difficulty === 'medium' ? 'bg-orange-100 text-orange-700' :
+                            'bg-red-100 text-red-700'
                         }`}>
                         {difficulty}
                     </span>
@@ -37,7 +78,10 @@ const Header = ({ questionType, instruction, questionId, title, description, boo
 
                 {/* Right side - Actions */}
                 <div className="flex items-center gap-3 ml-4">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
+                    <button onClick={addBookmarkHandler} className={`p-2 rounded-md transition-colors ${isBookmarked
+                        ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                        }`}>
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                         </svg>
@@ -46,13 +90,13 @@ const Header = ({ questionType, instruction, questionId, title, description, boo
                         Tested (410)
                     </span>
                 </div>
+            </div>
 
-                {/* Topic */}
-                <div className="mb-6">
-                    <p className="text-gray-800 text-base leading-relaxed">
-                        {description}
-                    </p>
-                </div>
+            {/* Topic */}
+            <div className="mb-6">
+                <p className="text-gray-800 text-base leading-relaxed">
+                    {description}
+                </p>
             </div>
         </div>
     )

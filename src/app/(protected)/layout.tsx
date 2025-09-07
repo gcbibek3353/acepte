@@ -1,7 +1,12 @@
 "use client"
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
-import React, { ReactNode, useEffect } from 'react'
+import React, { createContext, ReactNode, useEffect } from 'react'
+
+// Define the user context type based on the session user type
+type UserContextType = NonNullable<Awaited<ReturnType<typeof authClient.useSession>>['data']>['user'] | null;
+
+export const userContext = createContext<UserContextType>(null);
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
     const router = useRouter();
@@ -22,18 +27,24 @@ const ProtectedLayout = ({ children }: { children: ReactNode }) => {
 
     // Show loading state
     if (isPending) return <div>Loading...</div>
-    
+
     // Show error state but don't redirect (might be temporary network issue)
     if (error) return <div>Error: {error.message}</div>
-    
+
     // If no session and not loading, redirect is happening in useEffect
     if (!session) {
         return <div>Redirecting to login...</div>
     }
-    
-    // User is authenticated, render children
+
+    // User is authenticated, render children with userContext
+    const userData = session.user;
+
     return (
-        <div>{children}</div>
+        <div>
+            <userContext.Provider value={userData}>
+                {children}
+            </userContext.Provider>
+        </div>
     )
 }
 

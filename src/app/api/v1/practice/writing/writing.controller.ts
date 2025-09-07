@@ -66,7 +66,8 @@ const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion
                 id: id
             },
             include: {
-                answers: true // we are returning all the answers of this question.
+                answers: true, // we are returning all the answers of this question.
+                bookmarks: true
             }
         });
         if (!question) {
