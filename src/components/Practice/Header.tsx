@@ -4,7 +4,8 @@ import React, { useContext, useEffect } from 'react'
 interface BookMarkData {
     id: string
     userId: string
-    questionId: string
+    questionId?: string
+    passageId?: string
     createdAt: string
 }
 
@@ -12,24 +13,21 @@ type HeaderProps = {
     questionType: string;
     instruction: string;
     questionUniqueId: string;
-    questionId: string;
+    bookMarkURL: string
     title: string;
-    description: string;
+    description?: string;
     bookmarks: BookMarkData[];
     difficulty: 'easy' | 'medium' | 'hard';
 }
 
-const Header = ({ questionType, instruction, questionId,questionUniqueId, title, description, bookmarks, difficulty }: HeaderProps) => {
+const Header = ({ questionType, instruction, bookMarkURL, questionUniqueId, title, description, bookmarks, difficulty }: HeaderProps) => {
     const [isBookmarked, setIsBookmarked] = React.useState(false);
     const user = useContext(userContext);
-    console.log(user?.id);
-    console.log(bookmarks);
-    
+
     // Check if current user has bookmarked this question
     useEffect(() => {
         if (user?.id) {
             const isUserBookmarked = bookmarks.some(bookmark => bookmark.userId === user.id);
-            // console.log('Is user bookmarked:', isUserBookmarked);
             setIsBookmarked(isUserBookmarked);
         }
     }, [bookmarks, user?.id]);
@@ -37,8 +35,8 @@ const Header = ({ questionType, instruction, questionId,questionUniqueId, title,
     const addBookmarkHandler = async () => {
         try {
             // console.log('Bookmarking question:', questionId);
-            
-            const res = await fetch(`/api/v1/practice/writing/writeEssay/${questionId}/bookmark`, {
+
+            const res = await fetch(bookMarkURL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -89,16 +87,14 @@ const Header = ({ questionType, instruction, questionId,questionUniqueId, title,
                             <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                         </svg>
                     </button>
-                    <span className="px-3 py-1 bg-teal-500 text-white text-sm font-medium rounded">
-                        Tested (410)
-                    </span>
+
                 </div>
             </div>
 
             {/* Topic */}
             <div className="mb-6">
                 <p className="text-gray-800 text-base leading-relaxed">
-                    {description}
+                    {description ? description : ""}
                 </p>
             </div>
         </div>

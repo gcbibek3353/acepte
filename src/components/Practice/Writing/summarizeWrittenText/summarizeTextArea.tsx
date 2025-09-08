@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
-const EssayTextArea = ({ essayId }: { essayId: string }) => {
+const SummarizeTextArea = ({ textId, text }: { textId: string, text: string }) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`
+    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/summarizeWrittenText/${textId}`
 
     useEffect(() => {
         const words = essay.trim().split(/\s+/).filter(word => word.length > 0)
@@ -19,7 +19,7 @@ const EssayTextArea = ({ essayId }: { essayId: string }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    essay: essay,
+                    summarizedText: essay,
                 })
             })
 
@@ -40,6 +40,11 @@ const EssayTextArea = ({ essayId }: { essayId: string }) => {
 
     return (
         <div>
+
+        <div>
+            {text}
+        </div>
+
             <div className="mb-4">
                 <textarea
                     value={essay}
@@ -65,4 +70,4 @@ const EssayTextArea = ({ essayId }: { essayId: string }) => {
     )
 }
 
-export default EssayTextArea
+export default SummarizeTextArea

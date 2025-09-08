@@ -195,7 +195,7 @@ model SummarizeWrittenTextQuestion {
 
   // Relations
   answers                       SummarizeWrittenTextAnswer[]
-  summarizeWrittenTextBookmarks SummarizeWrittenTextBookMark[]
+  bookmarks SummarizeWrittenTextBookMark[]
 
   @@map("summarize_written_text_question")
 }

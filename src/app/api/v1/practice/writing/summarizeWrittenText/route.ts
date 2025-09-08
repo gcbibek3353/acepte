@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../writing.controller";
 import { auth_middleware } from "@/lib/auth-middleware";
-import { auth } from "@/lib/auth";
 
 interface QuestionQuery {
     page?: number;       // default 1

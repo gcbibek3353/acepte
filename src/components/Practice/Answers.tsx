@@ -8,10 +8,10 @@ interface AnswerData {
     contentScore: number | null
     formScore: number | null
     grammerScore: number | null
-    spellingScore: number | null
-    vocabScore: number | null
-    DSCScore: number | null
-    GLRScore: number | null
+    spellingScore?: number | null
+    vocabScore?: number | null
+    DSCScore?: number | null
+    GLRScore?: number | null
     createdAt: string
     updatedAt: string
 }

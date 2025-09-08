@@ -214,7 +214,8 @@ const getSummarizeWrittenTextQuestionById = async (id: string): Promise<Summariz
                 id: id
             },
             include: {
-                answers: true // we are returning all the answers of this question.
+                answers: true, // we are returning all the answers of this question.
+                bookmarks: true
             }
         });
         if (!question) {
