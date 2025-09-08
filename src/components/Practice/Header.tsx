@@ -22,18 +22,21 @@ type HeaderProps = {
 const Header = ({ questionType, instruction, questionId,questionUniqueId, title, description, bookmarks, difficulty }: HeaderProps) => {
     const [isBookmarked, setIsBookmarked] = React.useState(false);
     const user = useContext(userContext);
-
+    console.log(user?.id);
+    console.log(bookmarks);
+    
     // Check if current user has bookmarked this question
     useEffect(() => {
         if (user?.id) {
             const isUserBookmarked = bookmarks.some(bookmark => bookmark.userId === user.id);
+            // console.log('Is user bookmarked:', isUserBookmarked);
             setIsBookmarked(isUserBookmarked);
         }
     }, [bookmarks, user?.id]);
 
     const addBookmarkHandler = async () => {
         try {
-            console.log('Bookmarking question:', questionId);
+            // console.log('Bookmarking question:', questionId);
             
             const res = await fetch(`/api/v1/practice/writing/writeEssay/${questionId}/bookmark`, {
                 method: 'POST',
@@ -44,7 +47,7 @@ const Header = ({ questionType, instruction, questionId,questionUniqueId, title,
 
             if (res.ok) {
                 const data = await res.json();
-                alert(data.data.message)
+                alert(data.message)
                 setIsBookmarked(!isBookmarked);
             } else {
                 console.error('Failed to toggle bookmark');

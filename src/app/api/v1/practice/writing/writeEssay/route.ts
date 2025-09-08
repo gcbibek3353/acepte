@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../writing.controller";
+import { auth_middleware } from "@/lib/auth-middleware";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -12,7 +13,19 @@ interface QuestionQuery {
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3"; // Replace with actual user ID from auth middleware
+
+        const authCheck = await auth_middleware(request);
+        if(!authCheck.authenticated || !authCheck.user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                    data: null
+                },
+                { status: 401 }
+            );
+        }
+        const userId = authCheck.user.id;
 
         // Parse query parameters with defaults
         const queryParams: QuestionQuery = {

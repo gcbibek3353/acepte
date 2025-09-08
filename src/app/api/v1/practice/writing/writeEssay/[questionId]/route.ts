@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../../writing.controller";
 import { WriteEssayQuestion } from "@/generated/prisma";
+import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -81,7 +82,20 @@ export async function POST(
 
     const body = await req.json();
     const { essay } = body;
-    const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3" // TODO : get this from middleware
+
+    const authCheck = await auth_middleware(req);
+    if (!authCheck.authenticated || !authCheck.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+          data: null
+        },
+        { status: 401 }
+      );
+    }
+
+    const userId = authCheck.user.id;
 
     if (!essay) {
       return NextResponse.json(
@@ -94,7 +108,7 @@ export async function POST(
       );
     }
 
-    const evaluation = await exportFunctions.postWriteEssayAnswer(questionId, essay , userId);
+    const evaluation = await exportFunctions.postWriteEssayAnswer(questionId, essay, userId);
 
     return NextResponse.json(
       {

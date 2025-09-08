@@ -57,9 +57,7 @@ const Page = () => {
   const params = useParams()
   const essayId = params.essay_id as string
 
-  const user = useContext(userContext);
-  console.log(user);
-  
+  const user = useContext(userContext);  
 
   const [essay, setEssay] = useState('')
   const [wordCount, setWordCount] = useState(0)

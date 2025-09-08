@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../../writing.controller";
+import { auth_middleware } from "@/lib/auth-middleware";
 
 export async function GET(
   req: NextRequest,
@@ -35,7 +36,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: true,
-        message : "Question fetched successfully",
+        message: "Question fetched successfully",
         data: question
       },
       { status: 200 }
@@ -72,8 +73,22 @@ export async function POST(
       );
     }
 
-    const { summarizedText } = await req.json(); 
-     const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3" // TODO : get this from middleware
+    const { summarizedText } = await req.json();
+
+    const authCheck = await auth_middleware(req);
+    if (!authCheck.authenticated || !authCheck.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+          data: null
+        },
+        { status: 401 }
+      );
+    }
+
+    const userId = authCheck.user.id;
+
     if (!summarizedText) {
       return NextResponse.json(
         {
@@ -85,7 +100,7 @@ export async function POST(
       );
     }
 
-    const evaluation = await exportFunctions.postSummarizeWrittenTextAnswer(questionId , summarizedText , userId);
+    const evaluation = await exportFunctions.postSummarizeWrittenTextAnswer(questionId, summarizedText, userId);
 
     return NextResponse.json(
       {
