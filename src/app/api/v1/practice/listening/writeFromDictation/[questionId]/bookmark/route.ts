@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import listeningController from "../../../listening.controller";
+import { auth_middleware } from "@/lib/auth-middleware";
 
 export async function POST(
     req: NextRequest,
@@ -7,7 +8,18 @@ export async function POST(
 ) {
     try {
         const { questionId } = await params;
-        const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3"
+        const authCheck = await auth_middleware(req);
+        if (!authCheck.authenticated || !authCheck.user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                    data: null
+                },
+                { status: 401 }
+            );
+        }
+        const userId = authCheck.user.id;
         if (!questionId) {
             return NextResponse.json(
                 {

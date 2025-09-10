@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import listeningController from "../../listening.controller";
 import { ListeningWriteFromDictationPassage } from "@/generated/prisma";
+import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
     success: boolean;
@@ -77,7 +78,18 @@ export async function POST(
 
         const body = await req.json();
         const { answer } = body;
-        const userId = "6I7UHDZKl7XMaNAbV0g6pOKTdTzGeOj3"; // Replace with actual user ID retrieval logic
+        const authCheck = await auth_middleware(req);
+        if (!authCheck.authenticated || !authCheck.user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                    data: null
+                },
+                { status: 401 }
+            );
+        }
+        const userId = authCheck.user.id;
         if (!answer) {
             return NextResponse.json(
                 {
