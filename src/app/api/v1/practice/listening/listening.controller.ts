@@ -61,6 +61,7 @@ const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<S
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
