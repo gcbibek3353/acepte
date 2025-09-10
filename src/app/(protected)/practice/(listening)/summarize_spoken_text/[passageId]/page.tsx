@@ -66,27 +66,33 @@ const Page = () => {
 
   const questionData = data.data;
 
-  return (
-    <div>
-      {/* Header */}
-      <Header
-        questionType='Summarize Spoken Text'
-        instruction={`You will hear a short report. Write a summary for a fellow student who was not present. You should write 50-70 words. You have 10 minutes to finish this task. Your response will be judged on the quality of your writing and on how well your response presents the key points presented in the lecture.`}
-        questionUniqueId={questionData.questionId}
-        title={questionData.title}
-        bookMarkURL={`${URL}/bookmark`}
-        bookmarks={questionData.bookmarks}
-        difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
-      />
+ return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+            {/* Header */}
+            <Header
+                questionType='Summarize Spoken Text'
+                instruction={`You will hear a short report. Write a summary for a fellow student who was not present. You should write 50-70 words. You have 10 minutes to finish this task. Your response will be judged on the quality of your writing and on how well your response presents the key points presented in the lecture.`}
+                questionUniqueId={questionData.questionId}
+                title={questionData.title}
+                bookMarkURL={`${URL}/bookmark`}
+                bookmarks={questionData.bookmarks}
+                difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
+            />
 
-      {/* Timer */}
-      <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} title="Remaining time" />
+            {/* Timer */}
+            <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} title="Remaining time" />
 
-      <SummarizeSpokenTextComponent passageId={passageId as string} audioUrl={questionData.audioUrl} />
-      <AnswersComponent answers={questionData.answers} />
+            {/* Main Content */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
+                <SummarizeSpokenTextComponent passageId={passageId as string} audioUrl={questionData.audioUrl} />
+            </div>
 
+            {/* Answers Component */}
+            <AnswersComponent answers={questionData.answers} />
+        </div>
     </div>
-  )
+)
 }
 
 export default Page

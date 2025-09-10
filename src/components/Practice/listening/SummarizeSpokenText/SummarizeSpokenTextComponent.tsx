@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
+import PlayAudio from '../PlayAudio';
 
 interface SummarizeSpokenTextComponentProps {
     passageId: string;
@@ -6,15 +7,9 @@ interface SummarizeSpokenTextComponentProps {
 }
 
 const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTextComponentProps) => {
-    audioUrl='https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3' // TODO : Remove this line after testing
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [currentTime, setCurrentTime] = useState(0)
-    const [duration, setDuration] = useState(0)
-    const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
-
-    const audioRef = useRef<HTMLAudioElement>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText/${passageId}`
 
@@ -23,64 +18,8 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
         setWordCount(words.length)
     }, [essay])
 
-    useEffect(() => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        const updateTime = () => setCurrentTime(audio.currentTime)
-        const updateDuration = () => setDuration(audio.duration)
-        const handleEnded = () => setIsPlaying(false)
-
-        audio.addEventListener('timeupdate', updateTime)
-        audio.addEventListener('loadedmetadata', updateDuration)
-        audio.addEventListener('ended', handleEnded)
-
-        return () => {
-            audio.removeEventListener('timeupdate', updateTime)
-            audio.removeEventListener('loadedmetadata', updateDuration)
-            audio.removeEventListener('ended', handleEnded)
-        }
-    }, [audioUrl])
-
-    const togglePlayPause = () => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        if (isPlaying) {
-            audio.pause()
-        } else {
-            audio.play()
-        }
-        setIsPlaying(!isPlaying)
-    }
-
-    const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        const newTime = (parseFloat(e.target.value) / 100) * duration
-        audio.currentTime = newTime
-        setCurrentTime(newTime)
-    }
-
-    const handleSpeedChange = () => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        const newSpeed = playbackSpeed === 1.0 ? 1.25 : playbackSpeed === 1.25 ? 1.5 : playbackSpeed === 1.5 ? 2.0 : 1.0
-        audio.playbackRate = newSpeed
-        setPlaybackSpeed(newSpeed)
-    }
-
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60)
-        const seconds = Math.floor(time % 60)
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    }
-
-    const progress = duration > 0 ? (currentTime / duration) * 100 : 0
-
     const handleSubmit = async () => {
+        setIsSubmitting(true);
         try {
             const response = await fetch(URL, {
                 method: 'POST',
@@ -105,85 +44,51 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
             console.error('Error submitting essay:', error)
             alert('Failed to submit essay. Please try again.')
         }
+        finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
-        <div>
-            {/* Audio Player */}
-            <div className="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <audio ref={audioRef} src={audioUrl} preload="metadata" />
-
-                <div className="flex items-center space-x-4">
-                    {/* Play/Pause Button */}
-                    <button
-                        onClick={togglePlayPause}
-                        className="flex-shrink-0 w-12 h-12 bg-teal-500 text-white rounded-full flex items-center justify-center hover:bg-teal-600 transition-colors"
-                    >
-                        {isPlaying ? (
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                            </svg>
-                        ) : (
-                            <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                        )}
-                    </button>
-
-                    {/* Progress Bar Container */}
-                    <div className="flex-1 flex items-center space-x-3">
-                        {/* Progress Bar */}
-                        <div className="flex-1 relative">
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={progress}
-                                onChange={handleProgressChange}
-                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
-                                style={{
-                                    background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${progress}%, #d1d5db ${progress}%, #d1d5db 100%)`
-                                }}
-                            />
-                        </div>
-
-                        {/* Time Display */}
-                        <div className="flex-shrink-0 text-sm text-gray-600">
-                            {formatTime(currentTime)} / {formatTime(duration)}
-                        </div>
-                    </div>
-
-                    {/* Volume/Speed Control */}
-                    <button
-                        onClick={handleSpeedChange}
-                        className="flex-shrink-0 px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                    >
-                        X{playbackSpeed}
-                    </button>
-
-                </div>
-            </div>
+        <div className="space-y-6">
+            <PlayAudio audioUrl={audioUrl} />
 
             {/* Essay Textarea */}
-            <div className="mb-4">
+            <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-teal-50 to-blue-50 px-4 py-2 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800">Your Summary</h3>
+                </div>
                 <textarea
                     value={essay}
                     onChange={(e) => setEssay(e.target.value)}
-                    className="w-full h-96 p-4 border-2 border-teal-300 rounded-lg focus:outline-none focus:border-teal-500 resize-none"
-                    placeholder="Start writing your essay here..."
+                    className="w-full h-96 p-6 focus:outline-none focus:ring-0 resize-none text-gray-800 leading-relaxed"
+                    placeholder="Start writing your summary here... (Aim for 50-70 words)"
                 />
             </div>
 
             {/* Word Count and Submit */}
-            <div className="flex justify-between items-center">
-                <span className="text-gray-600">
-                    Word Count: {wordCount}
-                </span>
+            <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="flex items-center space-x-4">
+                    <span className={`text-lg font-semibold px-3 py-1 rounded-full ${wordCount >= 50 && wordCount <= 70
+                        ? 'text-green-700 bg-green-100 border border-green-200'
+                        : wordCount < 50
+                            ? 'text-orange-700 bg-orange-100 border border-orange-200'
+                            : 'text-red-700 bg-red-100 border border-red-200'
+                        }`}>
+                        Word Count: {wordCount}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                        {wordCount < 50 ? `${50 - wordCount} more words needed` :
+                            wordCount > 70 ? `${wordCount - 70} words over limit` :
+                                'Perfect word count!'}
+                    </span>
+                </div>
                 <button
                     onClick={handleSubmit}
-                    className="px-6 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                    disabled={wordCount === 0 || isSubmitting}
+                    className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                    Submit Essay
+                    {isSubmitting ? 'Submitting...' : 'Submit Summary'}
                 </button>
             </div>
         </div>
