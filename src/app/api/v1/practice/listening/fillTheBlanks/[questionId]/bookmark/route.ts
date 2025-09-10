@@ -9,7 +9,7 @@ export async function POST(
     try {
         const { questionId } = await params;
 
-        const authCheck = await auth_middleware(request);
+        const authCheck = await auth_middleware(req);
         if (!authCheck.authenticated || !authCheck.user) {
             return NextResponse.json(
                 {

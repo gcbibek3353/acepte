@@ -195,7 +195,8 @@ const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassa
             where: { id: questionId },
             include: {
                 answers: true,
-                options: true
+                options: true,
+                bookmarks : true
             }
         });
         if (!question) return null;
@@ -340,6 +341,7 @@ const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlan
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks : true
             }
         });
         if (!question) return null;
