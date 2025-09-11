@@ -196,7 +196,7 @@ const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassa
             include: {
                 answers: true,
                 options: true,
-                bookmarks : true
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -341,7 +341,7 @@ const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlan
             where: { id: questionId },
             include: {
                 answers: true,
-                bookmarks : true
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -492,6 +492,7 @@ const getHCSQuestionById = async (questionId: string): Promise<ListeningHighligh
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -618,6 +619,7 @@ const getMCSQuestionById = async (questionId: string): Promise<ListeningMCSPassa
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -740,6 +742,7 @@ const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMi
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -749,6 +752,7 @@ const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMi
         return null;
     }
 }
+
 const addOrRemoveSMWBookmark = async (userId: string, passageId: string): Promise<ListeningSelectMissingWordBookmark | null> => {
     try {
         const existingBookmark = await prisma.listeningSelectMissingWordBookmark.findUnique({
@@ -783,6 +787,7 @@ const addOrRemoveSMWBookmark = async (userId: string, passageId: string): Promis
         return null;
     }
 }
+
 const postSMWAnswer = async (userId: string, questionId: string, answerIndex: number): Promise<ListeningSelectMissingWordAnswer | null> => {
     try {
         const question = await prisma.listeningSelectMissingWordPassage.findUnique({
@@ -860,6 +865,8 @@ const getHIWQuestionById = async (questionId: string): Promise<ListeningHighligh
             where: { id: questionId },
             include: {
                 answers: true,
+                incorrectWords: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
@@ -869,6 +876,7 @@ const getHIWQuestionById = async (questionId: string): Promise<ListeningHighligh
         return null;
     }
 }
+
 const addOrRemoveHIWBookmark = async (userId: string, passageId: string): Promise<ListeningHighlightIncorrectWordsBookmark | null> => {
     try {
         const existingBookmark = await prisma.listeningHighlightIncorrectWordsBookmark.findUnique({
@@ -903,6 +911,7 @@ const addOrRemoveHIWBookmark = async (userId: string, passageId: string): Promis
         return null;
     }
 }
+
 const postHIWAnswer = async (userId: string, questionId: string, answer: {
     word: string;
     position: number;
@@ -947,7 +956,7 @@ const postHIWAnswer = async (userId: string, questionId: string, answer: {
                 userId,
                 passageId: questionId,
                 selectedWords: answer, // Assuming this field stores the user's selections
-                totalScore : score,
+                totalScore: score,
             }
         });
 
@@ -1008,6 +1017,7 @@ const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFro
             where: { id: questionId },
             include: {
                 answers: true,
+                bookmarks: true
             }
         });
         if (!question) return null;
