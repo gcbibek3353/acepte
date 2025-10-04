@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import React from 'react'
+import { FilterParams } from '@/hooks/useFilteredAPI';
 
 interface QuestionsProps {
     id: string;
@@ -10,13 +11,13 @@ interface QuestionsProps {
     answered: boolean;
 }
 
-interface FilterParams {
-    page?: number;
-    limit?: number;
-    difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
-    bookmarked?: boolean | null;
-    answered?: boolean | null;
-}
+// interface FilterParams {
+//     page?: number;
+//     limit?: number;
+//     difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
+//     bookmarked?: boolean | null;
+//     answered?: boolean | null;
+// }
 
 interface FilterQuestionsProps {
     questions: QuestionsProps[],
