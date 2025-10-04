@@ -26,17 +26,17 @@ const getSummarizeSpokenTextQuestions = async (userId: string, queryParams: Ques
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.SummarizeSpokenTextAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.SummarizeSpokenTextAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.SummarizeSpokenTextBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.SummarizeSpokenTextBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -164,17 +164,17 @@ const getMCMQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningMCMAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningMCMAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningMCMBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningMCMBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -314,17 +314,17 @@ const getFIBQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningFillBlankAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningFillBlankAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningFillBlankBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningFillBlankBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -471,17 +471,17 @@ const getHCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningHighlightIncorrectWordsAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningHighlightIncorrectWordsAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningHighlightIncorrectWordsBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningHighlightIncorrectWordsBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -602,17 +602,17 @@ const getMCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningMCMAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningMCMAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningMCMBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningMCMBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -730,16 +730,16 @@ const getSMWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningSelectMissingWordAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningSelectMissingWordAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningSelectMissingWordBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningSelectMissingWordBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -856,17 +856,17 @@ const getHIWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningHighlightIncorrectWordsAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningHighlightIncorrectWordsAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningHighlightIncorrectWordsBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningHighlightIncorrectWordsBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
@@ -1012,17 +1012,17 @@ const getWFDQuestions = async (userId: string, queryParams: QuestionQuery): Prom
 
         if (answered !== undefined) {
             if (answered) {
-                whereClause.ListeningWriteFromDictationAnswers = { some: { userId } };
+                whereClause.answers = { some: { userId } };
             } else {
-                whereClause.ListeningWriteFromDictationAnswers = { none: { userId } };
+                whereClause.answers = { none: { userId } };
             }
         }
 
         if (bookmarked !== undefined) {
             if (bookmarked) {
-                whereClause.ListeningWriteFromDictationBookmarks = { some: { userId } };
+                whereClause.bookmarks = { some: { userId } };
             } else {
-                whereClause.ListeningWriteFromDictationBookmarks = { none: { userId } };
+                whereClause.bookmarks = { none: { userId } };
             }
         }
 
