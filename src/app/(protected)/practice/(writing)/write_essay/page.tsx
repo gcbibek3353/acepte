@@ -1,9 +1,30 @@
 'use client'
 import FilterQuestions from '@/components/Practice/FilterQuestions';
-import useFetch from '@/hooks/useFetch';
 import useFilteredAPI from '@/hooks/useFilteredAPI';
-import { useState } from 'react';
 
+interface AnswerData {
+  id: string
+  userId: string
+  questionId: string
+  answer: string
+  wordCount: number
+  totalScore: number | null
+  contentScore: number | null
+  formScore: number | null
+  grammerScore: number | null
+  spellingScore: number | null
+  vocabScore: number | null
+  DSCScore: number | null
+  GLRScore: number | null
+  createdAt: string
+  updatedAt: string
+}
+interface BookMarkData {
+  id: string
+  userId: string
+  questionId: string
+  createdAt: string
+}
 interface EssayQuestion {
   id: string;
   essayTitle: string;
@@ -13,21 +34,13 @@ interface EssayQuestion {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  bookmarks: any[];
-  answers: any[];
-}
-
-interface FilterParams {
-  page?: number;
-  limit?: number;
-  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
-  bookmarked?: boolean | null;
-  answered?: boolean | null;
+  bookmarks: BookMarkData[];
+  answers: AnswerData[];
 }
 
 const Page = () => {
   const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<EssayQuestion[]>('/api/v1/practice/writing/writeEssay');
-  
+
   const filterQuestions = data?.map((q) => ({
     id: q.id,
     questionId: q.questionId,

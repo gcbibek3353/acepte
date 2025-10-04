@@ -45,6 +45,10 @@ const getSummarizeSpokenTextQuestions = async (userId: string, queryParams: Ques
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -179,6 +183,10 @@ const getMCMQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -325,6 +333,10 @@ const getFIBQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -419,7 +431,7 @@ const postFIBAnswer = async (userId: string, questionId: string, answer: string[
         });
 
         console.log(userId);
-        
+
         // Create the answer record
         const fibAnswer = await prisma.listeningFillBlankAnswer.create({
             data: {
@@ -478,6 +490,10 @@ const getHCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -605,6 +621,10 @@ const getMCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -728,6 +748,10 @@ const getSMWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -851,6 +875,10 @@ const getHIWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
@@ -1003,6 +1031,10 @@ const getWFDQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             skip,
             take: limit,
             orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;

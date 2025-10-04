@@ -51,7 +51,7 @@ const getWriteEssayQuestions = async (userId: string, queryParams: QuestionQuery
             orderBy: { createdAt: 'desc' },
             include: {
                 bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers : { where: { userId } } // include answers of the user only
+                answers: { where: { userId } } // include answers of the user only
             }
         });
 
@@ -199,7 +199,11 @@ const getSummarizeWrittenTextQuestions = async (userId: string, queryParams: Que
             where: whereClause,
             skip,
             take: limit,
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            include: {
+                bookmarks: { where: { userId } }, // include bookmarks of the user only
+                answers: { where: { userId } } // include answers of the user only
+            }
         });
 
         return questions;
