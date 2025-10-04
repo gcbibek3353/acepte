@@ -1,8 +1,7 @@
 'use client'
+import FilterQuestions from '@/components/Practice/FilterQuestions';
 import useFetch from '@/hooks/useFetch';
-import { NextApiResponse } from 'next';
-import Link from 'next/link';
-import React from 'react'
+import { useState } from 'react';
 
 interface EssayQuestion {
   id: string;
@@ -13,12 +12,62 @@ interface EssayQuestion {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  bookmarks: any[];
+  answers: any[];
+}
+
+interface FilterParams {
+  page?: number;
+  limit?: number;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | null;
+  bookmarked?: boolean | null;
+  answered?: boolean | null;
 }
 
 const Page = () => {
+  const [queryParams, setQueryParams] = useState<FilterParams>({
+    page: 1,
+    limit: 10,
+    difficulty: null,
+    bookmarked: null,
+    answered: null
+  })
 
-  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay`;
+  const buildURL = () => {
+    const baseURL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay`;
+    const params = new URLSearchParams();
+
+    // Always include page and limit
+    params.append('page', queryParams.page.toString());
+    params.append('limit', queryParams.limit.toString());
+
+    // Only add if they have values
+    if (queryParams.difficulty) {
+      params.append('difficulty', queryParams.difficulty);
+    }
+    if (queryParams.bookmarked !== null) {
+      params.append('bookmarked', queryParams.bookmarked.toString());
+    }
+    if (queryParams.answered !== null) {
+      params.append('answered', queryParams.answered.toString());
+    }
+
+    return `${baseURL}?${params.toString()}`;
+  };
+
+  const URL = buildURL();
   const { data, loading, error } = useFetch<{ data: EssayQuestion[] }>(URL)
+
+  const filterQuestions = data?.data.map((q) => ({
+    id: q.id,
+    questionId: q.questionId,
+    title: q.essayTitle,
+    difficulty: q.difficulty,
+    bookmarked : q.bookmarks.length > 0 ? true : false,
+    answered : q.answers.length > 0 ? true : false
+    // bookmarks: false,
+    // answered: false
+  }))
 
   if (loading) {
     return (
@@ -43,7 +92,9 @@ const Page = () => {
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Write Essay Practice</h1>
 
-      <div className="space-y-4">
+      <FilterQuestions questions={filterQuestions} queryParams={queryParams} setQueryParams={setQueryParams} />
+
+      {/* <div className="space-y-4">
         {data?.data && data.data.map((item: EssayQuestion) => (
           <Link
             key={item.id}
@@ -70,7 +121,7 @@ const Page = () => {
             </div>
           </Link>
         ))}
-      </div>
+      </div> */}
     </div>
   )
 }

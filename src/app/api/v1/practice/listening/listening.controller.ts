@@ -418,6 +418,8 @@ const postFIBAnswer = async (userId: string, questionId: string, answer: string[
             }
         });
 
+        console.log(userId);
+        
         // Create the answer record
         const fibAnswer = await prisma.listeningFillBlankAnswer.create({
             data: {

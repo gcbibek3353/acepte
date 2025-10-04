@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { auth } from "./auth"; // path to your Better Auth server instance
 
 export async function auth_middleware(req: Request) {
@@ -6,10 +5,15 @@ export async function auth_middleware(req: Request) {
         headers: req.headers
     })
 
+    // return {
+    //     authenticated: true,
+    //     user : "US1mNvXDg8dhQzsCAH3h6NXob17JXHz7"
+    // }
+
     if (!session || !session.user) {
         return {
             authenticated: true,
-            user : null
+            user: null
         }
     }
     return {
