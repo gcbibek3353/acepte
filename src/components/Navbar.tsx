@@ -18,11 +18,11 @@ const DropdownValues = {
         { title: "Write Essay", link: "/practice/write_essay" }
     ],
     reading: [
-        { title: "Fill in the Blanks (Dropdown)", link: "/practice/fib_wr" },
-        { title: "Multiple Choice (Multiple)", link: "/practice/r_mcm" },
-        { title: "Re-order Paragraphs", link: "/practice/reading" },
-        { title: "Fill in the Blanks (Drag and Drop)", link: "/practice/reading" },
-        { title: "Multiple Choice (Single)", link: "/practice/reading" }
+        { title: "Fill in the Blanks (Dropdown)", link: "/practice/reading_fib_dr" },
+        { title: "Multiple Choice (Multiple)", link: "/practice/reading_mcm" },
+        { title: "Re-order Paragraphs", link: "/practice/reading_rop" },
+        { title: "Fill in the Blanks (Drag and Drop)", link: "/practice/reading_fib_d&d" },
+        { title: "Multiple Choice (Single)", link: "/practice/reading_mcs" }
     ],
     listening: [
         { title: "Summarize Spoken Text", link: "/practice/summarize_spoken_text" },
