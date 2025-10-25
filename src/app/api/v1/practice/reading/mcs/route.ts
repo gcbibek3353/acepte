@@ -1,84 +1,82 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { auth_middleware } from "@/lib/auth-middleware";
+import { NextRequest, NextResponse } from "next/server";
+import readingController from "../reading.controller";
+
+interface QuestionQuery {
+    page?: number;       // default 1
+    limit?: number;      // default 10
+    difficulty?: "EASY" | "MEDIUM" | "HARD";
+    answered?: boolean;  // true = answered, false = unanswered
+    bookmarked?: boolean; // true = bookmarked, false = unbookmarked
+}
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const difficulty = searchParams.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD' | null
-    
-    const skip = (page - 1) * limit
-
-    // Build where clause
-    const whereClause: {
-      isActive: boolean
-      difficulty?: 'EASY' | 'MEDIUM' | 'HARD'
-    } = {
-      isActive: true
-    }
-
-    if (difficulty) {
-      whereClause.difficulty = difficulty
-    }
-
-    // Get total count for pagination
-    const totalCount = await prisma.multipleChoiceSinglePassage.count({
-      where: whereClause
-    })
-
-    // Fetch passages
-    const passages = await prisma.multipleChoiceSinglePassage.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        questionId: true,
-        title: true,
-        difficulty: true,
-        createdAt: true,
-        updatedAt: true,
-        options: true,
-        questionText: true
-        // Don't include correctOptionIndex to prevent cheating
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      skip,
-      take: limit
-    })
-
-    const totalPages = Math.ceil(totalCount / limit)
-
-    return NextResponse.json({
-      success: true,
-      message: 'MCS questions retrieved successfully',
-      data: {
-        questions: passages.map(passage => ({
-          id: passage.id,
-          questionId: passage.questionId,
-          title: passage.title,
-          difficulty: passage.difficulty,
-          questionText: passage.questionText,
-          optionsCount: passage.options.length,
-          createdAt: passage.createdAt,
-          updatedAt: passage.updatedAt
-        })),
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalCount,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
+    try {
+        const { searchParams } = new URL(request.url);
+        const authCheck = await auth_middleware(request);
+        if (!authCheck.authenticated || !authCheck.user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                    data: null
+                },
+                { status: 401 }
+            );
         }
-      }
-    })
+        const userId = authCheck.user.id;
 
-  } catch (error) {
-    console.error('Error fetching MCS questions:', error)
-    return NextResponse.json({
-      success: false,
-      message: 'Internal server error'
-    }, { status: 500 })
-  }
+        // Parse query parameters with defaults
+        const queryParams: QuestionQuery = {
+            page: parseInt(searchParams.get('page') || '1'),
+            limit: parseInt(searchParams.get('limit') || '10'),
+            difficulty: searchParams.get('difficulty') as "EASY" | "MEDIUM" | "HARD" || undefined,
+            answered: searchParams.get('answered') ? searchParams.get('answered') === 'true' : undefined,
+            bookmarked: searchParams.get('bookmarked') ? searchParams.get('bookmarked') === 'true' : undefined,
+        };
+        // Validate parameters
+        if (queryParams.page && queryParams.page < 1) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Page must be greater than 0",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+
+        if (queryParams.limit && (queryParams.limit < 1 || queryParams.limit > 100)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Limit must be between 1 and 100",
+                    data: null
+                },
+                { status: 400 }
+            );
+        }
+
+        const result = await readingController.getMcsqQuestions(userId, queryParams);
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Questions fetched successfully",
+                data: result,
+            },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error("Error fetching multiple choice single answer questions:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Internal Server Error",
+                data: null
+            },
+            { status: 500 }
+        );
+    }
 }

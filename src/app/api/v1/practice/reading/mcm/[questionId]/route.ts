@@ -1,181 +1,129 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { auth_middleware } from "@/lib/auth-middleware";
+import { NextRequest, NextResponse } from "next/server";
+import readingController from "../../reading.controller";
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { questionId: string } }
-) {
+  req: NextRequest,
+  { params }: { params: Promise<{ questionId: string }> }
+){
   try {
-    const { questionId } = await params
+    const { questionId } = await params;
 
     if (!questionId) {
-      return NextResponse.json({
-        success: false,
-        message: 'Question ID is required'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to get the question Id",
+          data: null
+        },
+        { status: 400 }
+      );
     }
 
-    // Fetch the passage with its question and options
-    const passage = await prisma.multipleChoiceMultiplePassage.findUnique({
-      where: {
-        questionId: questionId,
-        isActive: true
+    const question = await readingController.getMcmqQuestionById(questionId);
+
+    if (!question) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to get the question",
+          data: null
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Question fetched successfully",
+        data: question
       },
-      include: {
-        options: {
-          select: {
-            id: true,
-            text: true,
-            // Don't include isCorrect in the response to prevent cheating
-          }
-        }
-
-      }
-    })
-
-    if (!passage) {
-      return NextResponse.json({
-        success: false,
-        message: 'Question not found'
-      }, { status: 404 })
-    }
-
-    // Ensure we have exactly 5 options
-    if (passage.options.length !== 5) {
-      return NextResponse.json({
-        success: false,
-        message: 'Invalid question format - must have exactly 5 options'
-      }, { status: 500 })
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Question retrieved successfully',
-      data: {
-        id: passage.id,
-        questionId: passage.questionId,
-        title: passage.title,
-        content: passage.content,
-        difficulty: passage.difficulty,
-        prompt: passage.questionText,
-        options: passage.options,
-        createdAt: passage.createdAt,
-        updatedAt: passage.updatedAt
-      }
-    })
+      { status: 200 }
+    );
 
   } catch (error) {
-    console.error('Error fetching MCM question:', error)
-    return NextResponse.json({
-      success: false,
-      message: 'Internal server error'
-    }, { status: 500 })
+    console.error("Error fetching summarize spoken text question:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+        data: null
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { questionId: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ questionId: string }> }
 ) {
   try {
-    const { questionId } = await params
-    const body = await request.json()
-    const { userId, selectedOptions } = body
+    const { questionId } = await params;
 
-    if (!questionId || !userId || !selectedOptions) {
-      return NextResponse.json({
-        success: false,
-        message: 'Question ID, user ID, and selected options are required'
-      }, { status: 400 })
+    if (!questionId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to get the question Id",
+          data: null
+        },
+        { status: 400 }
+      );
     }
 
-    if (!Array.isArray(selectedOptions)) {
-      return NextResponse.json({
-        success: false,
-        message: 'Selected options must be an array'
-      }, { status: 400 })
+    const body = await req.json();
+    const { summarizedText } = body;
+    const authCheck = await auth_middleware(req);
+    if (!authCheck.authenticated || !authCheck.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+          data: null
+        },
+        { status: 401 }
+      );
+    }
+    const userId = authCheck.user.id;
+
+    if (!summarizedText) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Please provide the summarized text",
+          data: null
+        },
+        { status: 400 }
+      );
     }
 
-    // Fetch the passage with correct answers
-    const passage = await prisma.multipleChoiceMultiplePassage.findUnique({
-      where: {
-        questionId: questionId,
-        isActive: true
+    const evaluation = await readingController.postMcmqPassageAnswer(userId, questionId, summarizedText);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Answer submitted successfully",
+        data: evaluation
       },
-      include: {
-        options: true
-      }
-    })
-
-    if (!passage) {
-      return NextResponse.json({
-        success: false,
-        message: 'Question not found'
-      }, { status: 404 })
-    }
-
-    // Get correct option IDs
-    const correctOptionIds = passage.options
-      .filter(option => option.isCorrect)
-      .map(option => option.id)
-
-    // Calculate score
-    const totalCorrect = correctOptionIds.length
-    const userCorrect = selectedOptions.filter(optionId =>
-      correctOptionIds.includes(optionId)
-    ).length
-    const userIncorrect = selectedOptions.filter(optionId =>
-      !correctOptionIds.includes(optionId)
-    ).length
-
-    // Scoring: +1 for each correct selection, -1 for each incorrect selection
-    // Minimum score is 0
-    const rawScore = userCorrect - userIncorrect
-    const totalScore = Math.max(0, rawScore) / totalCorrect * 100
-
-    // Save the answer
-    const answer = await prisma.multipleChoiceMultipleAnswer.create({
-      data: {
-        userId,
-        passageId: passage.id,
-        selectedOptions,
-        totalScore
-      }
-    })
-
-    // Prepare detailed results
-    const results = passage.options.map(option => ({
-      id: option.id,
-      text: option.text,
-      isCorrect: option.isCorrect,
-      wasSelected: selectedOptions.includes(option.id),
-      status: option.isCorrect
-        ? (selectedOptions.includes(option.id) ? 'correct_selected' : 'correct_not_selected')
-        : (selectedOptions.includes(option.id) ? 'incorrect_selected' : 'incorrect_not_selected')
-    }))
-
-    return NextResponse.json({
-      success: true,
-      message: 'Answer submitted and evaluated successfully',
-      data: {
-        answerId: answer.id,
-        totalScore: Math.round(totalScore * 100) / 100,
-        correctAnswers: totalCorrect,
-        userCorrectSelections: userCorrect,
-        userIncorrectSelections: userIncorrect,
-        results,
-        explanation: {
-          correctOptionIds,
-          scoringMethod: 'Each correct selection: +1 point, Each incorrect selection: -1 points, Minimum: 0 points'
-        }
-      }
-    })
-
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('Error submitting MCM answer:', error)
-    return NextResponse.json({
-      success: false,
-      message: 'Internal server error'
-    }, { status: 500 })
+    console.error("Error submitting summarize spoken text answer:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+        data: null
+      },
+      { status: 500 }
+    );
   }
 }
