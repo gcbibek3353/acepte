@@ -81,7 +81,7 @@ export async function POST(
     }
 
     const body = await req.json();
-    const { summarizedText } = body;
+    const { correctOptionIndex } = body;
     const authCheck = await auth_middleware(req);
     if (!authCheck.authenticated || !authCheck.user) {
       return NextResponse.json(
@@ -95,7 +95,7 @@ export async function POST(
     }
     const userId = authCheck.user.id;
 
-    if (!summarizedText) {
+    if (!correctOptionIndex) {
       return NextResponse.json(
         {
           success: false,
@@ -106,7 +106,7 @@ export async function POST(
       );
     }
 
-    const evaluation = await readingController.postMcsqPassageAnswer(userId, questionId, summarizedText);
+    const evaluation = await readingController.postMcsqPassageAnswer(userId, questionId, correctOptionIndex);
 
     return NextResponse.json(
       {

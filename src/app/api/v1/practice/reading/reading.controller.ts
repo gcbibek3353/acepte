@@ -187,19 +187,19 @@ const getMcmqQuestionById = async (questionId: string): Promise<MultipleChoiceMu
     }
 }
 
-const addOrRemoveMcmqBookmark = async (userId: string, questionId: string): Promise<MultipleChoiceMultipleBookmark | null> => {
+const addOrRemoveMcmqBookmark = async (userId: string, passageId: string): Promise<MultipleChoiceMultipleBookmark | null> => {
     try {
-        const existingBookmark = await prisma.listeningMCMBookmark.findUnique({
+        const existingBookmark = await prisma.multipleChoiceMultipleBookmark.findUnique({
             where: {
                 userId_passageId: {
                     userId,
-                    passageId: questionId
+                    passageId
                 }
             }
         });
         if (existingBookmark) {
             // Remove bookmark
-            await prisma.listeningMCMBookmark.delete({
+            await prisma.multipleChoiceMultipleBookmark.delete({
                 where: {
                     id: existingBookmark.id
                 }
@@ -207,10 +207,10 @@ const addOrRemoveMcmqBookmark = async (userId: string, questionId: string): Prom
             return null; // Indicate that the bookmark was removed
         } else {
             // Add bookmark
-            const newBookmark = await prisma.listeningMCMBookmark.create({
+            const newBookmark = await prisma.multipleChoiceMultipleBookmark.create({
                 data: {
                     userId,
-                    passageId: questionId
+                    passageId
                 }
             });
             return newBookmark;
@@ -334,7 +334,7 @@ const getReorderParagraphQuestionById = async (questionId: string): Promise<Reor
 
 const addOrRemoveReorderParagraphBookmark = async (userId: string, passageId: string): Promise<ReorderParagraphBookmark | null> => {
     try {
-        const existingBookmark = await prisma.listeningMCMBookmark.findUnique({
+        const existingBookmark = await prisma.reorderParagraphBookmark.findUnique({
             where: {
                 userId_passageId: {
                     userId,
@@ -344,7 +344,7 @@ const addOrRemoveReorderParagraphBookmark = async (userId: string, passageId: st
         });
         if (existingBookmark) {
             // Remove bookmark
-            await prisma.listeningMCMBookmark.delete({
+            await prisma.reorderParagraphBookmark.delete({
                 where: {
                     id: existingBookmark.id
                 }
@@ -352,7 +352,7 @@ const addOrRemoveReorderParagraphBookmark = async (userId: string, passageId: st
             return null; // Indicate that the bookmark was removed
         } else {
             // Add bookmark
-            const newBookmark = await prisma.listeningMCMBookmark.create({
+            const newBookmark = await prisma.reorderParagraphBookmark.create({
                 data: {
                     userId,
                     passageId
@@ -577,7 +577,7 @@ const getMcsqQuestionById = async (questionId: string): Promise<MultipleChoiceSi
 
 const addOrRemoveMcsqBookmark = async (userId: string, passageId: string): Promise<MultipleChoiceSingleBookmark | null> => {
     try {
-        const existingBookmark = await prisma.listeningMCMBookmark.findUnique({
+        const existingBookmark = await prisma.multipleChoiceSingleBookmark.findUnique({
             where: {
                 userId_passageId: {
                     userId,
@@ -587,7 +587,7 @@ const addOrRemoveMcsqBookmark = async (userId: string, passageId: string): Promi
         });
         if (existingBookmark) {
             // Remove bookmark
-            await prisma.listeningMCMBookmark.delete({
+            await prisma.multipleChoiceSingleBookmark.delete({
                 where: {
                     id: existingBookmark.id
                 }
@@ -595,7 +595,7 @@ const addOrRemoveMcsqBookmark = async (userId: string, passageId: string): Promi
             return null; // Indicate that the bookmark was removed
         } else {
             // Add bookmark
-            const newBookmark = await prisma.listeningMCMBookmark.create({
+            const newBookmark = await prisma.multipleChoiceSingleBookmark.create({
                 data: {
                     userId,
                     passageId
@@ -634,7 +634,6 @@ const postMcsqPassageAnswer = async (userId: string, questionId: string, answerI
         return null;
     }
 }
-
 
 const readingController = {
     getFibDropdownQuestions,

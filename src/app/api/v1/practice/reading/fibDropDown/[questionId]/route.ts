@@ -27,7 +27,7 @@ export async function GET(
       );
     }
 
-    const question = await readingController.getFibDragDropQuestionById(questionId);
+    const question = await readingController.getFibDropdownQuestionById(questionId);
 
     if (!question) {
       return NextResponse.json(
