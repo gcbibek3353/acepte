@@ -70,10 +70,9 @@ model User {
   listeningWriteFromDictationAnswers   ListeningWriteFromDictationAnswer[]
   listeningWriteFromDictationBookmarks ListeningWriteFromDictationBookmark[]
 
-
   // Speaking relations
-  speakingReadAloudAnswers       SpeakingReadAloudAnswer[]
-  speakingReadAloudBookmarks     SpeakingReadAloudBookmark[]
+  speakingReadAloudAnswers   SpeakingReadAloudAnswer[]
+  speakingReadAloudBookmarks SpeakingReadAloudBookmark[]
 
   speakingRepeatSentenceAnswers   SpeakingRepeatSentenceAnswer[]
   speakingRepeatSentenceBookmarks SpeakingRepeatSentenceBookmark[]
@@ -92,7 +91,6 @@ model User {
 
   speakingRespondSituationAnswers   SpeakingRespondSituationAnswer[]
   speakingRespondSituationBookmarks SpeakingRespondSituationBookmark[]
-
 
   @@unique([email])
   @@map("user")
@@ -218,7 +216,7 @@ model SummarizeWrittenTextQuestion {
   isActive       Boolean    @default(true)
 
   // Relations
-  answers                       SummarizeWrittenTextAnswer[]
+  answers   SummarizeWrittenTextAnswer[]
   bookmarks SummarizeWrittenTextBookMark[]
 
   @@map("summarize_written_text_question")
@@ -299,7 +297,8 @@ model FillBlanksDropdownAnswer {
   id         String   @id @default(cuid())
   userId     String
   passageId  String
-  answers    Json // Store user's selected answers as JSON: {"1": 0, "2": 1, ...}
+  // answers    Json // Store user's selected answers as JSON: {"1": 0, "2": 1, ...}
+  answers    Json // Store user's selected answers as JSON:(New Approach) [{pos : string , index : string}]
   totalScore Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -454,10 +453,10 @@ model FillBlanksDragDropPassage {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   isActive   Boolean    @default(true)
+  options    String[] // Pool of options to drag and drop
 
   // Relations
   blanks    FillBlanksDragDropBlank[]
-  options   FillBlanksDragDropOption[]
   answers   FillBlanksDragDropAnswer[]
   bookmarks FillBlanksDragDropBookmark[]
 
@@ -465,34 +464,20 @@ model FillBlanksDragDropPassage {
 }
 
 model FillBlanksDragDropBlank {
-  id              String                    @id @default(cuid())
-  position        Int // Placeholder position (1 = first blank, 2 = second blank, etc.)
-  passageId       String
-  passage         FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  correctOptionId String                    @unique // Reference to the correct option
-  correctOption   FillBlanksDragDropOption  @relation("CorrectOptionForBlank", fields: [correctOptionId], references: [id])
+  id                 String                    @id @default(cuid())
+  position           Int // Placeholder position (1 = first blank, 2 = second blank, etc.)
+  passageId          String
+  passage            FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  correctOptionIndex Int // Index of the correct option in the options pool
 
   @@map("fill_blanks_drag_drop_blank")
-}
-
-model FillBlanksDragDropOption {
-  id            String                    @id @default(cuid())
-  text          String // Word/phrase in the draggable pool
-  passageId     String
-  blankPosition Int? // Correct position of this option (null if it's a distractor)
-  passage       FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-
-  // Reverse relation (to know if this option is the correct one for a blank)
-  correctForBlank FillBlanksDragDropBlank? @relation("CorrectOptionForBlank")
-
-  @@map("fill_blanks_drag_drop_option")
 }
 
 model FillBlanksDragDropAnswer {
   id         String   @id @default(cuid())
   userId     String
   passageId  String
-  answers    Json // Store user's answers as JSON: {"1": "optionId1", "2": "optionId2", ...}
+  answers    Json // Store user's answers as JSON: {"position" : String , "index" : number}[]
   totalScore Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -921,12 +906,12 @@ model ListeningHighlightIncorrectWordsPassage {
 }
 
 model ListeningIncorrectWord {
-  id          String                                  @id @default(cuid())
-  word        String // Incorrect word in passage
-  position    Int // Index/position of word in passage (helps to highlight)
-  passageId   String
-  passage     ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  createdAt   DateTime                                @default(now())
+  id        String                                  @id @default(cuid())
+  word      String // Incorrect word in passage
+  position  Int // Index/position of word in passage (helps to highlight)
+  passageId String
+  passage   ListeningHighlightIncorrectWordsPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  createdAt DateTime                                @default(now())
 
   @@map("listening_incorrect_word")
 }
@@ -1033,7 +1018,7 @@ model SpeakingReadAloudAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // How well content was delivered
@@ -1045,7 +1030,7 @@ model SpeakingReadAloudAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingReadAloudQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_read_aloud_answer")
@@ -1058,20 +1043,19 @@ model SpeakingReadAloudBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingReadAloudQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
   @@map("speaking_read_aloud_bookmark")
 }
 
-
 // Repeat Sentence
 model SpeakingRepeatSentenceQuestion {
   id         String     @id @default(cuid())
   questionId String     @unique
   title      String
-  audioUrl   String     // Audio file to be repeated
+  audioUrl   String // Audio file to be repeated
   transcript String     @db.Text // Correct sentence transcript
   difficulty Difficulty @default(MEDIUM)
   createdAt  DateTime   @default(now())
@@ -1089,7 +1073,7 @@ model SpeakingRepeatSentenceAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // How accurately content was repeated
@@ -1101,7 +1085,7 @@ model SpeakingRepeatSentenceAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRepeatSentenceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_repeat_sentence_answer")
@@ -1114,7 +1098,7 @@ model SpeakingRepeatSentenceBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRepeatSentenceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
@@ -1126,7 +1110,7 @@ model SpeakingDescribeImageQuestion {
   id          String     @id @default(cuid())
   questionId  String     @unique
   title       String
-  imageUrl    String     // URL to the image to be described
+  imageUrl    String // URL to the image to be described
   instruction String?    @db.Text // Optional specific instructions
   difficulty  Difficulty @default(MEDIUM)
   createdAt   DateTime   @default(now())
@@ -1144,7 +1128,7 @@ model SpeakingDescribeImageAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // Relevance and completeness of description
@@ -1156,7 +1140,7 @@ model SpeakingDescribeImageAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingDescribeImageQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_describe_image_answer")
@@ -1169,7 +1153,7 @@ model SpeakingDescribeImageBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingDescribeImageQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
@@ -1181,9 +1165,9 @@ model SpeakingRetellLectureQuestion {
   id                   String     @id @default(cuid())
   questionId           String     @unique
   title                String
-  audioUrl             String     // Audio lecture to be retold
+  audioUrl             String // Audio lecture to be retold
   audioTranscribedText String?    @db.Text // Optional transcript for reference
-  imageUrl             String?    // Optional accompanying image
+  imageUrl             String? // Optional accompanying image
   difficulty           Difficulty @default(MEDIUM)
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
@@ -1200,7 +1184,7 @@ model SpeakingRetellLectureAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // How well key points were covered
@@ -1212,7 +1196,7 @@ model SpeakingRetellLectureAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRetellLectureQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_retell_lecture_answer")
@@ -1225,7 +1209,7 @@ model SpeakingRetellLectureBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRetellLectureQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
@@ -1237,7 +1221,7 @@ model SpeakingAnswerShortQuestion {
   id           String     @id @default(cuid())
   questionId   String     @unique
   title        String
-  audioUrl     String     // Audio question to be answered
+  audioUrl     String // Audio question to be answered
   questionText String     @db.Text // Text version of the question
   sampleAnswer String?    @db.Text // Optional sample answer for evaluation reference
   difficulty   Difficulty @default(MEDIUM)
@@ -1256,16 +1240,16 @@ model SpeakingAnswerShortAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
-  vocabularyScore   Float? // 0 or 1 (this is total score)
+  vocabularyScore Float? // 0 or 1 (this is total score)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingAnswerShortQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_answer_short_answer")
@@ -1278,7 +1262,7 @@ model SpeakingAnswerShortBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingAnswerShortQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
@@ -1290,7 +1274,7 @@ model SpeakingGroupDiscussionQuestion {
   id                   String     @id @default(cuid())
   questionId           String     @unique
   title                String
-  audioUrl             String     // Audio of the group discussion
+  audioUrl             String // Audio of the group discussion
   audioTranscribedText String?    @db.Text // Optional transcript
   topic                String     @db.Text // Discussion topic/context
   difficulty           Difficulty @default(MEDIUM)
@@ -1309,7 +1293,7 @@ model SpeakingGroupDiscussionAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // How well discussion was summarized
@@ -1321,7 +1305,7 @@ model SpeakingGroupDiscussionAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingGroupDiscussionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_group_discussion_answer")
@@ -1334,7 +1318,7 @@ model SpeakingGroupDiscussionBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingGroupDiscussionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
@@ -1347,7 +1331,7 @@ model SpeakingRespondSituationQuestion {
   questionId  String     @unique
   title       String
   situation   String     @db.Text // Description of the situation
-  audioUrl    String?    // Optional audio describing the situation
+  audioUrl    String? // Optional audio describing the situation
   instruction String     @db.Text // What the user should respond to
   difficulty  Difficulty @default(MEDIUM)
   createdAt   DateTime   @default(now())
@@ -1365,7 +1349,7 @@ model SpeakingRespondSituationAnswer {
   userId     String
   questionId String
   audioUrl   String // URL to recorded audio file
-  duration   Int?   // Duration in seconds
+  duration   Int? // Duration in seconds
 
   // Evaluation fields
   contentScore       Float? // Appropriateness and relevance of response
@@ -1377,7 +1361,7 @@ model SpeakingRespondSituationAnswer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRespondSituationQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("speaking_respond_situation_answer")
@@ -1390,7 +1374,7 @@ model SpeakingRespondSituationBookmark {
   createdAt  DateTime @default(now())
 
   // Relations
-  user     User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
   question SpeakingRespondSituationQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])

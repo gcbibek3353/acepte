@@ -63,7 +63,8 @@ const getFibDropdownQuestionById = async (questionId: string): Promise<FillBlank
             where: { id: questionId },
             include: {
                 answers: true,
-                bookmarks: true
+                bookmarks: true,
+                blanks: true, //TODO : remove it after testing 
             }
         });
         if (!question) return null;
@@ -110,15 +111,48 @@ const addOrRemoveFibDropdownBookmark = async (userId: string, questionId: string
 }
 
 const postFibDropdownPassageAnswer = async (userId: string, questionId: string, answer: {
-    "1": number,
-    "2": number,
-    "3": number,
-    "4": number,
-    // TODO : But this object may contain 'n' number of keys based on number of blanks in the question
-}
+    position: string,
+    index: number
+}[]
 ): Promise<FillBlanksDropdownAnswer | null> => {
+    try {
+        const question = await prisma.fillBlanksDropdownPassage.findUnique({
+            where: { id: questionId },
+            include: { blanks: true }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
 
-    return null
+        let score = 0;
+
+        // Calculate score by comparing user answers with correct answers
+        answer.forEach(userAnswer => {
+            // Find the corresponding blank for this position
+            const blank = question.blanks.find(b => b.position.toString() === userAnswer.position);
+
+            if (blank) {
+                if (blank.correctIndex == userAnswer.index) score += 1;
+                else score -= 1;
+            }
+        });
+
+        score = score > 0 ? score : 0;
+
+        // Create the answer record
+        const fibDropdownAnswer = await prisma.fillBlanksDropdownAnswer.create({
+            data: {
+                userId,
+                passageId: questionId,
+                answers: answer, // Store as JSON array
+                totalScore: score,
+            }
+        });
+        return fibDropdownAnswer;
+    } catch (error) {
+        console.log("Errror submitting answer", error);
+        return null;
+    }
 }
 
 // Multiple Choice Multiple Answers related functions
@@ -462,7 +496,7 @@ const getFibDragDropQuestionById = async (questionId: string): Promise<FillBlank
             where: { id: questionId },
             include: {
                 answers: true,
-                options: true,
+                blanks: true,
                 bookmarks: true
             }
         });
@@ -508,7 +542,48 @@ const addOrRemoveFibDragDropBookmark = async (userId: string, passageId: string)
     }
 }
 
-const postFibDragDropPassageAnswer = async (userId: string, questionId: string, answer: string[]): Promise<FillBlanksDragDropAnswer | null> => { return null }
+const postFibDragDropPassageAnswer = async (userId: string, questionId: string, answer: {
+    position: string,
+    index: string
+}[]
+): Promise<FillBlanksDragDropAnswer | null> => {
+    try {
+        const question = await prisma.fillBlanksDragDropPassage.findUnique({
+            where: { id: questionId },
+            include: { blanks: true }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        let score = 0;
+        // Calculate score by comparing user answers with correct answers
+        answer.forEach((userAnswer) => {
+            // Find the corresponding blank for this position
+            const blank = question.blanks.find(b => b.position.toString() === userAnswer.position);
+
+            if (blank) {
+                if (blank.correctOptionIndex.toString() == userAnswer.index) score += 1;
+                else score -= 1;
+            }
+        });
+
+        score = score > 0 ? score : 0;
+
+        // Create the answer record
+        const fibDragDropAnswer = await prisma.fillBlanksDragDropAnswer.create({
+            data: {
+                userId,
+                passageId: questionId,
+                answers: answer, // Store as JSON array
+                totalScore: score,
+            }
+        });
+        return fibDragDropAnswer;
+    } catch (error) {
+        console.log("Errror submitting answer", error);
+        return null;
+    }
+}
 
 // Multiple Choice Single Answer related functions
 
