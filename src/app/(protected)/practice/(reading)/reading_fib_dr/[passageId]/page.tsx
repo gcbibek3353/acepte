@@ -1,6 +1,7 @@
 "use client"
 import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import FibDropDownComponent from '@/components/Practice/Reading/FibDropDown';
 import useFetch from '@/hooks/useFetch';
 import { useParams } from 'next/navigation';
 import React from 'react'
@@ -60,6 +61,7 @@ const FIBDropDown = () => {
   if (!data?.success || !data?.data) return <div className="max-w-4xl mx-auto p-6">No data found</div>
 
   const questionData = data.data;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="max-w-5xl mx-auto px-6 py-8">
@@ -79,7 +81,7 @@ const FIBDropDown = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          Main component content goes here.
+          <FibDropDownComponent passage={questionData.content} passageId={passageId as string} blanks={questionData.blanks} />
         </div>
 
         {/* Answers Component */}

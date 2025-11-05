@@ -1,6 +1,7 @@
 "use client"
 import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import ReadingMCMComponent from '@/components/Practice/Reading/MCM';
 import useFetch from '@/hooks/useFetch';
 import { useParams } from 'next/navigation';
 import React from 'react'
@@ -80,7 +81,7 @@ Read the text and answer the question by selecting all the correct responses. Mo
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          Main component content goes here.
+          <ReadingMCMComponent passage={questionData.content} passageId={questionData.id} options={questionData.options} />
         </div>
 
         {/* Answers Component */}

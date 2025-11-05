@@ -1,6 +1,7 @@
 "use client"
 import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import MCS from '@/components/Practice/Reading/MCS';
 import useFetch from '@/hooks/useFetch';
 import { useParams } from 'next/navigation';
 import React from 'react'
@@ -79,7 +80,7 @@ const FIBMCS = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          Main component content goes here.
+          <MCS passage={questionData.content} passageId={questionData.id} options={questionData.options} />
         </div>
 
         {/* Answers Component */}
