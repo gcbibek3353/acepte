@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { evaluateUsingAI } from '../../readAloudAi'
+import { evaluateUsingAI } from '@/lib/ai/google-voice'
 
 export async function GET(
   request: NextRequest,
