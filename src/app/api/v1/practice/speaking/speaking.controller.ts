@@ -74,7 +74,40 @@ const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingRea
         return null;
     }
 }
-const addOrRemoveReadAloudBookmark = async (userId: string, questionId: string): Promise<SpeakingReadAloudBookmark | null> => { return null }
+const addOrRemoveReadAloudBookmark = async (userId: string, questionId: string): Promise<SpeakingReadAloudBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingReadAloudBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingReadAloudBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingReadAloudBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingReadAloudAnswer | null> => { return null }
 
 // RepeatSentence related functions
@@ -140,7 +173,40 @@ const getRepeatSentenceQuestionById = async (questionId: string): Promise<Speaki
         return null;
     }
 }
-const addOrRemoveRepeatSentenceBookmark = async (userId: string, questionId: string): Promise<SpeakingRepeatSentenceBookmark | null> => { return null }
+const addOrRemoveRepeatSentenceBookmark = async (userId: string, questionId: string): Promise<SpeakingRepeatSentenceBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingRepeatSentenceBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingRepeatSentenceBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingRepeatSentenceBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postRepeatSentenceAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRepeatSentenceAnswer | null> => { return null }
 
 // DescribeImage related functions
@@ -206,7 +272,40 @@ const getDescribeImageQuestionById = async (questionId: string): Promise<Speakin
         return null;
     }
 }
-const addOrRemoveDescribeImageBookmark = async (userId: string, questionId: string): Promise<SpeakingDescribeImageBookmark | null> => { return null }
+const addOrRemoveDescribeImageBookmark = async (userId: string, questionId: string): Promise<SpeakingDescribeImageBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingDescribeImageBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingDescribeImageBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingDescribeImageBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postDescribeImageAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingDescribeImageAnswer | null> => { return null }
 
 // RetellLecture related functions
@@ -272,7 +371,40 @@ const getRetellLectureQuestionById = async (questionId: string): Promise<Speakin
         return null;
     }
 }
-const addOrRemoveRetellLectureBookmark = async (userId: string, questionId: string): Promise<SpeakingRetellLectureBookmark | null> => { return null }
+const addOrRemoveRetellLectureBookmark = async (userId: string, questionId: string): Promise<SpeakingRetellLectureBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingRetellLectureBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingRetellLectureBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingRetellLectureBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postRetellLectureAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRetellLectureAnswer | null> => { return null }
 
 // AnswerShort related functions
@@ -338,7 +470,40 @@ const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingA
         return null;
     }
 }
-const addOrRemoveAnswerShortBookmark = async (userId: string, questionId: string): Promise<SpeakingAnswerShortBookmark | null> => { return null }
+const addOrRemoveAnswerShortBookmark = async (userId: string, questionId: string): Promise<SpeakingAnswerShortBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingAnswerShortBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingAnswerShortBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingAnswerShortBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postAnswerShortAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingAnswerShortAnswer | null> => { return null }
 
 // SummarizeGroupDiscussion related functions
@@ -404,7 +569,40 @@ const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Prom
         return null;
     }
 }
-const addOrRemoveSummarizeGroupDiscussionBookmark = async (userId: string, questionId: string): Promise<SpeakingGroupDiscussionBookmark | null> => { return null }
+const addOrRemoveSummarizeGroupDiscussionBookmark = async (userId: string, questionId: string): Promise<SpeakingGroupDiscussionBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingGroupDiscussionBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingGroupDiscussionBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingGroupDiscussionBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingGroupDiscussionAnswer | null> => { return null }
 
 // RespondToASituation related functions
@@ -470,7 +668,40 @@ const getRespondToASituationQuestionById = async (questionId: string): Promise<S
         return null;
     }
 }
-const addOrRemoveRespondToASituationBookmark = async (userId: string, questionId: string): Promise<SpeakingRespondSituationBookmark | null> => { return null }
+const addOrRemoveRespondToASituationBookmark = async (userId: string, questionId: string): Promise<SpeakingRespondSituationBookmark | null> => {
+    try {
+        const existingBookmark = await prisma.speakingRespondSituationBookmark.findUnique({
+            where: {
+                userId_questionId: {
+                    userId,
+                    questionId
+                }
+            }
+        });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await prisma.speakingRespondSituationBookmark.delete({
+                where: {
+                    id: existingBookmark.id
+                }
+            });
+            return null; // Indicate that the bookmark was removed
+        } else {
+            // Add bookmark
+            const newBookmark = await prisma.speakingRespondSituationBookmark.create({
+                data: {
+                    userId,
+                    questionId
+                }
+            });
+            return newBookmark;
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+        return null;
+    }
+}
 const postRespondToASituationAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRespondSituationAnswer | null> => { return null }
 
 const speakingController = {
