@@ -110,4 +110,4 @@ async function GenerateImagesResponse() {
     console.log('Final result:', JSON.stringify(res, null, 2));
 }
 
-GenerateImagesResponse();
+// GenerateImagesResponse();
