@@ -57,7 +57,23 @@ const getReadAloudQuestions = async (userId: string, query: QuestionQuery): Prom
         return null;
     }
 }
-const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingReadAloudQuestion | null> => { return null }
+const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingReadAloudQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingReadAloudQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveReadAloudBookmark = async (userId: string, questionId: string): Promise<SpeakingReadAloudBookmark | null> => { return null }
 const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingReadAloudAnswer | null> => { return null }
 
@@ -107,7 +123,23 @@ const getRepeatSentenceQuestions = async (userId: string, query: QuestionQuery):
         return null;
     }
 }
-const getRepeatSentenceQuestionById = async (questionId: string): Promise<SpeakingRepeatSentenceQuestion | null> => { return null }
+const getRepeatSentenceQuestionById = async (questionId: string): Promise<SpeakingRepeatSentenceQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingRepeatSentenceQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveRepeatSentenceBookmark = async (userId: string, questionId: string): Promise<SpeakingRepeatSentenceBookmark | null> => { return null }
 const postRepeatSentenceAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRepeatSentenceAnswer | null> => { return null }
 
@@ -157,7 +189,23 @@ const getDescribeImageQuestions = async (userId: string, query: QuestionQuery): 
         return null;
     }
 }
-const getDescribeImageQuestionById = async (questionId: string): Promise<SpeakingDescribeImageQuestion | null> => { return null }
+const getDescribeImageQuestionById = async (questionId: string): Promise<SpeakingDescribeImageQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingDescribeImageQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveDescribeImageBookmark = async (userId: string, questionId: string): Promise<SpeakingDescribeImageBookmark | null> => { return null }
 const postDescribeImageAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingDescribeImageAnswer | null> => { return null }
 
@@ -207,7 +255,23 @@ const getRetellLectureQuestions = async (userId: string, query: QuestionQuery): 
         return null;
     }
 }
-const getRetellLectureQuestionById = async (questionId: string): Promise<SpeakingRetellLectureQuestion | null> => { return null }
+const getRetellLectureQuestionById = async (questionId: string): Promise<SpeakingRetellLectureQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingRetellLectureQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveRetellLectureBookmark = async (userId: string, questionId: string): Promise<SpeakingRetellLectureBookmark | null> => { return null }
 const postRetellLectureAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRetellLectureAnswer | null> => { return null }
 
@@ -257,7 +321,23 @@ const getAnswerShortQuestions = async (userId: string, query: QuestionQuery): Pr
         return null;
     }
 }
-const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingAnswerShortQuestion | null> => { return null }
+const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingAnswerShortQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingAnswerShortQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveAnswerShortBookmark = async (userId: string, questionId: string): Promise<SpeakingAnswerShortBookmark | null> => { return null }
 const postAnswerShortAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingAnswerShortAnswer | null> => { return null }
 
@@ -307,7 +387,23 @@ const getSummarizeGroupDiscussionQuestions = async (userId: string, query: Quest
         return null;
     }
 }
-const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Promise<SpeakingGroupDiscussionQuestion | null> => { return null }
+const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Promise<SpeakingGroupDiscussionQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingGroupDiscussionQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveSummarizeGroupDiscussionBookmark = async (userId: string, questionId: string): Promise<SpeakingGroupDiscussionBookmark | null> => { return null }
 const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingGroupDiscussionAnswer | null> => { return null }
 
@@ -357,7 +453,23 @@ const getRespondToASituationQuestions = async (userId: string, query: QuestionQu
         return null;
     }
 }
-const getRespondToASituationQuestionById = async (questionId: string): Promise<SpeakingRespondSituationQuestion | null> => { return null }
+const getRespondToASituationQuestionById = async (questionId: string): Promise<SpeakingRespondSituationQuestion | null> => {
+    // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
+    try {
+        const question = await prisma.speakingRespondSituationQuestion.findUnique({
+            where: { id: questionId },
+            include: {
+                answers: true,
+                bookmarks: true
+            }
+        });
+        if (!question) return null;
+        return question;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
 const addOrRemoveRespondToASituationBookmark = async (userId: string, questionId: string): Promise<SpeakingRespondSituationBookmark | null> => { return null }
 const postRespondToASituationAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRespondSituationAnswer | null> => { return null }
 
