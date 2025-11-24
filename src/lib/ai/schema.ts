@@ -37,3 +37,13 @@ export const SummarizeSpokenTextAnswerScoreSchema = z.object({
 });
 
 export type SummarizeSpokenTextAnswerScore = z.infer<typeof SummarizeSpokenTextAnswerScoreSchema>;
+
+// Speaking Specific schemas and types 
+
+export const SpeakingAnswerScoreSchema = z.object({
+  pronunciationScore: z.number().min(0).max(90),
+  fluencyScore: z.number().min(0).max(90),
+  contentScore: z.number().min(0).max(90),
+});
+
+export type SpeakingAnswerScore = z.infer<typeof SpeakingAnswerScoreSchema>;

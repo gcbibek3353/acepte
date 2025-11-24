@@ -2,9 +2,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { SummarizeSpokenTextAnswerScoreSchema, SummarizeWrittenTextAnswerScoreSchema, writeEssayAnswerScoreSchema } from './schema';
 
-const google = createGoogleGenerativeAI({
-    // custom settings if needed
-});
+const google = createGoogleGenerativeAI({});
 
 const model = google('gemini-2.5-flash');
 

@@ -1,6 +1,6 @@
 
 import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, ListeningSelectMissingWordAnswer, ListeningSelectMissingWordBookmark, ListeningSelectMissingWordPassage, ListeningWriteFromDictationAnswer, ListeningWriteFromDictationBookmark, ListeningWriteFromDictationPassage, SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
-import { evaluateSummarizeSpokenTextAnswer } from "@/lib/ai/google";
+import { evaluateAudioWithText } from "@/lib/ai/google-voice";
 import prisma from "@/lib/prisma";
 
 interface QuestionQuery {
@@ -108,7 +108,35 @@ const addOrRemoveReadAloudBookmark = async (userId: string, questionId: string):
         return null;
     }
 }
-const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingReadAloudAnswer | null> => { return null }
+const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingReadAloudAnswer | null> => {
+    try {
+
+        const question = await prisma.speakingReadAloudQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, oralFluencyScore, pronunciationScore } = evaluateAudioWithText(audioUrl, question.passage);
+        const totalScore = (contentScore + oralFluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: oralFluencyScore ? oralFluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // RepeatSentence related functions
 
