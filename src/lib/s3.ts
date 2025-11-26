@@ -14,8 +14,8 @@ const s3Client = new S3Client({
     }
 });
 
-export async function putObject() {
-    const fileKey = `uploads/audio/${uuid()}.webm`;
+export async function putObject(subdir: string) {
+    const fileKey = `uploads/audio/${subdir}/${uuid()}.webm`;
     const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: fileKey,

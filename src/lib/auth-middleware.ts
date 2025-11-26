@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { auth } from "./auth"; // path to your Better Auth server instance
 
 export async function auth_middleware(req: Request) {
@@ -26,4 +27,21 @@ export async function auth_middleware(req: Request) {
     //     }
     // }
 
+}
+
+export async function admin_auth_middleware(req: Request) {
+    const { email, password } = await req.json();
+
+    if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
+        return NextResponse.json({
+            success: false,
+            message: "You are Unauthorized",
+            url: null
+        }, { status: 401 });
+    }
+    else {
+        return {
+            authenticated: true,
+        }
+    }
 }
