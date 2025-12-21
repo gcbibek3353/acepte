@@ -5,13 +5,13 @@ import Image from 'next/image'
 
 const DropdownValues = {
     speaking: [
-        { title: "Read Aloud", link: "/practice/speaking" },
-        { title: "Repeat Sentence", link: "/practice/speaking" },
-        { title: "Describe Image", link: "/practice/speaking" },
-        { title: "Re-tell Lecture", link: "/practice/speaking" },
-        { title: "Answer Short Question", link: "/practice/speaking" },
-        { title: "Summarize Group Discussion", link: "/practice/speaking" },
-        { title: "Respond to a situation", link: "/practice/speaking" }
+        { title: "Read Aloud", link: "/practice/readAloud" },
+        { title: "Repeat Sentence", link: "/practice/repeatSentence" },
+        { title: "Describe Image", link: "/practice/describeImage" },
+        { title: "Re-tell Lecture", link: "/practice/retellLecture" },
+        { title: "Answer Short Question", link: "/practice/answerShortQuestions" },
+        { title: "Summarize Group Discussion", link: "/practice/summarizeGroupDiscussions" },
+        { title: "Respond to a situation", link: "/practice/respondToASituation" }
     ],
     writing: [
         { title: "Summarize Written Text", link: "/practice/summarize-written-text" },
