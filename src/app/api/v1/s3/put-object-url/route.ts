@@ -3,7 +3,7 @@ import { putObject } from "@/lib/s3";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
-    const res = admin_auth_middleware(request);
+    admin_auth_middleware(request);
 
     return new Response(JSON.stringify({
         success: true,

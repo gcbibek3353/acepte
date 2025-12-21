@@ -5,19 +5,39 @@ import { v4 as uuid } from "uuid";
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID || "";
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || "";
 const bucketName = process.env.BUCKET_NAME;
+const region = process.env.AWS_REGION || "";
+
+// const s3Client = new S3Client({
+//     region,
+//     credentials: {
+//         accessKeyId,
+//         secretAccessKey
+//     }
+// });
+
+// export async function putObject(subdir: string) {
+//     const fileKey = `uploads/audio/${subdir}/${uuid()}.webm`;
+//     const command = new PutObjectCommand({
+//         Bucket: bucketName,
+//         Key: fileKey,
+//         ContentType: "audio/webm",
+//     })
+//     const url = await getSignedUrl(s3Client, command);
+//     return url;  // Send PUT request to this url and send static object as binary 
+// }
 
 const s3Client = new S3Client({
     region: "ap-south-1",
     credentials: {
-        accessKeyId,
-        secretAccessKey
+        accessKeyId: "AKIATZ4GBQUJFPRCGBEU",
+        secretAccessKey: "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"
     }
 });
 
 export async function putObject(subdir: string) {
     const fileKey = `uploads/audio/${subdir}/${uuid()}.webm`;
     const command = new PutObjectCommand({
-        Bucket: bucketName,
+        Bucket: "ace-pte-demo",
         Key: fileKey,
         ContentType: "audio/webm",
     })
