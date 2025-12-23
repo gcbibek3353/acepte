@@ -70,7 +70,7 @@ const Page = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <Read_Aloud passage={questionData.passage} />
+          <Read_Aloud passage={questionData.passage} questionId={passageId as string} />
         </div>
 
         {/* Answers Component */}

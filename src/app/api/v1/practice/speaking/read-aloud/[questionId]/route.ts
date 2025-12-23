@@ -67,7 +67,7 @@ export async function GET(
 export async function POST(req: NextRequest,
     { params }: { params: Promise<{ questionId: string }> }
 ) {
-     try {
+    try {
         const { questionId } = await params;
         if (!questionId) {
             return NextResponse.json(
@@ -82,6 +82,7 @@ export async function POST(req: NextRequest,
 
         const body = await req.json();
         const { audioUrl } = body;
+        console.log('audioURL in back' + audioUrl);
 
         const authCheck = await auth_middleware(req);
         if (!authCheck.authenticated || !authCheck.user) {
