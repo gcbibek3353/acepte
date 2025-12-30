@@ -1,6 +1,6 @@
 
 import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, ListeningSelectMissingWordAnswer, ListeningSelectMissingWordBookmark, ListeningSelectMissingWordPassage, ListeningWriteFromDictationAnswer, ListeningWriteFromDictationBookmark, ListeningWriteFromDictationPassage, SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
-import { evaluateAudioWithText } from "@/lib/ai/google-voice";
+import { evaluateAudioWithAudio, evaluateAudioWithImage, evaluateaudioWithText } from "@/lib/ai/google-voice";
 import prisma from "@/lib/prisma";
 
 interface QuestionQuery {
@@ -117,8 +117,8 @@ const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl:
         if (!question) {
             throw new Error("Question not found");
         }
-        const { contentScore, oralFluencyScore, pronunciationScore } = evaluateAudioWithText(audioUrl, question.passage);
-        const totalScore = (contentScore + oralFluencyScore + pronunciationScore) / 3;
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateaudioWithText(audioUrl, question.passage);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
         const newAnswer = await prisma.speakingReadAloudAnswer.create({
             data: {
                 userId,
@@ -126,7 +126,7 @@ const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl:
                 audioUrl,
                 duration: 0, // TODO: extract duration from audio file
                 contentScore: contentScore ? contentScore : null,
-                oralFluencyScore: oralFluencyScore ? oralFluencyScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
                 pronunciationScore: pronunciationScore ? pronunciationScore : null,
                 totalScore: totalScore ? totalScore : null
             }
@@ -235,7 +235,34 @@ const addOrRemoveRepeatSentenceBookmark = async (userId: string, questionId: str
         return null;
     }
 }
-const postRepeatSentenceAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRepeatSentenceAnswer | null> => { return null }
+const postRepeatSentenceAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRepeatSentenceAnswer | null> => {
+    try {
+        const question = await prisma.speakingRepeatSentenceQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingRepeatSentenceAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // DescribeImage related functions
 
@@ -334,7 +361,35 @@ const addOrRemoveDescribeImageBookmark = async (userId: string, questionId: stri
         return null;
     }
 }
-const postDescribeImageAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingDescribeImageAnswer | null> => { return null }
+const postDescribeImageAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingDescribeImageAnswer | null> => {
+    try {
+
+        const question = await prisma.speakingDescribeImageQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithImage(audioUrl, question.imageUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // RetellLecture related functions
 
@@ -433,7 +488,35 @@ const addOrRemoveRetellLectureBookmark = async (userId: string, questionId: stri
         return null;
     }
 }
-const postRetellLectureAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRetellLectureAnswer | null> => { return null }
+const postRetellLectureAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRetellLectureAnswer | null> => {
+    try {
+
+        const question = await prisma.speakingRetellLectureQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // AnswerShort related functions
 
@@ -532,7 +615,34 @@ const addOrRemoveAnswerShortBookmark = async (userId: string, questionId: string
         return null;
     }
 }
-const postAnswerShortAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingAnswerShortAnswer | null> => { return null }
+const postAnswerShortAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingAnswerShortAnswer | null> => {
+    try {
+        const question = await prisma.speakingAnswerShortQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // SummarizeGroupDiscussion related functions
 
@@ -631,7 +741,34 @@ const addOrRemoveSummarizeGroupDiscussionBookmark = async (userId: string, quest
         return null;
     }
 }
-const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingGroupDiscussionAnswer | null> => { return null }
+const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingGroupDiscussionAnswer | null> => {
+    try {
+        const question = await prisma.speakingGroupDiscussionQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingRepeatSentenceAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 // RespondToASituation related functions
 
@@ -730,7 +867,34 @@ const addOrRemoveRespondToASituationBookmark = async (userId: string, questionId
         return null;
     }
 }
-const postRespondToASituationAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRespondSituationAnswer | null> => { return null }
+const postRespondToASituationAnswer = async (userId: string, questionId: string, audioUrl: string): Promise<SpeakingRespondSituationAnswer | null> => {
+    try {
+        const question = await prisma.speakingRespondSituationQuestion.findUnique({
+            where: { id: questionId }
+        });
+        if (!question) {
+            throw new Error("Question not found");
+        }
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
+        const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
+        const newAnswer = await prisma.speakingRepeatSentenceAnswer.create({
+            data: {
+                userId,
+                questionId,
+                audioUrl,
+                duration: 0, // TODO: extract duration from audio file
+                contentScore: contentScore ? contentScore : null,
+                oralFluencyScore: fluencyScore ? fluencyScore : null,
+                pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                totalScore: totalScore ? totalScore : null
+            }
+        });
+        return newAnswer;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+        return null;
+    }
+}
 
 const speakingController = {
     getReadAloudQuestions,

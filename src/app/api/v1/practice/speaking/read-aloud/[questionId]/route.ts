@@ -82,7 +82,6 @@ export async function POST(req: NextRequest,
 
         const body = await req.json();
         const { audioUrl } = body;
-        console.log('audioURL in back' + audioUrl);
 
         const authCheck = await auth_middleware(req);
         if (!authCheck.authenticated || !authCheck.user) {
@@ -96,7 +95,6 @@ export async function POST(req: NextRequest,
             );
         }
         const userId = authCheck.user.id;
-        // const userId = "rOwb3ejiPeGiZlvEtgPgb74rPryd7ULN"
         if (!userId || !audioUrl) {
             return NextResponse.json(
                 {
