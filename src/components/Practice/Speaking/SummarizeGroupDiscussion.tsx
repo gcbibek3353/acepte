@@ -3,12 +3,12 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 
-interface Repeat_SentenceProps {
+interface Summarize_Group_DiscussionProps {
   audioUrl: string;
   questionId: string;
 }
 
-const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
+const Summarize_Group_Discussion = ({ audioUrl, questionId }: Summarize_Group_DiscussionProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,7 +20,7 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
 
       // 3. Submit the answer to the backend with the S3 Object URL
       const submitToDb = async (url: string) => {
-        const response = await fetch(`/api/v1/practice/speaking/repeat-sentence/${questionId}`, {
+        const response = await fetch(`/api/v1/practice/speaking/summarize-group-discussions/${questionId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
         },
         body: audioFile,
       })
-        .then(async res => {
+        .then(async (res) => {
           // Extract the object URL by removing query parameters from the presigned URL
           const objectUrl = url.split('?')[0];
           await submitToDb(objectUrl);
@@ -63,29 +63,29 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6 bg-white rounded-xl shadow-sm border">
-    
-          <h1 className="text-xl font-semibold text-gray-800">
-            Repeat Sentence 
-          </h1>
-    
-          <PlayAudio audioUrl={audioUrl} />
-    
-          <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
-    
-          <div className="flex justify-end">
-            <button
-              onClick={submitHandler}
-              disabled={!audioFile || isSubmitting}
-              className="px-6 py-2 rounded-lg font-medium
+
+      <h1 className="text-xl font-semibold text-gray-800">
+        Summarize Group Discussion
+      </h1>
+
+      <PlayAudio audioUrl={audioUrl} />
+
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+
+      <div className="flex justify-end">
+        <button
+          onClick={submitHandler}
+          disabled={!audioFile || isSubmitting}
+          className="px-6 py-2 rounded-lg font-medium
                          bg-blue-600 text-white
                          hover:bg-blue-700
                          disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Submitting...' : ' Submit Answer'}
-            </button>
-          </div>
-        </div>
+        >
+          {isSubmitting ? 'Submitting...' : ' Submit Answer'}
+        </button>
+      </div>
+    </div>
   )
 }
 
-export default Repeat_Sentence
+export default Summarize_Group_Discussion

@@ -16,7 +16,6 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
       setIsSubmitting(true);
       // 1. Get PreSignedUrl from the backend
       const url = await fetch('/api/v1/s3/put-object-url').then(res => res.json()).then(data => data.url);
-      console.log('Presigned URl got from backend = ' + url);
 
       // 3. Submit the answer to the backend with the S3 Object URL
       const submitToDb = async (url: string) => {
@@ -33,7 +32,6 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
 
         if (result.success) {
           alert('Essay submitted and evaluated successfully!')
-          console.log('Evaluation result:', result.data)
         } else {
           alert(`Error: ${result.message}`)
         }
@@ -47,9 +45,10 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
         },
         body: audioFile,
       })
-        .then(res => {
-          submitToDb(res.url)
-          console.log("Upload Response:", res.url);
+        .then(async res => {
+          // Extract the object URL by removing query parameters from the presigned URL
+          const objectUrl = url.split('?')[0];
+          await submitToDb(objectUrl);
         }).catch(err => {
           console.error("Upload Error:", err);
         });
@@ -77,7 +76,7 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
       <div className="flex justify-end">
         <button
           onClick={submitHandler}
-          disabled={!audioFile}
+          disabled={!audioFile || isSubmitting}
           className="px-6 py-2 rounded-lg font-medium
                      bg-blue-600 text-white
                      hover:bg-blue-700

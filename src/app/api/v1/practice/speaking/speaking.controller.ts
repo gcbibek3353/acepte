@@ -372,7 +372,7 @@ const postDescribeImageAnswer = async (userId: string, questionId: string, audio
         }
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithImage(audioUrl, question.imageUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
-        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+        const newAnswer = await prisma.speakingDescribeImageAnswer.create({
             data: {
                 userId,
                 questionId,
@@ -499,7 +499,7 @@ const postRetellLectureAnswer = async (userId: string, questionId: string, audio
         }
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
-        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+        const newAnswer = await prisma.speakingRetellLectureAnswer.create({
             data: {
                 userId,
                 questionId,
@@ -623,18 +623,19 @@ const postAnswerShortAnswer = async (userId: string, questionId: string, audioUr
         if (!question) {
             throw new Error("Question not found");
         }
+        // TODO: change evaluate function to match short answer criteria . We have fixed answer for such questions
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
-        const newAnswer = await prisma.speakingReadAloudAnswer.create({
+        const newAnswer = await prisma.speakingAnswerShortAnswer.create({
             data: {
                 userId,
                 questionId,
                 audioUrl,
                 duration: 0, // TODO: extract duration from audio file
-                contentScore: contentScore ? contentScore : null,
-                oralFluencyScore: fluencyScore ? fluencyScore : null,
-                pronunciationScore: pronunciationScore ? pronunciationScore : null,
-                totalScore: totalScore ? totalScore : null
+                vocabularyScore: totalScore ? totalScore : null,
+                // oralFluencyScore: fluencyScore ? fluencyScore : null,
+                // pronunciationScore: pronunciationScore ? pronunciationScore : null,
+                // totalScore: totalScore ? totalScore : null
             }
         });
         return newAnswer;
@@ -751,7 +752,7 @@ const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: st
         }
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
-        const newAnswer = await prisma.speakingRepeatSentenceAnswer.create({
+        const newAnswer = await prisma.speakingGroupDiscussionAnswer.create({
             data: {
                 userId,
                 questionId,
@@ -877,7 +878,7 @@ const postRespondToASituationAnswer = async (userId: string, questionId: string,
         }
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
-        const newAnswer = await prisma.speakingRepeatSentenceAnswer.create({
+        const newAnswer = await prisma.speakingRespondSituationAnswer.create({
             data: {
                 userId,
                 questionId,

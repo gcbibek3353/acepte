@@ -3,12 +3,12 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 
-interface Repeat_SentenceProps {
+interface Retell_LectureProps {
   audioUrl: string;
   questionId: string;
 }
 
-const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
+const Retell_Lecture = ({ audioUrl, questionId }: Retell_LectureProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,7 +20,7 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
 
       // 3. Submit the answer to the backend with the S3 Object URL
       const submitToDb = async (url: string) => {
-        const response = await fetch(`/api/v1/practice/speaking/repeat-sentence/${questionId}`, {
+        const response = await fetch(`/api/v1/practice/speaking/retell-lecture/${questionId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -88,4 +88,4 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
   )
 }
 
-export default Repeat_Sentence
+export default Retell_Lecture
