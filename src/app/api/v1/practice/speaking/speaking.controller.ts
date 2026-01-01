@@ -1,5 +1,5 @@
 
-import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, ListeningSelectMissingWordAnswer, ListeningSelectMissingWordBookmark, ListeningSelectMissingWordPassage, ListeningWriteFromDictationAnswer, ListeningWriteFromDictationBookmark, ListeningWriteFromDictationPassage, SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
+import { SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion } from "@/generated/prisma";
 import { evaluateAudioWithAudio, evaluateAudioWithImage, evaluateaudioWithText } from "@/lib/ai/google-voice";
 import prisma from "@/lib/prisma";
 
@@ -63,7 +63,17 @@ const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingRea
         const question = await prisma.speakingReadAloudQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -190,7 +200,17 @@ const getRepeatSentenceQuestionById = async (questionId: string): Promise<Speaki
         const question = await prisma.speakingRepeatSentenceQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -316,7 +336,17 @@ const getDescribeImageQuestionById = async (questionId: string): Promise<Speakin
         const question = await prisma.speakingDescribeImageQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -443,7 +473,17 @@ const getRetellLectureQuestionById = async (questionId: string): Promise<Speakin
         const question = await prisma.speakingRetellLectureQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -570,7 +610,17 @@ const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingA
         const question = await prisma.speakingAnswerShortQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+               answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -697,7 +747,17 @@ const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Prom
         const question = await prisma.speakingGroupDiscussionQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+               answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -823,7 +883,17 @@ const getRespondToASituationQuestionById = async (questionId: string): Promise<S
         const question = await prisma.speakingRespondSituationQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include : {
+                        user : {
+                            select : {
+                                id : true,
+                                name : true,
+                                email : true,
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });

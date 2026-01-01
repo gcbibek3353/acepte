@@ -6,14 +6,23 @@ import { useParams } from 'next/navigation'
 import React from 'react'
 import Retell_Lecture from '@/components/Practice/Speaking/RetellLecture';
 import Summarize_Group_Discussion from '@/components/Practice/Speaking/SummarizeGroupDiscussion';
+import SpeakingAnswer from '@/components/Practice/Speaking/Answer/SpeakingAnswer';
 
-// TODO : NEED TO UPDATE THIS ANSWERS INTERFACE
 interface AnswerData {
   id: string
   userId: string
-  passageId: string
-  answers: Record<string, string> // Position -> Answer mapping
+  questionId: string
+  audiourl: string
+  duration: number
+  contentScore: number
+  oralFluencyScore: number
+  pronunciationScore: number
   totalScore: number
+  user: {
+    id: string
+    name: string
+    email: string
+  }
   createdAt: string
   updatedAt: string
 }
@@ -73,11 +82,15 @@ const Page = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-             <Summarize_Group_Discussion audioUrl={questionData.audioUrl} questionId={passageId as string} />
+          <Summarize_Group_Discussion audioUrl={questionData.audioUrl} questionId={passageId as string} />
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <SpeakingAnswer
+          answers={questionData.answers}
+          questionId={questionData.questionid}
+          questionTitle={questionData.title}
+        />
       </div>
     </div>
   )
