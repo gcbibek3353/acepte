@@ -63,7 +63,17 @@ const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<S
         const question = await prisma.summarizeSpokenTextQuestion.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -201,7 +211,17 @@ const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassa
         const question = await prisma.listeningMCMPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 options: true,
                 bookmarks: true
             }
@@ -351,7 +371,17 @@ const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlan
         const question = await prisma.listeningFillBlankPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -508,7 +538,17 @@ const getHCSQuestionById = async (questionId: string): Promise<ListeningHighligh
         const question = await prisma.listeningHighlightSummaryPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -639,7 +679,17 @@ const getMCSQuestionById = async (questionId: string): Promise<ListeningMCSPassa
         const question = await prisma.listeningMCSPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -766,7 +816,17 @@ const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMi
         const question = await prisma.listeningSelectMissingWordPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -893,7 +953,17 @@ const getHIWQuestionById = async (questionId: string): Promise<ListeningHighligh
         const question = await prisma.listeningHighlightIncorrectWordsPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 incorrectWords: true,
                 bookmarks: true
             }
@@ -1049,7 +1119,17 @@ const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFro
         const question = await prisma.listeningWriteFromDictationPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                 answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });

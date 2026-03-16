@@ -5,6 +5,7 @@ import useFetch from '@/hooks/useFetch'
 import { useParams } from 'next/navigation'
 import AnswersComponent from '@/components/Practice/Answers'
 import EssayTextArea from '@/components/Practice/Writing/writeEssay/EssayTextArea'
+import WriteEssayAnswer from '@/components/Practice/Writing/writeEssay/WriteEssayAnswer'
 
 interface AnswerData {
   id: string
@@ -20,9 +21,15 @@ interface AnswerData {
   vocabScore: number | null
   DSCScore: number | null
   GLRScore: number | null
+  user: {
+    id: string
+    name: string
+    email: string
+  }
   createdAt: string
   updatedAt: string
 }
+
 interface BookMarkData {
   id: string
   userId: string
@@ -89,7 +96,12 @@ const Page = () => {
 
       <EssayTextArea essayId={essayId} />
 
-      <AnswersComponent answers={questionData.answers} />
+      {/* Answers Section */}
+      <WriteEssayAnswer
+        answers={questionData.answers}
+        questionId={questionData.id}
+        questionTitle={questionData.essayTitle}
+      />
 
     </div>
   )

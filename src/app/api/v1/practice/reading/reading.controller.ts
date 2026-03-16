@@ -62,7 +62,17 @@ const getFibDropdownQuestionById = async (questionId: string): Promise<FillBlank
         const question = await prisma.fillBlanksDropdownPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true,
                 blanks: true, //TODO : remove it after testing 
             }
@@ -208,7 +218,17 @@ const getMcmqQuestionById = async (questionId: string): Promise<MultipleChoiceMu
         const question = await prisma.multipleChoiceMultiplePassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 options: true,
                 bookmarks: true
             }
@@ -353,7 +373,17 @@ const getReorderParagraphQuestionById = async (questionId: string): Promise<Reor
         const question = await prisma.reorderParagraphPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 paragraphs: true,
                 bookmarks: true
             }
@@ -495,7 +525,17 @@ const getFibDragDropQuestionById = async (questionId: string): Promise<FillBlank
         const question = await prisma.fillBlanksDragDropPassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 blanks: true,
                 bookmarks: true
             }
@@ -638,7 +678,17 @@ const getMcsqQuestionById = async (questionId: string): Promise<MultipleChoiceSi
         const question = await prisma.multipleChoiceSinglePassage.findUnique({
             where: { id: questionId },
             include: {
-                answers: true,
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });

@@ -70,7 +70,17 @@ const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion
                 id: id
             },
             include: {
-                answers: true, // we are returning all the answers of this question.
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
@@ -222,7 +232,17 @@ const getSummarizeWrittenTextQuestionById = async (id: string): Promise<Summariz
                 id: id
             },
             include: {
-                answers: true, // we are returning all the answers of this question.
+                answers: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
                 bookmarks: true
             }
         });
