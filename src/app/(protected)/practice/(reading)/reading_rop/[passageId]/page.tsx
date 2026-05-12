@@ -3,54 +3,16 @@ import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
 import Reorder from '@/components/Practice/Reading/Reorder';
 import useFetch from '@/hooks/useFetch';
+import { ReorderDetail, ApiResponse } from '@/types/reading';
 import { useParams } from 'next/navigation';
 import React from 'react'
-
-// TODO : not sure about these typescript interfaces , need to confirm later
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  answers: Record<string, string> // Position -> Answer mapping
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  audioTranscribedText: string
-  audioUrl: string
-  passage: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
-
 
 const FIBReorder = () => {
   const { passageId } = useParams();
   const timeLimit = 1 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/reorder/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<ReorderDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')
@@ -68,10 +30,10 @@ const FIBReorder = () => {
         <Header
           questionType='Re-order Paragraphs'
           instruction={`The text boxes in the left panel have been placed in a random order. Restore the original order by dragging the text boxes from the left panel to the right panel.`}
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
-          bookmarks={questionData.bookmarks}
+          bookmarks={questionData.bookmarks as any}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
@@ -84,7 +46,7 @@ const FIBReorder = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <AnswersComponent answers={questionData.answers as any} />
       </div>
     </div>
   )
