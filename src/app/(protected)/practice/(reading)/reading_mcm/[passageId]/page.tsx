@@ -34,7 +34,7 @@ Read the text and answer the question by selecting all the correct responses. Mo
           questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
-          bookmarks={questionData.bookmarks as any}
+          bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
@@ -43,11 +43,11 @@ Read the text and answer the question by selecting all the correct responses. Mo
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <ReadingMCMComponent passage={questionData.content} passageId={questionData.id} options={questionData.options as any} />
+          <ReadingMCMComponent passage={questionData.content} passageId={questionData.id} options={questionData.options} />
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers as any} />
+        <AnswersComponent answers={questionData.answers} />
       </div>
     </div>
   )

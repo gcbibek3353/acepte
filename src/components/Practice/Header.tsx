@@ -6,7 +6,7 @@ interface BookMarkData {
     userId: string
     questionId?: string
     passageId?: string
-    createdAt: string
+    createdAt: Date | string
 }
 
 type HeaderProps = {

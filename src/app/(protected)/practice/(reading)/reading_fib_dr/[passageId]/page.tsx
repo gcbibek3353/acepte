@@ -34,7 +34,7 @@ const FIBDropDown = () => {
           questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
-          bookmarks={questionData.bookmarks as any}
+          bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
@@ -43,11 +43,11 @@ const FIBDropDown = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <FibDropDownComponent passage={questionData.content} passageId={passageId as string} blanks={questionData.blanks as any} />
+          <FibDropDownComponent passage={questionData.content} passageId={passageId as string} blanks={questionData.blanks} />
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers as any} />
+        <AnswersComponent answers={questionData.answers} />
       </div>
     </div>
   )

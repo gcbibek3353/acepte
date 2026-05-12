@@ -33,7 +33,7 @@ const FIBReorder = () => {
           questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
-          bookmarks={questionData.bookmarks as any}
+          bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
@@ -46,7 +46,7 @@ const FIBReorder = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers as any} />
+        <AnswersComponent answers={questionData.answers} />
       </div>
     </div>
   )

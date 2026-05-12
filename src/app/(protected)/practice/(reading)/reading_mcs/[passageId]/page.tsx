@@ -33,7 +33,7 @@ const FIBMCS = () => {
           questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
-          bookmarks={questionData.bookmarks as any}
+          bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
@@ -42,11 +42,11 @@ const FIBMCS = () => {
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <MCS passage={questionData.content} passageId={questionData.id} options={questionData.options as any} />
+          <MCS passage={questionData.content} passageId={questionData.id} options={questionData.options} />
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers as any} />
+        <AnswersComponent answers={questionData.answers} />
       </div>
     </div>
   )

@@ -1,19 +1,20 @@
 interface AnswerData {
     id: string
-    userId: string
-    questionId: string
-    answer: string
-    wordCount: number
-    totalScore: number | null
-    contentScore: number | null
-    formScore: number | null
-    grammerScore: number | null
+    userId?: string
+    questionId?: string
+    passageId?: string
+    answer?: string
+    wordCount?: number
+    totalScore?: number | null
+    contentScore?: number | null
+    formScore?: number | null
+    grammerScore?: number | null
     spellingScore?: number | null
     vocabScore?: number | null
     DSCScore?: number | null
     GLRScore?: number | null
-    createdAt: string
-    updatedAt: string
+    createdAt: Date | string
+    updatedAt?: Date | string
 }
 
 const AnswersComponent = ({ answers }: { answers: AnswerData[] }) => {
@@ -58,13 +59,17 @@ const AnswersComponent = ({ answers }: { answers: AnswerData[] }) => {
                             </span>
                         </div>
 
-                        <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <p className="text-gray-800 text-base leading-relaxed">{answer.answer}</p>
-                        </div>
+                        {answer.answer && (
+                            <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <p className="text-gray-800 text-base leading-relaxed">{answer.answer}</p>
+                            </div>
+                        )}
 
                         <div className="flex justify-between items-center mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                            <span className="text-sm font-semibold text-blue-700">Words: {answer.wordCount}</span>
-                            {answer.totalScore !== null && (
+                            {answer.wordCount != null && (
+                                <span className="text-sm font-semibold text-blue-700">Words: {answer.wordCount}</span>
+                            )}
+                            {answer.totalScore != null && (
                                 <span className="text-lg font-bold text-indigo-700 bg-white px-3 py-1 rounded-full shadow-sm">
                                     Total Score: {answer.totalScore.toFixed(2)}
                                 </span>
