@@ -3,54 +3,16 @@ import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
 import ListeningHCS from '@/components/Practice/listening/HighlightCorrectSummary/ListeningHCS'
 import useFetch from '@/hooks/useFetch'
+import { ListeningHcsDetail, ApiResponse } from '@/types/listening'
 import { useParams } from 'next/navigation'
 import React from 'react'
-
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  selectedOptionIndex: number
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  passageId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionId: string
-  title: string
-  audioUrl: string
-  passage: string
-  questionText: string
-  options: string[]
-  correctOptionIndex: number
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
 
 const Page = () => {
   const { passageId } = useParams();
   const timeLimit = 1 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/highlightCorrectSummary/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<ListeningHcsDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')

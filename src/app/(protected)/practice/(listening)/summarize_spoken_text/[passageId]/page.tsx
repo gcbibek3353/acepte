@@ -4,57 +4,16 @@ import Header from '@/components/Practice/Header'
 import SummarizeSpokenTextComponent from '@/components/Practice/listening/SummarizeSpokenText/SummarizeSpokenTextComponent'
 import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
+import { SstDetail, ApiResponse } from '@/types/listening'
 import { useParams } from 'next/navigation'
 import React from 'react'
-
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  response: string
-  wordCount: number
-  contentScore: number | null
-  formScore: number | null
-  grammerScore: number | null
-  spellingScore: number | null
-  vocabScore: number | null
-  totalScore: number | null
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionId: string
-  title: string
-  audioTranscribedText: string
-  audioUrl: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
 
 const Page = () => {
   const { passageId } = useParams();
   const timeLimit = 10 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<SstDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')

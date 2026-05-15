@@ -4,52 +4,16 @@ import Header from '@/components/Practice/Header'
 import ListeningFIB from '@/components/Practice/listening/FillInTheBlanks/ListeningFIB';
 import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
+import { ListeningFibDetail, ApiResponse } from '@/types/listening'
 import { useParams } from 'next/navigation'
 import React from 'react'
-
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  answers: Record<string, string> // Position -> Answer mapping
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  audioTranscribedText: string
-  audioUrl: string
-  passage: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
 
 const Page = () => {
   const { passageId } = useParams();
   const timeLimit = 1 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/fillTheBlanks/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<ListeningFibDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')
@@ -68,7 +32,7 @@ const Page = () => {
         <Header
           questionType='Fill in the Blanks'
           instruction={`You will hear a recording. Type the missing words in each blank.`}
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}

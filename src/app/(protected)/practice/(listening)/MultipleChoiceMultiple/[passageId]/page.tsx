@@ -2,67 +2,16 @@
 import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
 import ListeningMCM from '@/components/Practice/listening/MultipleChoiceMultiple/listeningMCM'
-import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
+import { ListeningMcmDetail, ApiResponse } from '@/types/listening'
 import { useParams } from 'next/navigation'
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  selectedOptions: string[]
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface OptionsData {
-  id: string
-  text: string
-  isCorrect: boolean
-  passageId: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  audioTranscribedText: string
-  audioUrl: string
-  questionText: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-  options: OptionsData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
-
-
 const Page = () => {
   const { passageId } = useParams();
-  const timeLimit = 1 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/multipleChoiceMultiple/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
-
-  const handleTimeExceedHandler = () => {
-    alert('Time is up! Please submit your essay.')
-  }
+  const { data, loading, error } = useFetch<ApiResponse<ListeningMcmDetail>>(URL)
 
   if (loading) return <div className="max-w-4xl mx-auto p-6">Loading...</div>
   if (error) return <div className="max-w-4xl mx-auto p-6">Error: {error}</div>
@@ -77,7 +26,7 @@ const Page = () => {
         <Header
           questionType='Multiple Choice (Multiple)'
           instruction={`Listen to the recording and answer the question by selecting all the correct responses. You will need to select more than one response.`}
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}

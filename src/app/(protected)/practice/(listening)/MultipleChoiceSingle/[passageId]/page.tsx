@@ -3,58 +3,15 @@ import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
 import ListeningMCS from '@/components/Practice/listening/MultipleChoiceSingle/ListeningMCS'
 import useFetch from '@/hooks/useFetch'
+import { ListeningMcsDetail, ApiResponse } from '@/types/listening'
 import { useParams } from 'next/navigation'
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  selectedOptionIndex: number
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  passageId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionId: string
-  title: string
-  audioUrl: string
-  questionText: string
-  options: string[]
-  correctOptionIndex: number
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
-
-
 const Page = () => {
   const { passageId } = useParams();
-  const timeLimit = 1 * 60; // 10 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/multipleChoiceSingle/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
-
-  const handleTimeExceedHandler = () => {
-    alert('Time is up! Please submit your essay.')
-  }
+  const { data, loading, error } = useFetch<ApiResponse<ListeningMcsDetail>>(URL)
 
   if (loading) return <div className="max-w-4xl mx-auto p-6">Loading...</div>
   if (error) return <div className="max-w-4xl mx-auto p-6">Error: {error}</div>

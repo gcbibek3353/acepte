@@ -4,7 +4,7 @@ interface AnswerData {
     questionId?: string
     passageId?: string
     answer?: string
-    wordCount?: number
+    wordCount?: number | null
     totalScore?: number | null
     contentScore?: number | null
     formScore?: number | null
