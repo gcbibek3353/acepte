@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import Fib_dd_answer from '@/components/Practice/Reading/Answers/Fib_dd_answer';
 import DragAndDrop from '@/components/Practice/Reading/DragAndDrop';
 import useFetch from '@/hooks/useFetch';
 import { FibDragDropDetail, ApiResponse } from '@/types/reading';
@@ -46,7 +46,7 @@ const FIBDragAndDrop = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Fib_dd_answer answers={questionData.answers} blanks={questionData.blanks} options={questionData.options} />
       </div>
     </div>
   )

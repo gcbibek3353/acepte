@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import Mcm_answer from '@/components/Practice/Reading/Answers/Mcm_answer';
 import ReadingMCMComponent from '@/components/Practice/Reading/MCM';
 import useFetch from '@/hooks/useFetch';
 import { McmDetail, ApiResponse } from '@/types/reading';
@@ -47,7 +47,7 @@ Read the text and answer the question by selecting all the correct responses. Mo
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Mcm_answer answers={questionData.answers} options={questionData.options} />
       </div>
     </div>
   )

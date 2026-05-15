@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
 interface FibDragDropProps {
     passageId: string

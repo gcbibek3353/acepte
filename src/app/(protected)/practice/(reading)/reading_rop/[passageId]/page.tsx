@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import Rop_answer from '@/components/Practice/Reading/Answers/Rop_answer';
 import Reorder from '@/components/Practice/Reading/Reorder';
 import useFetch from '@/hooks/useFetch';
 import { ReorderDetail, ApiResponse } from '@/types/reading';
@@ -46,7 +46,7 @@ const FIBReorder = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Rop_answer answers={questionData.answers} paragraphs={questionData.paragraphs} />
       </div>
     </div>
   )

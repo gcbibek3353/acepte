@@ -1,6 +1,7 @@
 "use client"
 import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import Fib_dr_answer from '@/components/Practice/Reading/Answers/Fib_dr_answer';
 import FibDropDownComponent from '@/components/Practice/Reading/FibDropDown';
 import useFetch from '@/hooks/useFetch';
 import { FibDropdownDetail, ApiResponse } from '@/types/reading';
@@ -47,7 +48,7 @@ const FIBDropDown = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Fib_dr_answer answers={questionData.answers} blanks={questionData.blanks} />
       </div>
     </div>
   )

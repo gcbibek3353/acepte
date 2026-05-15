@@ -17,7 +17,7 @@ export type WriteEssayAnswerScore = z.infer<typeof writeEssayAnswerScoreSchema>;
 
 export const SummarizeWrittenTextAnswerScoreSchema = z.object({
   totalScore: z.number().min(0).max(7),
-  contentScore: z.number().min(0).max(2),
+  contentScore: z.number().min(0).max(4),
   formScore: z.number().min(0).max(1),
   grammerScore: z.number().min(0).max(2),
   vocabScore: z.number().min(0).max(2),
@@ -28,12 +28,12 @@ export type SummarizeWrittenTextAnswerScore = z.infer<typeof SummarizeWrittenTex
 // Listening specific schemas and types
 
 export const SummarizeSpokenTextAnswerScoreSchema = z.object({
-  contentScore : z.number().min(0).max(2),
-  formScore : z.number().min(0).max(2),
-  grammarScore : z.number().min(0).max(2),
-  spellingScore : z.number().min(0).max(2),
-  vocabularyScore : z.number().min(0).max(2),
-  totalScore : z.number().min(0).max(10)
+  contentScore: z.number().min(0).max(2),
+  formScore: z.number().min(0).max(2),
+  grammarScore: z.number().min(0).max(2),
+  spellingScore: z.number().min(0).max(2),
+  vocabularyScore: z.number().min(0).max(2),
+  totalScore: z.number().min(0).max(10)
 });
 
 export type SummarizeSpokenTextAnswerScore = z.infer<typeof SummarizeSpokenTextAnswerScoreSchema>;

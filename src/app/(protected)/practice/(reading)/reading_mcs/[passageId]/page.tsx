@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers';
 import Header from '@/components/Practice/Header';
+import Mcs_answer from '@/components/Practice/Reading/Answers/Mcs_answer';
 import MCS from '@/components/Practice/Reading/MCS';
 import useFetch from '@/hooks/useFetch';
 import { McsDetail, ApiResponse } from '@/types/reading';
@@ -46,7 +46,7 @@ const FIBMCS = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Mcs_answer answers={questionData.answers} options={questionData.options} correctOptionIndex={questionData.correctOptionIndex} />
       </div>
     </div>
   )
