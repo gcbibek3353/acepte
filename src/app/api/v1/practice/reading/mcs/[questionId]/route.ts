@@ -95,11 +95,11 @@ export async function POST(
     }
     const userId = authCheck.user.id;
 
-    if (!correctOptionIndex) {
+    if (correctOptionIndex != 0 && !correctOptionIndex) {
       return NextResponse.json(
         {
           success: false,
-          message: "Please provide the summarized text",
+          message: "Please provide the correct option index",
           data: null
         },
         { status: 400 }
