@@ -1,6 +1,6 @@
 'use client'
-import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
+import Listening_mcm_answer from '@/components/Practice/listening/Answers/Listening_mcm_answer'
 import ListeningMCM from '@/components/Practice/listening/MultipleChoiceMultiple/listeningMCM'
 import useFetch from '@/hooks/useFetch'
 import { ListeningMcmDetail, ApiResponse } from '@/types/listening'
@@ -42,7 +42,7 @@ const Page = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Listening_mcm_answer answers={questionData.answers} options={questionData.options} />
       </div>
     </div>
   )

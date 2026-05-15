@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
+import Listening_hcs_answer from '@/components/Practice/listening/Answers/Listening_hcs_answer'
 import ListeningHCS from '@/components/Practice/listening/HighlightCorrectSummary/ListeningHCS'
 import useFetch from '@/hooks/useFetch'
 import { ListeningHcsDetail, ApiResponse } from '@/types/listening'
@@ -47,7 +47,7 @@ const Page = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Listening_hcs_answer answers={questionData.answers} options={questionData.options} correctOptionIndex={questionData.correctOptionIndex} />
       </div>
     </div>
   )

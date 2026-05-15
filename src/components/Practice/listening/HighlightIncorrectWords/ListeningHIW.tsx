@@ -87,7 +87,7 @@ const ListeningHIW = ({ audioUrl, passage, passageId }: ListeningHIWProps) => {
 
             {/* Passage with clickable words */}
             <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-8">
-                <div className="text-lg leading-relaxed text-gray-800 space-x-1">
+                <div className="text-lg leading-relaxed text-gray-800 flex flex-wrap gap-x-1 gap-y-1">
                     {renderPassage()}
                 </div>
             </div>

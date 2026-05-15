@@ -1,6 +1,6 @@
 "use client"
-import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
+import Listening_wfd_answer from '@/components/Practice/listening/Answers/Listening_wfd_answer'
 import ListeningWFD from '@/components/Practice/listening/WriteFromDictation/ListeningWFD'
 import useFetch from '@/hooks/useFetch'
 import { ListeningWfdDetail, ApiResponse } from '@/types/listening'
@@ -42,7 +42,7 @@ const Page = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Listening_wfd_answer answers={questionData.answers} transcript={questionData.transcript} />
       </div>
     </div>
   )

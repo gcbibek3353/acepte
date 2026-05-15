@@ -1,6 +1,6 @@
 'use client';
-import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
+import Listening_fib_answer from '@/components/Practice/listening/Answers/Listening_fib_answer'
 import ListeningFIB from '@/components/Practice/listening/FillInTheBlanks/ListeningFIB';
 import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
@@ -48,7 +48,7 @@ const Page = () => {
         </div>
 
         {/* Answers Component */}
-        <AnswersComponent answers={questionData.answers} />
+        <Listening_fib_answer answers={questionData.answers} blanks={questionData.blanks} />
       </div>
     </div>
   )

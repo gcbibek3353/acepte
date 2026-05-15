@@ -1,6 +1,6 @@
 'use client'
-import AnswersComponent from '@/components/Practice/Answers'
 import Header from '@/components/Practice/Header'
+import Sst_answer from '@/components/Practice/listening/Answers/Sst_answer'
 import SummarizeSpokenTextComponent from '@/components/Practice/listening/SummarizeSpokenText/SummarizeSpokenTextComponent'
 import Timer from '@/components/Practice/Timer'
 import useFetch from '@/hooks/useFetch'
@@ -48,7 +48,7 @@ const Page = () => {
             </div>
 
             {/* Answers Component */}
-            <AnswersComponent answers={questionData.answers} />
+            <Sst_answer answers={questionData.answers} />
         </div>
     </div>
 )
