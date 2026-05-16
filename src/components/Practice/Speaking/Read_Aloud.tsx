@@ -12,24 +12,39 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
-  const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1//practice/speaking/read-aloud/${questionId}`;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
+  const detailUrl = `${apiUrl}/api/v1/practice/speaking/read-aloud/${questionId}`;
 
   const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
     mutationFn: async (file: File) => {
-      const { url: presignedUrl } = await fetch('/api/v1/s3/put-object-url').then(r => r.json());
-      await fetch(presignedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type || 'audio/webm' },
-        body: file,
+      const formData = new FormData();
+      formData.append("audio", file);
+      formData.append("subdir", "speaking-read-aloud");
+
+      const uploadResponse = await fetch("/api/v1/s3/upload-audio", {
+        method: "POST",
+        body: formData,
       });
-      const audioUrl = presignedUrl.split('?')[0];
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || `Upload failed: ${uploadResponse.status}`);
+      }
+
+      const uploadJson = await uploadResponse.json();
+      if (!uploadJson.success || !uploadJson.audioUrl) {
+        throw new Error("Upload response missing audioUrl");
+      }
+
       const response = await fetch(`/api/v1/practice/speaking/read-aloud/${questionId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioUrl }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audioUrl: uploadJson.audioUrl }),
       });
       const result = await response.json();
-      if (!result.success) throw new Error(result.message);
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || `Submit failed: ${response.status}`);
+      }
       return result;
     },
     onSuccess: () => {
