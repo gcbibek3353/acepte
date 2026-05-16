@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface AnswerShortQuestionProps {
   audioUrl: string;
@@ -10,56 +11,36 @@ interface AnswerShortQuestionProps {
 
 const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const submitHandler = async () => {
-    try {
-      setIsSubmitting(true);
-      // 1. Get PreSignedUrl from the backend
-      const url = await fetch('/api/v1/s3/put-object-url').then(res => res.json()).then(data => data.url);
+  const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/answer-short-question/${questionId}`;
 
-      // 3. Submit the answer to the backend with the S3 Object URL
-      const submitToDb = async (url: string) => {
-        const response = await fetch(`/api/v1/practice/speaking/answer-short-question/${questionId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            audioUrl: url,
-          })
-        })
-        const result = await response.json()
-
-        if (result.success) {
-          alert('Essay submitted and evaluated successfully!')
-        } else {
-          alert(`Error: ${result.message}`)
-        }
-      }
-
-      // 2. Store the audio file to S3 using the PreSignedUrl
-      const s3Response = await fetch(url, {
+  const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+    mutationFn: async (file: File) => {
+      const { url: presignedUrl } = await fetch('/api/v1/s3/put-object-url').then(r => r.json());
+      await fetch(presignedUrl, {
         method: 'PUT',
-        headers: {
-          'Content-Type': audioFile?.type || 'audio/webm',
-        },
-        body: audioFile,
-      })
-        .then(async (res) => {
-          // Extract the object URL by removing query parameters from the presigned URL
-          const objectUrl = url.split('?')[0];
-          await submitToDb(objectUrl);
-        }).catch(err => {
-          console.error("Upload Error:", err);
-        });
-    } catch (error) {
-      console.log('Failed while getting PreSignedUrl or storing the audio or Submitting the Answer');
-    }
-    finally {
-      setIsSubmitting(false);
-    }
-  }
+        headers: { 'Content-Type': file.type || 'audio/webm' },
+        body: file,
+      });
+      const audioUrl = presignedUrl.split('?')[0];
+      const response = await fetch(`/api/v1/practice/speaking/answer-short-question/${questionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioUrl }),
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      alert('Answer submitted successfully!');
+    },
+    onError: (error) => {
+      alert(`Error: ${error.message}`);
+    },
+  });
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6 bg-white rounded-xl shadow-sm border">
@@ -74,7 +55,7 @@ const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps)
 
       <div className="flex justify-end">
         <button
-          onClick={submitHandler}
+          onClick={() => audioFile && submitAnswer(audioFile)}
           disabled={!audioFile || isSubmitting}
           className="px-6 py-2 rounded-lg font-medium
                          bg-blue-600 text-white

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Options {
     id: string
@@ -15,54 +16,42 @@ interface MCMProps {
 
 const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
     const [answer, setAnswer] = useState<string[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/mcm/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/mcm/${passageId}`;
 
-    // Handle option selection (checkbox behavior for multiple selection)
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (ans: string[]) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: ans }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
+
     const handleOptionSelect = (optionId: string) => {
         setAnswer(prevAnswer => {
             if (prevAnswer.includes(optionId)) {
-                // Remove if already selected
                 return prevAnswer.filter(id => id !== optionId)
             } else {
-                // Add if not selected
                 return [...prevAnswer, optionId]
             }
         })
     }
 
-    // Check if an option is selected
     const isOptionSelected = (optionId: string): boolean => {
         return answer.includes(optionId)
-    }
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    answer: answer,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Answer submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        } finally {
-            setIsSubmitting(false);
-        }
     }
 
     return (
@@ -113,7 +102,7 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
                 {/* Submit button */}
                 <div className="flex justify-end">
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => submitAnswer(answer)}
                         disabled={answer.length === 0 || isSubmitting}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     >

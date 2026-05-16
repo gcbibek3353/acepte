@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface FibDragDropProps {
     passageId: string
@@ -11,18 +12,36 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
     const [answer, setAnswer] = useState<{ position: string, index: number }[]>([]);
     const [availableOptions, setAvailableOptions] = useState<string[]>([]);
     const [blankContents, setBlankContents] = useState<{ [key: string]: string }>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDragDrop/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDragDrop/${passageId}`;
 
-    // Fix for SSR hydration issues
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (ans: typeof answer) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: ans }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
+
     useEffect(() => {
         setIsMounted(true);
         setAvailableOptions([...options]);
     }, [options]);
 
-    // Extract blank positions from passage
     const getBlankPositions = () => {
         const matches = passage.match(/\{(\d+)\}/g);
         return matches ? matches.map(match => match.replace(/[{}]/g, '')) : [];
@@ -37,34 +56,28 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
 
         const sourceId = source.droppableId;
         const destinationId = destination.droppableId;
-        const draggedItem = sourceId === 'options' 
-            ? availableOptions[source.index] 
+        const draggedItem = sourceId === 'options'
+            ? availableOptions[source.index]
             : blankContents[sourceId];
 
-        // If dropping into a blank
         if (destinationId !== 'options' && blankPositions.includes(destinationId)) {
             const position = destinationId;
             const optionIndex = options.indexOf(draggedItem);
 
-            // Remove from source
             if (sourceId === 'options') {
                 const newAvailableOptions = [...availableOptions];
                 newAvailableOptions.splice(source.index, 1);
                 setAvailableOptions(newAvailableOptions);
             } else if (blankPositions.includes(sourceId)) {
-                // Moving from one blank to another
                 setBlankContents(prev => ({ ...prev, [sourceId]: '' }));
-                // Remove old answer
                 setAnswer(prev => prev.filter(ans => ans.position !== sourceId));
             }
 
-            // If there's already something in the destination blank, move it back to options
             if (blankContents[position]) {
                 setAvailableOptions(prev => [...prev, blankContents[position]]);
                 setAnswer(prev => prev.filter(ans => ans.position !== position));
             }
 
-            // Add to destination
             setBlankContents(prev => ({ ...prev, [position]: draggedItem }));
             setAnswer(prev => {
                 const filtered = prev.filter(ans => ans.position !== position);
@@ -72,14 +85,11 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
             });
         }
 
-        // If dropping back to options
         if (destinationId === 'options') {
             if (blankPositions.includes(sourceId)) {
-                // Remove from blank
                 setBlankContents(prev => ({ ...prev, [sourceId]: '' }));
                 setAnswer(prev => prev.filter(ans => ans.position !== sourceId));
-                
-                // Add back to options
+
                 const newAvailableOptions = [...availableOptions];
                 newAvailableOptions.splice(destination.index, 0, draggedItem);
                 setAvailableOptions(newAvailableOptions);
@@ -92,7 +102,6 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
 
         blankPositions.forEach(position => {
             const placeholder = `{${position}}`;
-            const blankContent = blankContents[position] || '';
             const blankElement = `<BLANK_${position}>`;
             modifiedPassage = modifiedPassage.replace(placeholder, blankElement);
         });
@@ -103,11 +112,11 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
             <div className="text-lg leading-relaxed">
                 {parts.map((part, index) => {
                     const blankMatch = part.match(/<BLANK_(\d+)>/);
-                    
+
                     if (blankMatch) {
                         const position = blankMatch[1];
                         const content = blankContents[position];
-                        
+
                         return (
                             <Droppable key={`blank-${position}`} droppableId={position} isDropDisabled={false}>
                                 {(provided, snapshot) => (
@@ -147,40 +156,12 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                             </Droppable>
                         );
                     }
-                    
+
                     return <span key={index}>{part}</span>;
                 })}
             </div>
         );
     };
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    answer: answer,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Answer submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
 
     if (!isMounted) {
         return <div>Loading...</div>
@@ -214,9 +195,9 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                                     }`}
                                 >
                                     {availableOptions.map((option, index) => (
-                                        <Draggable 
-                                            key={`option-${option}-${index}`} 
-                                            draggableId={`option-${option}-${index}`} 
+                                        <Draggable
+                                            key={`option-${option}-${index}`}
+                                            draggableId={`option-${option}-${index}`}
                                             index={index}
                                             isDragDisabled={false}
                                         >
@@ -246,7 +227,7 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                 {/* Submit button */}
                 <div className="flex justify-end">
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => submitAnswer(answer)}
                         disabled={answer.length === 0 || isSubmitting}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     >

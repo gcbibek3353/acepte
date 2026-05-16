@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface MCSProps {
     passageId: string
@@ -8,41 +9,32 @@ interface MCSProps {
 
 const MCS = ({ passageId, passage, options }: MCSProps) => {
     const [answer, setAnswer] = useState<number | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/mcs/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/mcs/${passageId}`;
 
-    // Handle option selection
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (correctOptionIndex: number) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correctOptionIndex }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
+
     const handleOptionSelect = (index: number) => {
         setAnswer(index);
-    }
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    correctOptionIndex: answer,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Answer submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        } finally {
-            setIsSubmitting(false);
-        }
     }
 
     return (
@@ -94,7 +86,7 @@ const MCS = ({ passageId, passage, options }: MCSProps) => {
                 {/* Submit button */}
                 <div className="flex justify-end">
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => answer !== null && submitAnswer(answer)}
                         disabled={answer === null || isSubmitting}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     >

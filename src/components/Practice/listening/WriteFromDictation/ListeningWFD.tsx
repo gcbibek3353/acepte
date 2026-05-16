@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PlayAudio from '../PlayAudio'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface ListeningWFDProps {
     audioUrl: string
@@ -9,49 +10,38 @@ interface ListeningWFDProps {
 const ListeningWFD = ({ audioUrl, passageId }: ListeningWFDProps) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const queryClient = useQueryClient();
 
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/writeFromDictation/${passageId}`;
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/writeFromDictation/${passageId}`;
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (text: string) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: text }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            setEssay('');
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     useEffect(() => {
         const words = essay.trim().split(/\s+/).filter(word => word.length > 0)
         setWordCount(words.length)
     }, [essay])
 
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    answer: essay,
-                })
-            })
-
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Essay submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-                setEssay('')
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting essay:', error)
-            alert('Failed to submit essay. Please try again.')
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
-
     return (
         <div>
-
             <PlayAudio audioUrl={audioUrl} />
 
             <div className="mb-4">
@@ -69,7 +59,7 @@ const ListeningWFD = ({ audioUrl, passageId }: ListeningWFDProps) => {
                     Word Count: {wordCount}
                 </span>
                 <button
-                    onClick={handleSubmit}
+                    onClick={() => submitAnswer(essay)}
                     disabled={isSubmitting || wordCount === 0}
                     className="px-6 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 >

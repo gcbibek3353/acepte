@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 interface UseFetchReturn<T> {
   data: T | null
@@ -7,40 +7,21 @@ interface UseFetchReturn<T> {
 }
 
 const useFetch = <T = any>(url: string | null): UseFetchReturn<T> => {
-  const [data, setData] = useState<T | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data, isLoading, error } = useQuery<T>({
+    queryKey: [url],
+    queryFn: async () => {
+      const response = await fetch(url!)
+      if (!response.ok) throw new Error(`Error: ${response.status}`)
+      return response.json()
+    },
+    enabled: !!url,
+  })
 
-  useEffect(() => {
-    if (!url) {
-      setLoading(false)
-      return
-    }
-
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        const response = await fetch(url)
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-        
-        const result = await response.json()
-        setData(result)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [url])
-
-  return { data, loading, error }
+  return {
+    data: data ?? null,
+    loading: isLoading,
+    error: error ? (error instanceof Error ? error.message : 'Something went wrong') : null,
+  }
 }
 
-export default useFetch;
+export default useFetch

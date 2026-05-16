@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import PlayAudio from '../PlayAudio';
+import PlayAudio from '../PlayAudio'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface SummarizeSpokenTextComponentProps {
     passageId: string;
@@ -9,45 +10,35 @@ interface SummarizeSpokenTextComponentProps {
 const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTextComponentProps) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText/${passageId}`;
+
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (text: string) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ summarizedText: text }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            setEssay('');
+            alert('Summary submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     useEffect(() => {
         const words = essay.trim().split(/\s+/).filter(word => word.length > 0)
         setWordCount(words.length)
     }, [essay])
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    summarizedText: essay,
-                })
-            })
-
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Essay submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-                setEssay('')
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting essay:', error)
-            alert('Failed to submit essay. Please try again.')
-        }
-        finally {
-            setIsSubmitting(false);
-        }
-    }
 
     return (
         <div className="space-y-6">
@@ -84,7 +75,7 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
                     </span>
                 </div>
                 <button
-                    onClick={handleSubmit}
+                    onClick={() => submitAnswer(essay)}
                     disabled={wordCount === 0 || isSubmitting}
                     className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >

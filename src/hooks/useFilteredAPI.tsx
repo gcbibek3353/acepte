@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import useFetch from './useFetch';
+import { useQuery } from '@tanstack/react-query';
 
 interface FilterParams {
     page?: number;
@@ -18,7 +18,7 @@ const useFilteredAPI = <T = any>(baseURL: string) => {
         answered: null
     });
 
-    const URL = useMemo(() => {
+    const url = useMemo(() => {
         const fullURL = `${process.env.NEXT_PUBLIC_API_URL}${baseURL}`;
         const params = new URLSearchParams();
 
@@ -29,23 +29,30 @@ const useFilteredAPI = <T = any>(baseURL: string) => {
             params.append('difficulty', queryParams.difficulty);
         }
         if (queryParams.bookmarked !== null) {
-            params.append('bookmarked', queryParams.bookmarked.toString());
+            params.append('bookmarked', queryParams.bookmarked!.toString());
         }
         if (queryParams.answered !== null) {
-            params.append('answered', queryParams.answered.toString());
+            params.append('answered', queryParams.answered!.toString());
         }
 
         return `${fullURL}?${params.toString()}`;
     }, [baseURL, queryParams]);
 
-    const { data: response, loading, error } = useFetch<{ data: T }>(URL);
+    const { data: response, isLoading, error } = useQuery<{ data: T }>({
+        queryKey: [baseURL, queryParams],
+        queryFn: async () => {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            return res.json();
+        },
+    });
 
     return {
         data: response?.data,
-        loading,
-        error,
+        loading: isLoading,
+        error: error ? (error instanceof Error ? error.message : 'Something went wrong') : null,
         queryParams,
-        setQueryParams
+        setQueryParams,
     };
 };
 

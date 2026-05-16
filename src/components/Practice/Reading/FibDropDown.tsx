@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Blanks {
   id: string
@@ -19,17 +20,34 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
     position: string,
     index: string
   }[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDropDown/${passageId}`
+  const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDropDown/${passageId}`;
 
-  // Handle dropdown selection
+  const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+    mutationFn: async (ans: typeof answer) => {
+      const response = await fetch(detailUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer: ans }),
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      alert('Answer submitted successfully!');
+    },
+    onError: (error) => {
+      alert(`Error: ${error.message}`);
+    },
+  });
+
   const handleOptionSelect = (blankPosition: number, selectedIndex: number) => {
     setAnswer(prevAnswer => {
-      // Remove existing answer for this position if any
       const filteredAnswers = prevAnswer.filter(ans => ans.position !== blankPosition.toString())
 
-      // Add new answer (only if an actual option is selected, not the placeholder)
       if (selectedIndex >= 0) {
         return [...filteredAnswers, {
           position: blankPosition.toString(),
@@ -41,13 +59,11 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
     })
   }
 
-  // Get selected index for a specific position
   const getSelectedIndex = (position: number): number => {
     const foundAnswer = answer.find(ans => ans.position === position.toString())
     return foundAnswer ? parseInt(foundAnswer.index) : -1
   }
 
-  // Render passage with dropdowns
   const renderPassageWithDropdowns = () => {
     if (!blanks || blanks.length === 0) {
       return <p className="text-gray-600">{passage}</p>
@@ -55,19 +71,14 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
 
     let modifiedPassage = passage
 
-    // Sort blanks by position to replace them in correct order
     const sortedBlanks = [...blanks].sort((a, b) => a.position - b.position)
 
-    // Replace each placeholder with dropdown (in reverse order to maintain positions)
     sortedBlanks.reverse().forEach(blank => {
       const placeholder = `{${blank.position}}`
-      const selectedIndex = getSelectedIndex(blank.position)
-
       const dropdown = `<SELECT_${blank.position}>`
       modifiedPassage = modifiedPassage.replace(placeholder, dropdown)
     })
 
-    // Split the passage and insert actual dropdowns
     const parts = modifiedPassage.split(/(<SELECT_\d+>)/)
 
     return (
@@ -109,35 +120,6 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
     )
   }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          answer: answer,
-        })
-      })
-      const result = await response.json()
-
-      if (result.success) {
-        alert('Answer submitted and evaluated successfully!')
-        console.log('Evaluation result:', result.data)
-      } else {
-        alert(`Error: ${result.message}`)
-      }
-    } catch (error) {
-      console.error('Error submitting answer:', error)
-      alert('Failed to submit answer. Please try again.')
-    }
-    finally {
-      setIsSubmitting(false);
-    }
-  }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -153,7 +135,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
         {/* Submit button */}
         <div className="mt-6 flex justify-end">
           <button
-            onClick={handleSubmit}
+            onClick={() => submitAnswer(answer)}
             disabled={answer.length === 0 || isSubmitting}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >

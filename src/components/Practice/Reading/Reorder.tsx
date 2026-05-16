@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Paragraph {
     id: string
@@ -16,27 +17,43 @@ interface ReorderProps {
 const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
     const [answer, setAnswer] = useState<string[]>([]);
     const [orderedParagraphs, setOrderedParagraphs] = useState<Paragraph[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/reorder/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/reorder/${passageId}`;
 
-    // Fix for SSR hydration issues with react-beautiful-dnd
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (userAnswer: string[]) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userAnswer }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    // Initialize with shuffled paragraphs
     useEffect(() => {
         if (paragraphs && paragraphs.length > 0) {
-            // Shuffle the paragraphs to randomize initial order
             const shuffled = [...paragraphs].sort(() => Math.random() - 0.5);
             setOrderedParagraphs(shuffled);
             setAnswer(shuffled.map(p => p.id));
         }
     }, [paragraphs]);
 
-    // Handle drag end
     const handleDragEnd = (result: DropResult) => {
         if (!result.destination) return;
 
@@ -47,34 +64,6 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
         setOrderedParagraphs(items);
         setAnswer(items.map(p => p.id));
     };
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userAnswer: answer,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Answer submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
 
     if (!paragraphs || paragraphs.length === 0) {
         return <div className="text-center text-gray-500">No paragraphs available</div>
@@ -87,7 +76,6 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                     Re-order Paragraphs
                 </h2>
 
-                {/* Only render DragDropContext after component is mounted */}
                 {isMounted ? (
                     <DragDropContext onDragEnd={handleDragEnd}>
                         <Droppable droppableId="paragraphs" isDropDisabled={false}>
@@ -96,15 +84,15 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                     className={`space-y-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
-                                        snapshot.isDraggingOver 
-                                            ? 'border-blue-400 bg-blue-50' 
+                                        snapshot.isDraggingOver
+                                            ? 'border-blue-400 bg-blue-50'
                                             : 'border-gray-300 bg-gray-50'
                                     }`}
                                 >
                                     {orderedParagraphs.map((paragraph, index) => (
-                                        <Draggable 
-                                            key={paragraph.id} 
-                                            draggableId={paragraph.id} 
+                                        <Draggable
+                                            key={paragraph.id}
+                                            draggableId={paragraph.id}
                                             index={index}
                                             isDragDisabled={false}
                                         >
@@ -147,7 +135,6 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                         </Droppable>
                     </DragDropContext>
                 ) : (
-                    // Show static content while mounting
                     <div className="space-y-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
                         {orderedParagraphs.map((paragraph, index) => (
                             <div
@@ -174,7 +161,7 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                 {/* Submit button */}
                 <div className="mt-6 flex justify-end">
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => submitAnswer(answer)}
                         disabled={answer.length === 0 || isSubmitting || !isMounted}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     >

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import PlayAudio from '../PlayAudio'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface ListeningFIBProps {
     audioUrl: string
@@ -9,12 +10,32 @@ interface ListeningFIBProps {
 
 const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
     const [answers, setAnswers] = useState<string[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/fillTheBlanks/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/fillTheBlanks/${passageId}`;
+
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (ans: string[]) => {
+            const response = await fetch(detailUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: ans }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     const handleInputChange = (placeholder: string, value: string) => {
-        const index = parseInt(placeholder) - 1; // Convert 1-based to 0-based index
+        const index = parseInt(placeholder) - 1;
         setAnswers(prev => {
             const newAnswers = [...prev];
             newAnswers[index] = value;
@@ -25,15 +46,13 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
     const renderPassageWithInputs = () => {
         const placeholderRegex = /\{(\d+)\}/g;
         const parts = passage.split(placeholderRegex);
-        
+
         return parts.map((part, index) => {
             if (index % 2 === 0) {
-                // Regular text
                 return <span key={index}>{part}</span>;
             } else {
-                // Placeholder number
                 const placeholderNum = part;
-                const arrayIndex = parseInt(placeholderNum) - 1; // Convert to 0-based index
+                const arrayIndex = parseInt(placeholderNum) - 1;
                 return (
                     <input
                         key={index}
@@ -47,35 +66,6 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
             }
         });
     };
-
-    const handlSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    answer: answers,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Essay submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        }
-        finally {
-            setIsSubmitting(false);
-        }
-    }
 
     return (
         <div className="space-y-6">
@@ -91,7 +81,7 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
             {/* Submit Button */}
             <div className="flex justify-end">
                 <button
-                    onClick={handlSubmit}
+                    onClick={() => submitAnswer(answers)}
                     disabled={isSubmitting || answers.filter(answer => answer && answer.trim()).length === 0}
                     className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >

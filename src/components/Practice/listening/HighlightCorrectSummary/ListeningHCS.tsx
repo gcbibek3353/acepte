@@ -1,5 +1,6 @@
 import React from 'react'
 import PlayAudio from '../PlayAudio'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface ListeningHCSProps {
     audioUrl: string
@@ -10,38 +11,29 @@ interface ListeningHCSProps {
 
 const ListeningHCS = ({ audioUrl, questionText, options, passageId }: ListeningHCSProps) => {
     const [answerIndex, setAnswerIndex] = React.useState<number | null>(null);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const queryClient = useQueryClient();
 
-    const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/highlightCorrectSummary/${passageId}`
+    const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/highlightCorrectSummary/${passageId}`;
 
-    const handlSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(URL, {
+    const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
+        mutationFn: async (answerIdx: number) => {
+            const response = await fetch(detailUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    answerIndex: answerIndex,
-                })
-            })
-            const result = await response.json()
-
-            if (result.success) {
-                alert('Essay submitted and evaluated successfully!')
-                console.log('Evaluation result:', result.data)
-            } else {
-                alert(`Error: ${result.message}`)
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error)
-            alert('Failed to submit answer. Please try again.')
-        }
-        finally {
-            setIsSubmitting(false);
-        }
-    }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answerIndex: answerIdx }),
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            alert('Answer submitted successfully!');
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     return (
         <div className="space-y-6">
@@ -50,7 +42,7 @@ const ListeningHCS = ({ audioUrl, questionText, options, passageId }: ListeningH
             {/* Question Text */}
             <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-6">{questionText}</h3>
-                
+
                 {/* Options */}
                 <div className="space-y-4">
                     {options.map((option, index) => (
@@ -74,7 +66,7 @@ const ListeningHCS = ({ audioUrl, questionText, options, passageId }: ListeningH
             {/* Submit Button */}
             <div className="flex justify-end">
                 <button
-                    onClick={handlSubmit}
+                    onClick={() => answerIndex !== null && submitAnswer(answerIndex)}
                     disabled={isSubmitting || answerIndex === null}
                     className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
