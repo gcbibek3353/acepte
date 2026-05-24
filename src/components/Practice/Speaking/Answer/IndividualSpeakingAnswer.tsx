@@ -12,78 +12,68 @@ interface SpeakingAnswerProps {
   audioUrl: string
 }
 
-const IndividualSpeakingAnswer = (props: SpeakingAnswerProps) => {
-  const { questionId, questionTitle, audioUrl, contentScore, oralFluencyScore, pronunciationScore, totalScore } = props;
+const scoreRows = [
+  { label: 'Content', key: 'contentScore' as const, max: 10 },
+  { label: 'Pronunciation', key: 'pronunciationScore' as const, max: 10 },
+  { label: 'Oral Fluency', key: 'oralFluencyScore' as const, max: 10 },
+] as const
 
-   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm border p-6">
-      {/* heading */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium text-gray-800">
-          #{questionId} Score Info
-        </h2>
+const IndividualSpeakingAnswer = (props: SpeakingAnswerProps) => {
+  const { audioUrl, contentScore, oralFluencyScore, pronunciationScore, totalScore } = props;
+  const scores = { contentScore, pronunciationScore, oralFluencyScore };
+
+  const percentage = totalScore ? Math.round((totalScore / 30) * 100) : 0;
+  const circumference = 2 * Math.PI * 15.9155;
+  const dashOffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="rounded-lg border border-border overflow-hidden">
+      <div className="px-4 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Score</span>
+        <span className="text-sm font-bold text-primary">{totalScore ?? 0} / 30</span>
       </div>
 
-      {/* content  */}
-      <div className="space-y-6">
-        {/* chart section */}
-        <div className="flex items-start gap-6">
-          {/* circular progress */}
-          <div className="relative">
-            <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
-              {/* Background circle */}
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#e5e7eb"
-                strokeWidth="2"
-              />
-              {/* Progress circle */}
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#14b8a6"
-                strokeWidth="2"
-                strokeDasharray={`${(totalScore / 30) * 100}, 100`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-lg font-bold text-gray-800">{totalScore && totalScore.toFixed(2)}/30</div>
-              <div className="text-sm text-teal-600 font-medium">Total</div>
-            </div>
-          </div>
-
-          {/* scores breakdown */}
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Content :</span>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{contentScore}/10</span>
-                <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Pronun :</span>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{pronunciationScore}/10</span>
-                <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Fluency :</span>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{oralFluencyScore}/10</span>
-                <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              </div>
-            </div>
+      <div className="p-4 flex items-start gap-6">
+        <div className="relative shrink-0">
+          <svg className="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-muted/50"
+            />
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={`${dashOffset}`}
+              strokeLinecap="round"
+              className="text-primary transition-all duration-500"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-sm font-bold text-foreground">{totalScore ?? 0}</span>
+            <span className="text-xs text-muted-foreground">/ 30</span>
           </div>
         </div>
 
-        {/* audio player */}
-        <div className="pt-4 border-t border-gray-100">
-          <PlayAudio audioUrl={audioUrl} />
+        <div className="flex-1 divide-y divide-border">
+          {scoreRows.map(({ label, key, max }) => (
+            <div key={key} className="flex items-center justify-between py-2 text-sm">
+              <span className="text-muted-foreground">{label}</span>
+              <span className="font-semibold text-foreground tabular-nums">
+                {scores[key] ?? 0} / {max}
+              </span>
+            </div>
+          ))}
         </div>
+      </div>
+
+      <div className="px-4 pb-4 pt-1 border-t border-border">
+        <PlayAudio audioUrl={audioUrl} />
       </div>
     </div>
   )

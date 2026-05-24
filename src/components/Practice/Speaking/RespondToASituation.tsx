@@ -38,12 +38,7 @@ const RespondToASituation = ({ audioUrl, questionId }: RespondToASituationProps)
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 bg-white rounded-xl shadow-sm border">
-
-      <h1 className="text-xl font-semibold text-gray-800">
-        Respond to a situation
-      </h1>
-
+    <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
       <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
@@ -52,12 +47,9 @@ const RespondToASituation = ({ audioUrl, questionId }: RespondToASituationProps)
         <button
           onClick={() => audioFile && submitAnswer(audioFile)}
           disabled={!audioFile || isSubmitting}
-          className="px-6 py-2 rounded-lg font-medium
-                         bg-blue-600 text-white
-                         hover:bg-blue-700
-                         disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          {isSubmitting ? 'Submitting...' : ' Submit Answer'}
+          {isSubmitting ? 'Submitting…' : 'Submit Answer'}
         </button>
       </div>
     </div>

@@ -41,14 +41,9 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 bg-white rounded-xl shadow-sm border">
-
-      <h1 className="text-xl font-semibold text-gray-800">
-        Read Aloud
-      </h1>
-
-      <div className="p-4 bg-gray-50 border rounded-lg text-gray-700 leading-relaxed">
-        {passage}
+    <div className="space-y-6">
+      <div className="bg-muted/30 border border-border rounded-lg p-6">
+        <p className="text-base leading-relaxed text-foreground">{passage}</p>
       </div>
 
       <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
@@ -57,12 +52,9 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
         <button
           onClick={() => audioFile && submitAnswer(audioFile)}
           disabled={!audioFile || isSubmitting}
-          className="px-6 py-2 rounded-lg font-medium
-                     bg-blue-600 text-white
-                     hover:bg-blue-700
-                     disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          {isSubmitting ? 'Submitting...' : ' Submit Answer'}
+          {isSubmitting ? 'Submitting…' : 'Submit Answer'}
         </button>
       </div>
     </div>
