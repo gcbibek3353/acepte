@@ -50,65 +50,52 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
         })
     }
 
-    const isOptionSelected = (optionId: string): boolean => {
-        return answer.includes(optionId)
-    }
-
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                    Multiple Choice - Multiple Select
-                </h2>
-
-                {/* Passage */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                    <div className="text-lg leading-relaxed text-gray-800 whitespace-pre-wrap">
-                        {passage}
-                    </div>
+        <div className="space-y-6">
+            <div className="bg-muted/30 border border-border rounded-lg p-6">
+                <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
+                    {passage}
                 </div>
+            </div>
 
-                {/* Options */}
-                <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Select all correct options:</h3>
-                    <div className="space-y-3">
-                        {options.map((option, index) => (
-                            <div
-                                key={option.id}
-                                className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
-                                    isOptionSelected(option.id)
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50'
-                                }`}
-                                onClick={() => handleOptionSelect(option.id)}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={isOptionSelected(option.id)}
-                                    onChange={() => handleOptionSelect(option.id)}
-                                    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                />
-                                <div className="flex-1">
-                                    <span className="text-sm font-medium text-gray-600 mr-2">
-                                        {String.fromCharCode(65 + index)}.
-                                    </span>
-                                    <span className="text-gray-800">{option.text}</span>
-                                </div>
+            <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">Select all correct options:</p>
+                <div className="space-y-3">
+                    {options.map((option, index) => (
+                        <label
+                            key={option.id}
+                            className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-colors ${
+                                answer.includes(option.id)
+                                    ? 'border-primary/40 bg-primary/5'
+                                    : 'border-border hover:bg-muted/50'
+                            }`}
+                            onClick={() => handleOptionSelect(option.id)}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={answer.includes(option.id)}
+                                onChange={() => handleOptionSelect(option.id)}
+                                className="mt-0.5 w-4 h-4 accent-primary rounded shrink-0"
+                            />
+                            <div className="flex-1 text-sm text-foreground leading-relaxed">
+                                <span className="font-medium text-muted-foreground mr-1.5">
+                                    {String.fromCharCode(65 + index)}.
+                                </span>
+                                {option.text}
                             </div>
-                        ))}
-                    </div>
+                        </label>
+                    ))}
                 </div>
+            </div>
 
-                {/* Submit button */}
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => submitAnswer(answer)}
-                        disabled={answer.length === 0 || isSubmitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                        {isSubmitting ? 'Submitting...' : `Submit Answer (${answer.length} selected)`}
-                    </button>
-                </div>
+            <div className="flex justify-end">
+                <button
+                    onClick={() => submitAnswer(answer)}
+                    disabled={answer.length === 0 || isSubmitting}
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                    {isSubmitting ? 'Submitting…' : `Submit Answer (${answer.length} selected)`}
+                </button>
             </div>
         </div>
     )

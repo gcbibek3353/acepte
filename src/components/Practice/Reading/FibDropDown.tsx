@@ -47,14 +47,9 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
   const handleOptionSelect = (blankPosition: number, selectedIndex: number) => {
     setAnswer(prevAnswer => {
       const filteredAnswers = prevAnswer.filter(ans => ans.position !== blankPosition.toString())
-
       if (selectedIndex >= 0) {
-        return [...filteredAnswers, {
-          position: blankPosition.toString(),
-          index: selectedIndex.toString()
-        }]
+        return [...filteredAnswers, { position: blankPosition.toString(), index: selectedIndex.toString() }]
       }
-
       return filteredAnswers
     })
   }
@@ -66,34 +61,25 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
 
   const renderPassageWithDropdowns = () => {
     if (!blanks || blanks.length === 0) {
-      return <p className="text-gray-600">{passage}</p>
+      return <p className="text-foreground text-base leading-relaxed">{passage}</p>
     }
 
     let modifiedPassage = passage
-
     const sortedBlanks = [...blanks].sort((a, b) => a.position - b.position)
-
     sortedBlanks.reverse().forEach(blank => {
-      const placeholder = `{${blank.position}}`
-      const dropdown = `<SELECT_${blank.position}>`
-      modifiedPassage = modifiedPassage.replace(placeholder, dropdown)
+      modifiedPassage = modifiedPassage.replace(`{${blank.position}}`, `<SELECT_${blank.position}>`)
     })
-
     const parts = modifiedPassage.split(/(<SELECT_\d+>)/)
 
     return (
-      <div className="text-lg leading-relaxed">
+      <div className="text-base leading-relaxed text-foreground">
         {parts.map((part, index) => {
           const selectMatch = part.match(/<SELECT_(\d+)>/)
-
           if (selectMatch) {
             const position = parseInt(selectMatch[1])
             const blank = blanks.find(b => b.position === position)
-
             if (!blank) return null
-
             const selectedIndex = getSelectedIndex(position)
-
             return (
               <select
                 key={`dropdown-${position}`}
@@ -102,9 +88,9 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
                   const value = e.target.value
                   handleOptionSelect(position, value === '' ? -1 : parseInt(value))
                 }}
-                className="mx-1 px-2 py-1 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="mx-1 px-2 py-1 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <option value="">Select...</option>
+                <option value="">Select…</option>
                 {blank.options.map((option, optionIndex) => (
                   <option key={optionIndex} value={optionIndex}>
                     {option}
@@ -113,7 +99,6 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
               </select>
             )
           }
-
           return <span key={index}>{part}</span>
         })}
       </div>
@@ -121,27 +106,22 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Fill in the Blanks - Dropdown
-        </h2>
+    <div className="space-y-6">
+      <div className="bg-muted/30 border border-border rounded-lg p-6">
+        {renderPassageWithDropdowns()}
+      </div>
 
-        {/* Passage with dropdowns */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-          {renderPassageWithDropdowns()}
-        </div>
-
-        {/* Submit button */}
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={() => submitAnswer(answer)}
-            disabled={answer.length === 0 || isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Submitting...' : `Submit Answer (${answer.length}/${blanks?.length || 0})`}
-          </button>
-        </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">
+          {answer.length} of {blanks?.length || 0} blanks filled
+        </span>
+        <button
+          onClick={() => submitAnswer(answer)}
+          disabled={answer.length === 0 || isSubmitting}
+          className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+        >
+          {isSubmitting ? 'Submitting…' : 'Submit Answer'}
+        </button>
       </div>
     </div>
   )

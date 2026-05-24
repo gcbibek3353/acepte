@@ -56,118 +56,92 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
 
     const handleDragEnd = (result: DropResult) => {
         if (!result.destination) return;
-
         const items = Array.from(orderedParagraphs);
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
-
         setOrderedParagraphs(items);
         setAnswer(items.map(p => p.id));
     };
 
     if (!paragraphs || paragraphs.length === 0) {
-        return <div className="text-center text-gray-500">No paragraphs available</div>
+        return <p className="text-center text-muted-foreground text-sm">No paragraphs available.</p>
     }
 
+    const ParagraphCard = ({ paragraph, index }: { paragraph: Paragraph; index: number }) => (
+        <div className="flex items-start gap-3">
+            <div className="shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                {index + 1}
+            </div>
+            <p className="flex-1 text-sm text-foreground leading-relaxed pt-0.5">
+                {paragraph.text}
+            </p>
+            <svg className="shrink-0 w-4 h-4 text-muted-foreground mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+            </svg>
+        </div>
+    );
+
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                    Re-order Paragraphs
-                </h2>
-
-                {isMounted ? (
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId="paragraphs" isDropDisabled={false}>
-                            {(provided, snapshot) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className={`space-y-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
-                                        snapshot.isDraggingOver
-                                            ? 'border-blue-400 bg-blue-50'
-                                            : 'border-gray-300 bg-gray-50'
-                                    }`}
-                                >
-                                    {orderedParagraphs.map((paragraph, index) => (
-                                        <Draggable
-                                            key={paragraph.id}
-                                            draggableId={paragraph.id}
-                                            index={index}
-                                            isDragDisabled={false}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    className={`p-4 bg-white border rounded-lg cursor-move transition-all duration-200 ${
-                                                        snapshot.isDragging
-                                                            ? 'shadow-lg border-blue-400 bg-blue-50 rotate-2'
-                                                            : 'shadow-sm border-gray-300 hover:border-gray-400 hover:shadow-md'
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start space-x-3">
-                                                        <div className="flex-shrink-0">
-                                                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
-                                                                {index + 1}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <p className="text-gray-800 leading-relaxed">
-                                                                {paragraph.text}
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex-shrink-0 text-gray-400">
-                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/>
-                                                                <path d="M4 6L2.59 7.41 7.17 12l-4.58 4.59L4 18l6-6-6-6z"/>
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
-                ) : (
-                    <div className="space-y-4 min-h-[400px] p-4 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
-                        {orderedParagraphs.map((paragraph, index) => (
+        <div className="space-y-6">
+            {isMounted ? (
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="paragraphs" isDropDisabled={false}>
+                        {(provided, snapshot) => (
                             <div
-                                key={paragraph.id}
-                                className="p-4 bg-white border border-gray-300 rounded-lg"
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                className={`space-y-3 min-h-[300px] p-4 rounded-lg border-2 border-dashed transition-colors ${
+                                    snapshot.isDraggingOver
+                                        ? 'border-primary/50 bg-primary/5'
+                                        : 'border-border bg-muted/20'
+                                }`}
                             >
-                                <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0">
-                                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
-                                            {index + 1}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-gray-800 leading-relaxed">
-                                            {paragraph.text}
-                                        </p>
-                                    </div>
-                                </div>
+                                {orderedParagraphs.map((paragraph, index) => (
+                                    <Draggable
+                                        key={paragraph.id}
+                                        draggableId={paragraph.id}
+                                        index={index}
+                                        isDragDisabled={false}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className={`p-4 bg-card border rounded-lg cursor-move transition-all ${
+                                                    snapshot.isDragging
+                                                        ? 'shadow-md border-primary/40 bg-primary/5 rotate-1'
+                                                        : 'shadow-sm border-border hover:border-primary/30 hover:shadow-md'
+                                                }`}
+                                            >
+                                                <ParagraphCard paragraph={paragraph} index={index} />
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
                             </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Submit button */}
-                <div className="mt-6 flex justify-end">
-                    <button
-                        onClick={() => submitAnswer(answer)}
-                        disabled={answer.length === 0 || isSubmitting || !isMounted}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-                    </button>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+            ) : (
+                <div className="space-y-3 min-h-[300px] p-4 rounded-lg border-2 border-dashed border-border bg-muted/20">
+                    {orderedParagraphs.map((paragraph, index) => (
+                        <div key={paragraph.id} className="p-4 bg-card border border-border rounded-lg shadow-sm">
+                            <ParagraphCard paragraph={paragraph} index={index} />
+                        </div>
+                    ))}
                 </div>
+            )}
+
+            <div className="flex justify-end">
+                <button
+                    onClick={() => submitAnswer(answer)}
+                    disabled={answer.length === 0 || isSubmitting || !isMounted}
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                    {isSubmitting ? 'Submitting…' : 'Submit Answer'}
+                </button>
             </div>
         </div>
     )

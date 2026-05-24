@@ -51,7 +51,6 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
 
     const handleDragEnd = (result: DropResult) => {
         const { source, destination } = result;
-
         if (!destination) return;
 
         const sourceId = source.droppableId;
@@ -89,7 +88,6 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
             if (blankPositions.includes(sourceId)) {
                 setBlankContents(prev => ({ ...prev, [sourceId]: '' }));
                 setAnswer(prev => prev.filter(ans => ans.position !== sourceId));
-
                 const newAvailableOptions = [...availableOptions];
                 newAvailableOptions.splice(destination.index, 0, draggedItem);
                 setAvailableOptions(newAvailableOptions);
@@ -99,36 +97,30 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
 
     const renderPassageWithBlanks = () => {
         let modifiedPassage = passage;
-
         blankPositions.forEach(position => {
-            const placeholder = `{${position}}`;
-            const blankElement = `<BLANK_${position}>`;
-            modifiedPassage = modifiedPassage.replace(placeholder, blankElement);
+            modifiedPassage = modifiedPassage.replace(`{${position}}`, `<BLANK_${position}>`);
         });
-
         const parts = modifiedPassage.split(/(<BLANK_\d+>)/);
 
         return (
-            <div className="text-lg leading-relaxed">
+            <div className="text-base leading-relaxed text-foreground">
                 {parts.map((part, index) => {
                     const blankMatch = part.match(/<BLANK_(\d+)>/);
-
                     if (blankMatch) {
                         const position = blankMatch[1];
                         const content = blankContents[position];
-
                         return (
                             <Droppable key={`blank-${position}`} droppableId={position} isDropDisabled={false}>
                                 {(provided, snapshot) => (
                                     <span
                                         ref={provided.innerRef}
                                         {...provided.droppableProps}
-                                        className={`inline-block min-w-[120px] min-h-[40px] mx-1 px-3 py-2 border-2 border-dashed rounded-lg transition-colors ${
+                                        className={`inline-block min-w-[110px] min-h-[36px] mx-1 px-3 py-1.5 border-2 border-dashed rounded-md transition-colors ${
                                             snapshot.isDraggingOver
-                                                ? 'border-blue-400 bg-blue-50'
+                                                ? 'border-primary/50 bg-primary/5'
                                                 : content
-                                                    ? 'border-green-400 bg-green-50'
-                                                    : 'border-gray-300 bg-gray-50'
+                                                    ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20'
+                                                    : 'border-border bg-muted/30'
                                         }`}
                                     >
                                         {content && (
@@ -138,8 +130,8 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
-                                                        className={`inline-block px-2 py-1 bg-blue-100 border border-blue-300 rounded cursor-move ${
-                                                            snapshot.isDragging ? 'opacity-50' : ''
+                                                        className={`inline-block px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-sm rounded cursor-move font-medium ${
+                                                            snapshot.isDragging ? 'opacity-60' : ''
                                                         }`}
                                                     >
                                                         {content}
@@ -148,7 +140,7 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                                             </Draggable>
                                         )}
                                         {!content && (
-                                            <span className="text-gray-400 text-sm">Drop here</span>
+                                            <span className="text-muted-foreground text-xs">drop here</span>
                                         )}
                                         {provided.placeholder}
                                     </span>
@@ -156,7 +148,6 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
                             </Droppable>
                         );
                     }
-
                     return <span key={index}>{part}</span>;
                 })}
             </div>
@@ -164,76 +155,72 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
     };
 
     if (!isMounted) {
-        return <div>Loading...</div>
+        return (
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Loading…
+            </div>
+        )
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                    Fill in the Blanks - Drag and Drop
-                </h2>
-
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    {/* Passage with droppable blanks */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-                        {renderPassageWithBlanks()}
-                    </div>
-
-                    {/* Available options */}
-                    <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4">Available Words:</h3>
-                        <Droppable droppableId="options" direction="horizontal" isDropDisabled={false}>
-                            {(provided, snapshot) => (
-                                <div
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={`flex flex-wrap gap-3 p-4 border-2 border-dashed rounded-lg min-h-[100px] transition-colors ${
-                                        snapshot.isDraggingOver
-                                            ? 'border-blue-400 bg-blue-50'
-                                            : 'border-gray-300 bg-gray-50'
-                                    }`}
-                                >
-                                    {availableOptions.map((option, index) => (
-                                        <Draggable
-                                            key={`option-${option}-${index}`}
-                                            draggableId={`option-${option}-${index}`}
-                                            index={index}
-                                            isDragDisabled={false}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    className={`px-3 py-2 bg-white border border-gray-300 rounded-lg cursor-move transition-all duration-200 ${
-                                                        snapshot.isDragging
-                                                            ? 'shadow-lg opacity-50 rotate-2'
-                                                            : 'hover:shadow-md hover:border-gray-400'
-                                                    }`}
-                                                >
-                                                    {option}
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-                    </div>
-                </DragDropContext>
-
-                {/* Submit button */}
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => submitAnswer(answer)}
-                        disabled={answer.length === 0 || isSubmitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                        {isSubmitting ? 'Submitting...' : `Submit Answer (${answer.length} filled)`}
-                    </button>
+        <div className="space-y-6">
+            <DragDropContext onDragEnd={handleDragEnd}>
+                <div className="bg-muted/30 border border-border rounded-lg p-6">
+                    {renderPassageWithBlanks()}
                 </div>
+
+                <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-3">Available words:</p>
+                    <Droppable droppableId="options" direction="horizontal" isDropDisabled={false}>
+                        {(provided, snapshot) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`flex flex-wrap gap-2 p-4 border-2 border-dashed rounded-lg min-h-[72px] transition-colors ${
+                                    snapshot.isDraggingOver
+                                        ? 'border-primary/50 bg-primary/5'
+                                        : 'border-border bg-muted/20'
+                                }`}
+                            >
+                                {availableOptions.map((option, index) => (
+                                    <Draggable
+                                        key={`option-${option}-${index}`}
+                                        draggableId={`option-${option}-${index}`}
+                                        index={index}
+                                        isDragDisabled={false}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className={`px-3 py-1.5 bg-card border border-border rounded-md cursor-move text-sm text-foreground transition-all ${
+                                                    snapshot.isDragging
+                                                        ? 'shadow-md opacity-60 border-primary/40'
+                                                        : 'hover:border-primary/40 hover:shadow-sm'
+                                                }`}
+                                            >
+                                                {option}
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </div>
+            </DragDropContext>
+
+            <div className="flex justify-end">
+                <button
+                    onClick={() => submitAnswer(answer)}
+                    disabled={answer.length === 0 || isSubmitting}
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                    {isSubmitting ? 'Submitting…' : `Submit Answer (${answer.length} filled)`}
+                </button>
             </div>
         </div>
     )
