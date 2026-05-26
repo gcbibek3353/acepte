@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { uploadAudioFile } from '@/lib/uploadAudio'
 
 interface Read_AloudProps {
   passage: string;
@@ -17,29 +18,12 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
 
   const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("audio", file);
-      formData.append("subdir", "speaking-read-aloud");
-
-      const uploadResponse = await fetch("/api/v1/s3/upload-audio", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.message || `Upload failed: ${uploadResponse.status}`);
-      }
-
-      const uploadJson = await uploadResponse.json();
-      if (!uploadJson.success || !uploadJson.audioUrl) {
-        throw new Error("Upload response missing audioUrl");
-      }
+      const audioUrl = await uploadAudioFile(file, 'speaking-read-aloud');
 
       const response = await fetch(`/api/v1/practice/speaking/read-aloud/${questionId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioUrl: uploadJson.audioUrl }),
+        body: JSON.stringify({ audioUrl }),
       });
       const result = await response.json();
       if (!response.ok || !result.success) {
