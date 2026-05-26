@@ -65,7 +65,7 @@ const Page = () => {
   const timeLimit = 20 * 60 // 20 minutes in seconds
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error, refetch } = useFetch<ApiResponse>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')
@@ -94,7 +94,7 @@ const Page = () => {
       {/* Timer */}
       <Timer countDownTime={timeLimit} callbackFn={handleTimeExceedHandler} title="Remaining time" />
 
-      <EssayTextArea essayId={essayId} />
+      <EssayTextArea essayId={essayId} onSubmitted={async () => { await refetch() }} />
 
       {/* Answers Section */}
       <WriteEssayAnswer

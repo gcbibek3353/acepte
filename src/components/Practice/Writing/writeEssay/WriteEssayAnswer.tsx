@@ -1,4 +1,4 @@
-import React from 'react'
+import { useMemo, useState } from 'react'
 
 interface AnswerData {
     id: string
@@ -29,129 +29,125 @@ interface WriteEssayAnswerProps {
     questionTitle: string
 }
 
+const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    }) + ' • ' + new Date(dateString).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
 const WriteEssayAnswer = ({ answers, questionId, questionTitle }: WriteEssayAnswerProps) => {
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+    const [selectedAnswer, setSelectedAnswer] = useState<AnswerData | null>(null)
+
+    const sortedAnswers = useMemo(
+        () => [...answers].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        [answers]
+    )
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
-            {/* Header */}
             <div className="border-b pb-4">
                 <h1 className="text-2xl font-semibold text-gray-800">Essay Answers</h1>
                 <p className="text-gray-600 mt-1">Question #{questionId}: {questionTitle}</p>
-                <p className="text-sm text-gray-500 mt-1">{answers.length} answers submitted</p>
+                <p className="text-sm text-gray-500 mt-1">{answers.length} attempt{answers.length === 1 ? '' : 's'} submitted</p>
             </div>
 
-            {/* Answers List */}
-            <div className="space-y-6">
-                {answers.map((answer) => (
-                    <div key={answer.id} className="bg-white rounded-lg border shadow-sm p-6">
-                        {/* User Info and Date */}
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
-                                    {answer.user.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 className="font-medium text-gray-800">{answer.user.name}</h3>
-                                    <p className="text-sm text-gray-500">{answer.user.email}</p>
-                                </div>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                                {formatDate(answer.createdAt)}
-                            </div>
-                        </div>
-
-                        {/* AI Score Section */}
-                        {answer.totalScore !== null && (
-                            <div className="mb-6">
-                                <h4 className="text-lg font-medium text-gray-800 mb-4">AI Score</h4>
-
-                                <div className="overflow-x-auto">
-                                    <table className="w-full border-collapse">
-                                        <thead>
-                                            <tr className="bg-gray-50">
-                                                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Component</th>
-                                                <th className="border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700">Score</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Content</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.contentScore || 0}/3</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Form</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.formScore || 0}/2</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Grammar</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.grammerScore || 0}/2</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Spelling</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.spellingScore || 0}/2</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Vocabulary range</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.vocabScore || 0}/2</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">General linguistic range</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.GLRScore || 0}/2</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm">Development, structure and coherence</td>
-                                                <td className="border border-gray-200 px-4 py-2 text-sm text-center">{answer.DSCScore || 0}/2</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="mt-4 flex items-center justify-between">
-                                    <div className="text-sm">
-                                        <span className="text-gray-600">Max Score: 15, Your Score: </span>
-                                        <span className="font-medium text-red-500">{answer.totalScore}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200">
-                                            Essay V2.0
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Essay Content */}
-                        <div>
-                            <div className="flex justify-between items-center mb-3">
-                                <h4 className="text-lg font-medium text-gray-800">Essay</h4>
-                                <span className="text-sm text-gray-500">Word Count: {answer.wordCount}</span>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4 border">
-                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{answer.answer}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {answers.length === 0 && (
+            {answers.length === 0 ? (
                 <div className="text-center py-12">
                     <div className="text-gray-400 text-lg mb-2">📝</div>
                     <h3 className="text-lg font-medium text-gray-600 mb-2">No answers yet</h3>
                     <p className="text-gray-500">Be the first to submit an answer for this question!</p>
                 </div>
+            ) : (
+                <div className="space-y-3">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg border border-gray-200">
+                        <span>Response</span>
+                        <span className="text-right">Submitted</span>
+                        <span className="text-right">Action</span>
+                    </div>
+
+                    {sortedAnswers.map((answer) => (
+                        <div key={answer.id} className="grid grid-cols-[1fr_auto_auto] gap-4 items-center p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                            <div className="text-sm text-gray-800 break-words whitespace-pre-line max-h-24 overflow-hidden">
+                                {answer.answer || <span className="text-gray-400">No response provided</span>}
+                            </div>
+                            <div className="text-sm text-gray-500 text-right">
+                                {formatDate(answer.createdAt)}
+                            </div>
+                            <div className="text-right">
+                                <button
+                                    onClick={() => setSelectedAnswer(answer)}
+                                    className="inline-flex items-center justify-center rounded-lg border border-teal-500 bg-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                                >
+                                    Score Information
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {selectedAnswer && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-2xl h-[80vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
+                        <div className="flex items-start justify-between border-b border-gray-200 px-6 py-4">
+                            <div>
+                                <h4 className="text-xl font-semibold text-gray-900">Score Information</h4>
+                                <p className="text-sm text-gray-500">Submission on {formatDate(selectedAnswer.createdAt)}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedAnswer(null)}
+                                className="rounded-full bg-gray-100 p-2 text-gray-600 hover:bg-gray-200"
+                                aria-label="Close score details"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="space-y-6 px-6 py-5">
+                            <div className="rounded-2xl border border-gray-200 bg-slate-50 p-4">
+                                <h5 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Submitted Response</h5>
+                                <p className="mt-3 text-sm leading-7 text-gray-800 whitespace-pre-line">{selectedAnswer.answer || 'No response provided.'}</p>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                                    <p className="text-xs uppercase tracking-[0.18em] text-gray-500">Total Score</p>
+                                    <p className="mt-3 text-3xl font-semibold text-gray-900">{selectedAnswer.totalScore != null ? selectedAnswer.totalScore.toFixed(1) : 'N/A'}</p>
+                                </div>
+                                <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                                    <p className="text-xs uppercase tracking-[0.18em] text-gray-500">Word Count</p>
+                                    <p className="mt-3 text-3xl font-semibold text-gray-900">{selectedAnswer.wordCount ?? 'N/A'}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-4">
+                                <ScoreCard title="Content" value={selectedAnswer.contentScore} max={6} />
+                                <ScoreCard title="Form" value={selectedAnswer.formScore} max={2} />
+                                <ScoreCard title="Grammar" value={(selectedAnswer as any).grammerScore ?? (selectedAnswer as any).grammarScore ?? null} max={2} />
+                                <ScoreCard title="Spelling" value={selectedAnswer.spellingScore} max={2} />
+                                <ScoreCard title="Vocabulary" value={selectedAnswer.vocabScore} max={2} />
+                                <ScoreCard title="Development, Structure & Coherence" value={selectedAnswer.DSCScore} max={6} />
+                                <ScoreCard title="General Linguistic Range" value={selectedAnswer.GLRScore} max={6} />
+                                <ScoreCard title="Total" value={selectedAnswer.totalScore} max={26} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )
 }
+
+const ScoreCard = ({ title, value, max }: { title: string; value?: number | null; max: number }) => (
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 text-center">
+        <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{title}</p>
+        <p className="mt-2 text-2xl font-semibold text-gray-900">{value != null ? value.toFixed(1) : 'N/A'}</p>
+        <p className="text-xs text-gray-500">/ {max}</p>
+    </div>
+)
 
 export default WriteEssayAnswer

@@ -26,7 +26,7 @@ const Timer = ({ countDownTime, callbackFn, title }: TimerProps) => {
     const { minutes, seconds } = convertSecondsToMinutesAndSeconds(timeLeft)
 
    return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-18 right-4 z-50">
         <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl shadow-lg border-2 border-red-400">
             <div className="flex items-center space-x-2">
                 <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">

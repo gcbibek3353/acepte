@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const EssayTextArea = ({ essayId }: { essayId: string }) => {
+const EssayTextArea = ({ essayId, onSubmitted }: { essayId: string, onSubmitted?: () => Promise<void> }) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
     const queryClient = useQueryClient();
@@ -19,10 +19,16 @@ const EssayTextArea = ({ essayId }: { essayId: string }) => {
             if (!result.success) throw new Error(result.message);
             return result;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [detailUrl] });
+        onSuccess: async () => {
+            // keep existing invalidation for safety
+            try {
+                await queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            } catch (e) {
+                // ignore
+            }
             setEssay('');
             alert('Essay submitted and evaluated successfully!');
+            if (onSubmitted) await onSubmitted();
         },
         onError: (error) => {
             alert(`Error: ${error.message}`);

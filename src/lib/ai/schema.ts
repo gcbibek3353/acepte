@@ -3,20 +3,20 @@ import z from "zod";
 // Writing specific schemas and types
 
 export const writeEssayAnswerScoreSchema = z.object({
-  totalScore: z.number().min(0).max(15),
-  contentScore: z.number().min(0).max(3),
+  totalScore: z.number().min(0).max(26),
+  contentScore: z.number().min(0).max(6),
   formScore: z.number().min(0).max(2),
   grammarScore: z.number().min(0).max(2),
   spellingScore: z.number().min(0).max(2),
   vocabScore: z.number().min(0).max(2),
-  DSCScore: z.number().min(0).max(2),
-  GLRScore: z.number().min(0).max(2),
+  DSCScore: z.number().min(0).max(6),
+  GLRScore: z.number().min(0).max(6),
 });
 
 export type WriteEssayAnswerScore = z.infer<typeof writeEssayAnswerScoreSchema>;
 
 export const SummarizeWrittenTextAnswerScoreSchema = z.object({
-  totalScore: z.number().min(0).max(7),
+  totalScore: z.number().min(0).max(9),
   contentScore: z.number().min(0).max(4),
   formScore: z.number().min(0).max(1),
   grammerScore: z.number().min(0).max(2),
