@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import ImageWithFallback from '@/components/ImageWithFallBack';
+import { uploadAudioFile } from '@/lib/uploadAudio';
 
 interface Describe_imageProps {
     imageUrl: string;
@@ -17,20 +18,14 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
 
     const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
         mutationFn: async (file: File) => {
-            const { url: presignedUrl } = await fetch('/api/v1/s3/put-object-url').then(r => r.json());
-            await fetch(presignedUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': file.type || 'audio/webm' },
-                body: file,
-            });
-            const audioUrl = presignedUrl.split('?')[0];
+            const audioUrl = await uploadAudioFile(file, 'speaking-read-aloud');
             const response = await fetch(`/api/v1/practice/speaking/describe-image/${questionId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ audioUrl }),
             });
             const result = await response.json();
-            if (!result.success) throw new Error(result.message);
+            if (!response.ok || !result.success) throw new Error(result.message || 'Submit failed');
             return result;
         },
         onSuccess: () => {

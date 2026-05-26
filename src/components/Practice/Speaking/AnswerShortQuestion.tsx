@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { uploadAudioFile } from '@/lib/uploadAudio'
 
 interface AnswerShortQuestionProps {
   audioUrl: string;
@@ -17,20 +18,14 @@ const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps)
 
   const { mutate: submitAnswer, isPending: isSubmitting } = useMutation({
     mutationFn: async (file: File) => {
-      const { url: presignedUrl } = await fetch('/api/v1/s3/put-object-url').then(r => r.json());
-      await fetch(presignedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type || 'audio/webm' },
-        body: file,
-      });
-      const audioUrl = presignedUrl.split('?')[0];
+      const audioUrl = await uploadAudioFile(file, 'speaking-read-aloud');
       const response = await fetch(`/api/v1/practice/speaking/answer-short-question/${questionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ audioUrl }),
       });
       const result = await response.json();
-      if (!result.success) throw new Error(result.message);
+      if (!response.ok || !result.success) throw new Error(result.message || 'Submit failed');
       return result;
     },
     onSuccess: () => {
