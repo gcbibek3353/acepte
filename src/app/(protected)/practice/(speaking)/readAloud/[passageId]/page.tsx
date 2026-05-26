@@ -52,7 +52,8 @@ interface ApiResponse {
 const Page = () => {
   const { passageId } = useParams();
 
-  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1//practice/speaking/read-aloud/${passageId}`;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
+  const URL = `${apiUrl}/api/v1/practice/speaking/read-aloud/${passageId}`;
   const { data, loading, error } = useFetch<ApiResponse>(URL)
 
   if (loading) return <div className="max-w-4xl mx-auto p-6">Loading...</div>

@@ -19,7 +19,8 @@ const useFilteredAPI = <T = any>(baseURL: string) => {
     });
 
     const url = useMemo(() => {
-        const fullURL = `${process.env.NEXT_PUBLIC_API_URL}${baseURL}`;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? '';
+        const fullURL = `${apiUrl}${baseURL}`;
         const params = new URLSearchParams();
 
         params.append('page', queryParams.page!.toString());
