@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import ImageWithFallback from '@/components/ImageWithFallBack';
 
 interface Describe_imageProps {
     imageUrl: string;
@@ -49,7 +50,8 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
             </h1>
 
             <div className="p-4 bg-gray-50 border rounded-lg text-gray-700 leading-relaxed">
-                <img src={imageUrl} alt="" />
+                {/* <img src={imageUrl} alt="" /> */}
+                <ImageWithFallback src={imageUrl} alt='' />
             </div>
 
             <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
