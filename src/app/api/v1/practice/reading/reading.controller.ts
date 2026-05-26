@@ -44,8 +44,8 @@ const getFibDropdownQuestions = async (userId: string, queryParams: QuestionQuer
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -200,8 +200,8 @@ const getMcmqQuestions = async (userId: string, queryParams: QuestionQuery): Pro
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -355,8 +355,8 @@ const getReorderParagraphQuestions = async (userId: string, queryParams: Questio
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -507,8 +507,8 @@ const getFibDragDropQuestions = async (userId: string, queryParams: QuestionQuer
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -660,8 +660,8 @@ const getMcsqQuestions = async (userId: string, queryParams: QuestionQuery): Pro
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 

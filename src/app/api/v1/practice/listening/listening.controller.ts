@@ -45,8 +45,8 @@ const getSummarizeSpokenTextQuestions = async (userId: string, queryParams: Ques
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -63,7 +63,7 @@ const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<S
         const question = await prisma.summarizeSpokenTextQuestion.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -193,8 +193,8 @@ const getMCMQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -211,7 +211,7 @@ const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassa
         const question = await prisma.listeningMCMPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -353,8 +353,8 @@ const getFIBQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -371,7 +371,7 @@ const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlan
         const question = await prisma.listeningFillBlankPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -520,8 +520,8 @@ const getHCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -538,7 +538,7 @@ const getHCSQuestionById = async (questionId: string): Promise<ListeningHighligh
         const question = await prisma.listeningHighlightSummaryPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -661,8 +661,8 @@ const getMCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -679,7 +679,7 @@ const getMCSQuestionById = async (questionId: string): Promise<ListeningMCSPassa
         const question = await prisma.listeningMCSPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -798,8 +798,8 @@ const getSMWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -816,7 +816,7 @@ const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMi
         const question = await prisma.listeningSelectMissingWordPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -935,8 +935,8 @@ const getHIWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -953,7 +953,7 @@ const getHIWQuestionById = async (questionId: string): Promise<ListeningHighligh
         const question = await prisma.listeningHighlightIncorrectWordsPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {
@@ -1101,8 +1101,8 @@ const getWFDQuestions = async (userId: string, queryParams: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } }, // include bookmarks of the user only
+                answers: { where: { userId }, select: { id: true } } // include answers of the user only
             }
         });
 
@@ -1119,7 +1119,7 @@ const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFro
         const question = await prisma.listeningWriteFromDictationPassage.findUnique({
             where: { id: questionId },
             include: {
-                 answers: {
+                answers: {
                     include: {
                         user: {
                             select: {

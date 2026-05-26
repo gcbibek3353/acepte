@@ -1,21 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "./auth"; // path to your Better Auth server instance
+import { auth } from "./auth";
 
 export async function auth_middleware(req: Request) {
-    const session = await auth.api.getSession({
-        headers: req.headers
-    })
+    // cookieCache in auth.ts makes this fast after the first request —
+    // session is validated from a signed cookie instead of a DB lookup.
+    const session = await auth.api.getSession({ headers: req.headers });
 
-    // return {
-    //     authenticated: true,
-    //     user: { id: "US1mNvXDg8dhQzsCAH3h6NXob17JXHz7" }
-    // }
-
-    if (!session || !session.user) {
-        return {
-            authenticated: true,
-            user: null
-        }
+    if (!session?.user) {
+        return { authenticated: false, user: null };
     }
     return {
         authenticated: true,
@@ -23,10 +15,9 @@ export async function auth_middleware(req: Request) {
             id: session.user.id,
             email: session.user.email,
             name: session.user.name,
-            image: session.user.image
+            image: session.user.image,
         }
-    }
-
+    };
 }
 
 export async function admin_auth_middleware(req: Request) {

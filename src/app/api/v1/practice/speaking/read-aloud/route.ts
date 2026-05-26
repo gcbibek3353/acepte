@@ -89,9 +89,12 @@ interface QuestionQuery {
 
 export async function GET(request: NextRequest) {
   try {
+    const t0 = performance.now();
     const { searchParams } = new URL(request.url);
 
     const authCheck = await auth_middleware(request);
+    const tAuth = performance.now();
+
     if (!authCheck.authenticated || !authCheck.user) {
       return NextResponse.json(
         {
@@ -136,6 +139,9 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await speakingController.getReadAloudQuestions(userId, queryParams);
+    const tDB = performance.now();
+
+    console.log(`[read-aloud GET] auth: ${(tAuth - t0).toFixed(1)}ms | db: ${(tDB - tAuth).toFixed(1)}ms | total: ${(tDB - t0).toFixed(1)}ms`);
     return NextResponse.json(
       {
         success: true,

@@ -46,8 +46,8 @@ const getReadAloudQuestions = async (userId: string, query: QuestionQuery): Prom
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -183,8 +183,8 @@ const getRepeatSentenceQuestions = async (userId: string, query: QuestionQuery):
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -319,8 +319,8 @@ const getDescribeImageQuestions = async (userId: string, query: QuestionQuery): 
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -456,8 +456,8 @@ const getRetellLectureQuestions = async (userId: string, query: QuestionQuery): 
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -593,8 +593,8 @@ const getAnswerShortQuestions = async (userId: string, query: QuestionQuery): Pr
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -730,8 +730,8 @@ const getSummarizeGroupDiscussionQuestions = async (userId: string, query: Quest
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
@@ -866,8 +866,8 @@ const getRespondToASituationQuestions = async (userId: string, query: QuestionQu
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: {
-                bookmarks: { where: { userId } }, // include bookmarks of the user only
-                answers: { where: { userId } } // include answers of the user only
+                bookmarks: { where: { userId }, select: { id: true } },
+                answers: { where: { userId }, select: { id: true } }
             }
         });
 
