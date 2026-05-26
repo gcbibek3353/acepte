@@ -120,6 +120,7 @@ const AnswersComponent = ({ answers }: { answers: AnswerData[] }) => {
     )
 }
 
+<<<<<<< HEAD
 const ScoreCard = ({ title, value, max }: { title: string; value?: number | null; max: number }) => (
     <div className="rounded-2xl border border-gray-200 bg-white p-2 text-center">
         <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{title}</p>
@@ -129,3 +130,6 @@ const ScoreCard = ({ title, value, max }: { title: string; value?: number | null
 )
 
 export default AnswersComponent;
+=======
+export default AnswersComponent;
+>>>>>>> c61e8c3 (styled writing section)

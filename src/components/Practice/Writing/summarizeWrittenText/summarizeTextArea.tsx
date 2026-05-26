@@ -55,19 +55,17 @@ const SummarizeTextArea = ({ textId, text }: { textId: string, text: string }) =
     }, [essay])
 
     return (
-        <div>
-            <div>
-                {text}
+        <div className="space-y-5">
+            <div className="bg-muted/30 border border-border rounded-lg p-6">
+                <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">{text}</p>
             </div>
 
-            <div className="mb-4">
-                <textarea
-                    value={essay}
-                    onChange={(e) => setEssay(e.target.value)}
-                    className="w-full h-96 p-4 border-2 border-teal-300 rounded-lg focus:outline-none focus:border-teal-500 resize-none"
-                    placeholder="Start writing your essay here..."
-                />
-            </div>
+            <textarea
+                value={essay}
+                onChange={(e) => setEssay(e.target.value)}
+                className="w-full h-40 p-4 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground resize-none text-sm leading-relaxed"
+                placeholder="Write your one-sentence summary here…"
+            />
 
             {/* Word Count and Submit */}
             <div className="flex flex-col gap-4">

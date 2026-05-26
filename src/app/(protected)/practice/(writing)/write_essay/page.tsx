@@ -1,6 +1,7 @@
 'use client'
 import FilterQuestions from '@/components/Practice/FilterQuestions';
 import useFilteredAPI from '@/hooks/useFilteredAPI';
+import React from 'react'
 
 interface AnswerData {
   id: string
@@ -52,24 +53,39 @@ const Page = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span className="text-base font-medium">Loading questions…</span>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-600">Error loading questions</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
+          Error loading questions: {error}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Write Essay Practice</h1>
-      <FilterQuestions questions={filterQuestions} queryParams={queryParams} setQueryParams={setQueryParams} />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+              Writing
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Write Essay</h1>
+          <p className="mt-1 text-muted-foreground">Plan, write and revise an essay on the given topic in 20 minutes.</p>
+        </div>
+        <FilterQuestions questions={filterQuestions ?? []} queryParams={queryParams} setQueryParams={setQueryParams} />
+      </div>
     </div>
   )
 }

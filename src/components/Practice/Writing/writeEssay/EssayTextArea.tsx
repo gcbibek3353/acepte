@@ -41,27 +41,24 @@ const EssayTextArea = ({ essayId, onSubmitted }: { essayId: string, onSubmitted?
     }, [essay])
 
     return (
-        <div>
-            <div className="mb-4">
-                <textarea
-                    value={essay}
-                    onChange={(e) => setEssay(e.target.value)}
-                    className="w-full h-96 p-4 border-2 border-teal-300 rounded-lg focus:outline-none focus:border-teal-500 resize-none"
-                    placeholder="Start writing your essay here..."
-                />
-            </div>
+        <div className="space-y-4">
+            <textarea
+                value={essay}
+                onChange={(e) => setEssay(e.target.value)}
+                className="w-full h-96 p-4 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground resize-none text-sm leading-relaxed"
+                placeholder="Start writing your essay here…"
+            />
 
-            {/* Word Count and Submit */}
             <div className="flex justify-between items-center">
-                <span className="text-gray-600">
-                    Word Count: {wordCount}
+                <span className="text-sm text-muted-foreground">
+                    Word count: {wordCount}
                 </span>
                 <button
                     onClick={() => submitEssay(essay)}
                     disabled={isSubmitting || wordCount === 0}
-                    className="px-6 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting...' : 'Submit Essay'}
+                    {isSubmitting ? 'Submitting…' : 'Submit Essay'}
                 </button>
             </div>
         </div>
