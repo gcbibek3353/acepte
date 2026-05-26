@@ -60,10 +60,10 @@ const ListeningHIW = ({ audioUrl, passage, passageId }: ListeningHIWProps) => {
             <span
                 key={index}
                 onClick={() => handleWordClick(word, index)}
-                className={`cursor-pointer px-1 py-0.5 rounded transition-colors duration-200 ${
+                className={`cursor-pointer px-1 py-0.5 rounded transition-colors ${
                     isWordSelected(index)
-                        ? 'bg-red-200 text-red-800 border border-red-400'
-                        : 'hover:bg-gray-200'
+                        ? 'bg-destructive/15 text-destructive border border-destructive/30'
+                        : 'hover:bg-muted'
                 }`}
             >
                 {word}
@@ -72,22 +72,26 @@ const ListeningHIW = ({ audioUrl, passage, passageId }: ListeningHIWProps) => {
     };
 
     return (
-       <div className="space-y-6">
+        <div className="space-y-6">
             <PlayAudio audioUrl={audioUrl} />
 
-            <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-8">
-                <div className="text-lg leading-relaxed text-gray-800 flex flex-wrap gap-x-1 gap-y-1">
+            <div className="rounded-lg border border-border bg-card shadow-sm p-8">
+                <p className="text-xs text-muted-foreground mb-4">Click on words that differ from what the speaker said.</p>
+                <div className="text-base leading-relaxed text-foreground flex flex-wrap gap-x-1 gap-y-1">
                     {renderPassage()}
                 </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                    {answer.length} word{answer.length !== 1 ? 's' : ''} selected
+                </span>
                 <button
                     onClick={() => submitAnswer(answer)}
                     disabled={isSubmitting || answer.length === 0}
-                    className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                    {isSubmitting ? 'Submitting…' : 'Submit Answer'}
                 </button>
             </div>
         </div>

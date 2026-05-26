@@ -5,71 +5,80 @@ interface Props {
   answers: SstDetail['answers']
 }
 
+const scoreCategories = [
+  { key: 'contentScore',    label: 'Content',    color: 'text-emerald-700 dark:text-emerald-400',  bg: 'bg-emerald-50 dark:bg-emerald-900/20',  border: 'border-emerald-200 dark:border-emerald-800' },
+  { key: 'formScore',       label: 'Form',       color: 'text-blue-700 dark:text-blue-400',        bg: 'bg-blue-50 dark:bg-blue-900/20',         border: 'border-blue-200 dark:border-blue-800' },
+  { key: 'grammarScore',    label: 'Grammar',    color: 'text-amber-700 dark:text-amber-400',      bg: 'bg-amber-50 dark:bg-amber-900/20',       border: 'border-amber-200 dark:border-amber-800' },
+  { key: 'vocabularyScore', label: 'Vocabulary', color: 'text-violet-700 dark:text-violet-400',   bg: 'bg-violet-50 dark:bg-violet-900/20',    border: 'border-violet-200 dark:border-violet-800' },
+  { key: 'spellingScore',   label: 'Spelling',   color: 'text-rose-700 dark:text-rose-400',        bg: 'bg-rose-50 dark:bg-rose-900/20',         border: 'border-rose-200 dark:border-rose-800' },
+] as const;
+
 const Sst_answer = ({ answers }: Props) => {
   if (answers.length === 0) {
     return (
-      <div className="mt-10 p-8 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border-2 border-gray-200 text-center">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Previous Submissions</h3>
-        <p className="text-gray-600 text-lg">No previous submissions found for this question.</p>
+      <div className="mt-6 rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+        <p className="text-sm font-medium text-foreground mb-1">No submissions yet</p>
+        <p className="text-xs text-muted-foreground">Your submissions for this question will appear here.</p>
       </div>
     )
   }
 
   return (
-    <div className="mt-10 p-6 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border-2 border-gray-200 shadow-sm">
-      <div className="flex items-center mb-6">
-        <div className="w-2 h-8 bg-teal-500 rounded-full mr-3"></div>
-        <h3 className="text-2xl font-bold text-gray-900">Previous Submissions ({answers.length})</h3>
+    <div className="mt-6 rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+      {/* Section header */}
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-border bg-muted/30">
+        <span className="inline-block w-1 h-5 rounded-full bg-amber-500 shrink-0" />
+        <h3 className="text-base font-semibold text-foreground">
+          Previous Submissions
+        </h3>
+        <span className="ml-auto text-xs text-muted-foreground font-mono">
+          {answers.length} {answers.length === 1 ? 'submission' : 'submissions'}
+        </span>
       </div>
-      <div className="space-y-6">
+
+      <div className="divide-y divide-border">
         {answers.map((answer, index) => (
-          <div key={answer.id} className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-base font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded-full">
+          <div key={answer.id} className="p-6 space-y-4">
+            {/* Meta row */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <span className="text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                 Submission #{index + 1}
               </span>
-              <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                {new Date(answer.createdAt).toLocaleDateString()} at {new Date(answer.createdAt).toLocaleTimeString()}
+              <span className="text-xs text-muted-foreground font-mono">
+                {new Date(answer.createdAt).toLocaleDateString()} · {new Date(answer.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
 
-            <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <p className="text-gray-800 text-base leading-relaxed">{answer.response}</p>
+            {/* Response text */}
+            <div className="rounded-md border border-border bg-muted/40 px-4 py-3">
+              <p className="text-sm text-foreground leading-relaxed">{answer.response}</p>
             </div>
 
-            <div className="flex justify-between items-center mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            {/* Word count + total score */}
+            <div className="flex items-center justify-between gap-4 rounded-md bg-muted/30 border border-border px-4 py-2.5">
               {answer.wordCount != null && (
-                <span className="text-sm font-semibold text-blue-700">Words: {answer.wordCount}</span>
+                <span className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{answer.wordCount}</span> words
+                </span>
               )}
               {answer.totalScore != null && (
-                <span className="text-lg font-bold text-indigo-700 bg-white px-3 py-1 rounded-full shadow-sm">
-                  Total Score: {answer.totalScore}
+                <span className="text-sm font-bold text-primary">
+                  Total: {answer.totalScore}
                 </span>
               )}
             </div>
 
+            {/* Score breakdown */}
             {answer.totalScore != null && (
-              <div className="grid grid-cols-5 gap-3">
-                <div className="text-center bg-green-50 p-3 rounded-lg border border-green-200">
-                  <span className="block text-green-600 font-semibold text-xs mb-1">Content</span>
-                  <span className="text-lg font-bold text-green-700">{answer.contentScore ?? 'N/A'}</span>
-                </div>
-                <div className="text-center bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <span className="block text-blue-600 font-semibold text-xs mb-1">Form</span>
-                  <span className="text-lg font-bold text-blue-700">{answer.formScore ?? 'N/A'}</span>
-                </div>
-                <div className="text-center bg-orange-50 p-3 rounded-lg border border-orange-200">
-                  <span className="block text-orange-600 font-semibold text-xs mb-1">Grammar</span>
-                  <span className="text-lg font-bold text-orange-700">{answer.grammarScore ?? 'N/A'}</span>
-                </div>
-                <div className="text-center bg-purple-50 p-3 rounded-lg border border-purple-200">
-                  <span className="block text-purple-600 font-semibold text-xs mb-1">Vocabulary</span>
-                  <span className="text-lg font-bold text-purple-700">{answer.vocabularyScore ?? 'N/A'}</span>
-                </div>
-                <div className="text-center bg-rose-50 p-3 rounded-lg border border-rose-200">
-                  <span className="block text-rose-600 font-semibold text-xs mb-1">Spelling</span>
-                  <span className="text-lg font-bold text-rose-700">{answer.spellingScore ?? 'N/A'}</span>
-                </div>
+              <div className="grid grid-cols-5 gap-2">
+                {scoreCategories.map(({ key, label, color, bg, border }) => (
+                  <div key={key} className={`rounded-md border ${border} ${bg} px-2 py-3 text-center`}>
+                    <span className={`block text-xs font-medium mb-1 ${color}`}>{label}</span>
+                    <span className={`text-base font-bold ${color}`}>
+                      {answer[key] ?? '—'}
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>

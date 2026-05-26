@@ -56,37 +56,38 @@ const ListeningMCM = ({ audioUrl, questionText, passageId, options }: ListeningM
         <div className="space-y-6">
             <PlayAudio audioUrl={audioUrl} />
 
-            {/* Question Text */}
-            <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">{questionText}</h3>
+            <div className="rounded-lg border border-border bg-card shadow-sm p-6">
+                <h3 className="text-base font-semibold text-foreground mb-4">{questionText}</h3>
 
-                {/* Options */}
                 <div className="space-y-3">
                     {options.map((option) => (
                         <label
                             key={option.id}
-                            className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                            className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-colors ${
+                                answers.includes(option.id)
+                                    ? 'border-primary/40 bg-primary/5'
+                                    : 'border-border hover:bg-muted/50'
+                            }`}
                         >
                             <input
                                 type="checkbox"
                                 checked={answers.includes(option.id)}
                                 onChange={() => handleOptionChange(option.id)}
-                                className="mt-1 w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500 focus:ring-2"
+                                className="mt-0.5 w-4 h-4 accent-primary rounded shrink-0"
                             />
-                            <span className="text-gray-800 leading-relaxed">{option.text}</span>
+                            <span className="text-sm text-foreground leading-relaxed">{option.text}</span>
                         </label>
                     ))}
                 </div>
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-end">
                 <button
                     onClick={() => submitAnswer(answers)}
                     disabled={isSubmitting || answers.length === 0}
-                    className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                    {isSubmitting ? 'Submitting…' : 'Submit Answer'}
                 </button>
             </div>
         </div>

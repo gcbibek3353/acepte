@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
-        audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3' // TODO : Remove this line after testing
+    audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3' // TODO: Remove after testing
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
@@ -32,19 +32,13 @@ const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
     const togglePlayPause = () => {
         const audio = audioRef.current
         if (!audio) return
-
-        if (isPlaying) {
-            audio.pause()
-        } else {
-            audio.play()
-        }
+        if (isPlaying) { audio.pause() } else { audio.play() }
         setIsPlaying(!isPlaying)
     }
 
     const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const audio = audioRef.current
         if (!audio) return
-
         const newTime = (parseFloat(e.target.value) / 100) * duration
         audio.currentTime = newTime
         setCurrentTime(newTime)
@@ -53,76 +47,72 @@ const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
     const handleSpeedChange = () => {
         const audio = audioRef.current
         if (!audio) return
-
         const newSpeed = playbackSpeed === 1.0 ? 1.25 : playbackSpeed === 1.25 ? 1.5 : playbackSpeed === 1.5 ? 2.0 : 1.0
         audio.playbackRate = newSpeed
         setPlaybackSpeed(newSpeed)
     }
 
     const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60)
-        const seconds = Math.floor(time % 60)
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+        const m = Math.floor(time / 60)
+        const s = Math.floor(time % 60)
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
     }
 
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
     return (
-    <div className="mb-8 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border-2 border-gray-200 shadow-sm">
-        <audio ref={audioRef} src={audioUrl} preload="metadata" />
-        
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-            <div className="flex items-center space-x-6">
-                {/* Play/Pause Button */}
+        <div className="rounded-lg border border-border bg-muted/30 p-5 mb-6">
+            <audio ref={audioRef} src={audioUrl} preload="metadata" />
+
+            <div className="flex items-center gap-5">
+                {/* Play / Pause */}
                 <button
                     onClick={togglePlayPause}
-                    className="flex-shrink-0 w-14 h-14 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center hover:from-teal-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                    className="shrink-0 w-11 h-11 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center transition-colors shadow-sm"
                 >
                     {isPlaying ? (
-                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                         </svg>
                     ) : (
-                        <svg className="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                         </svg>
                     )}
                 </button>
 
-                {/* Progress Bar Container */}
-                <div className="flex-1 flex items-center space-x-4">
-                    {/* Progress Bar */}
-                    <div className="flex-1 relative bg-gray-200 rounded-full h-3 shadow-inner">
+                {/* Progress bar + time */}
+                <div className="flex-1 flex items-center gap-4">
+                    <div className="flex-1 relative h-2 bg-border rounded-full overflow-hidden">
+                        <div
+                            className="absolute inset-y-0 left-0 bg-amber-500 rounded-full transition-all duration-100"
+                            style={{ width: `${progress}%` }}
+                        />
                         <input
                             type="range"
                             min="0"
                             max="100"
                             value={progress}
                             onChange={handleProgressChange}
-                            className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer slider absolute top-0 left-0"
-                            style={{
-                                background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${progress}%, #e5e7eb ${progress}%, #e5e7eb 100%)`
-                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
                     </div>
-
-                    {/* Time Display */}
-                    <div className="flex-shrink-0 text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
+                    <span className="shrink-0 text-xs font-mono text-muted-foreground tabular-nums">
                         {formatTime(currentTime)} / {formatTime(duration)}
-                    </div>
+                    </span>
                 </div>
 
-                {/* Volume/Speed Control */}
+                {/* Speed toggle */}
                 <button
                     onClick={handleSpeedChange}
-                    className="flex-shrink-0 px-4 py-2 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
+                    className="shrink-0 px-3 py-1.5 text-xs font-semibold text-foreground bg-card border border-border rounded-md hover:bg-muted transition-colors"
                 >
-                    {playbackSpeed}x
+                    {playbackSpeed}×
                 </button>
             </div>
         </div>
-    </div>
-)
+    )
 }
 
 export default PlayAudio

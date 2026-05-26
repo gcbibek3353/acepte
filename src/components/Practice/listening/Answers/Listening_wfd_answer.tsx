@@ -9,44 +9,47 @@ interface Props {
 const Listening_wfd_answer = ({ answers, transcript }: Props) => {
   if (answers.length === 0) {
     return (
-      <div className="mt-10 p-8 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border-2 border-gray-200 text-center">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Previous Submissions</h3>
-        <p className="text-gray-600 text-lg">No previous submissions found for this question.</p>
+      <div className="mt-6 rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+        <h3 className="text-sm font-semibold text-foreground mb-1">Previous Submissions</h3>
+        <p className="text-sm text-muted-foreground">No previous submissions found for this question.</p>
       </div>
     )
   }
 
   return (
-    <div className="mt-10 p-6 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border-2 border-gray-200 shadow-sm">
-      <div className="flex items-center mb-6">
-        <div className="w-2 h-8 bg-teal-500 rounded-full mr-3"></div>
-        <h3 className="text-2xl font-bold text-gray-900">Previous Submissions ({answers.length})</h3>
+    <div className="mt-6 rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+      <div className="flex items-center gap-3 px-6 py-4 bg-muted/30 border-b border-border">
+        <div className="w-1 h-6 rounded-full bg-amber-500 shrink-0" />
+        <h3 className="text-base font-semibold text-foreground">Previous Submissions</h3>
+        <span className="ml-auto text-xs font-medium rounded-full bg-amber-100 text-amber-700 px-2.5 py-0.5 dark:bg-amber-900/30 dark:text-amber-300">
+          {answers.length}
+        </span>
       </div>
 
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Correct Transcript</p>
-        <p className="text-blue-900 font-medium">{transcript}</p>
+      <div className="px-6 py-4 border-b border-border bg-primary/5">
+        <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1.5">Correct Transcript</p>
+        <p className="text-sm text-foreground font-medium leading-relaxed">{transcript}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="divide-y divide-border">
         {answers.map((answer, index) => (
-          <div key={answer.id} className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-base font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded-full">
+          <div key={answer.id} className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
                 Submission #{index + 1}
               </span>
-              <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <span className="text-xs text-muted-foreground font-mono">
                 {new Date(answer.createdAt).toLocaleDateString()} at {new Date(answer.createdAt).toLocaleTimeString()}
               </span>
             </div>
 
-            <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <p className="text-gray-800 text-base leading-relaxed">{answer.response}</p>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-sm text-foreground leading-relaxed">{answer.response}</p>
             </div>
 
             {answer.totalScore != null && (
-              <div className="flex justify-end p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                <span className="text-lg font-bold text-indigo-700 bg-white px-3 py-1 rounded-full shadow-sm">
+              <div className="flex justify-end">
+                <span className="text-sm font-bold text-primary">
                   Total Score: {answer.totalScore}
                 </span>
               </div>

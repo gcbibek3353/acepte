@@ -15,26 +15,56 @@ const SummarizeSpokenText = () => {
     bookmarked: q.bookmarks.length > 0 ? true : false,
     answered: q.answers.length > 0 ? true : false
   }))
-if (loading) {
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span className="text-base font-medium">Loading questions…</span>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-600">Error loading questions</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
+          Failed to load questions. Please try again.
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Write Essay Practice</h1>
-      <FilterQuestions questions={filterQuestions ?? []} queryParams={queryParams} setQueryParams={setQueryParams} />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-4xl px-4 py-8 sm:px-6">
+
+        {/* Page header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+              Listening
+            </span>
+            <span className="text-xs text-muted-foreground font-mono">
+              {filterQuestions?.length ?? 0} questions
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Summarize Spoken Text
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Listen to a short lecture and write a 50–70 word summary.
+          </p>
+        </div>
+
+        <FilterQuestions
+          questions={filterQuestions ?? []}
+          queryParams={queryParams}
+          setQueryParams={setQueryParams}
+        />
+      </div>
     </div>
   )
 }

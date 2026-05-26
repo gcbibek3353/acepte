@@ -59,7 +59,7 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
                         type="text"
                         value={answers[arrayIndex] || ''}
                         onChange={(e) => handleInputChange(placeholderNum, e.target.value)}
-                        className="inline-block mx-1 px-3 py-1 border-b-2 border-teal-400 focus:border-teal-600 focus:outline-none bg-transparent text-gray-800 font-medium min-w-[120px] text-center"
+                        className="inline-block mx-1 px-2 py-0.5 border-b-2 border-amber-400 focus:border-primary focus:outline-none bg-transparent text-foreground font-medium min-w-[120px] text-center transition-colors"
                         placeholder={`Answer ${placeholderNum}`}
                     />
                 );
@@ -71,21 +71,19 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
         <div className="space-y-6">
             <PlayAudio audioUrl={audioUrl} />
 
-            {/* Passage with Input Fields */}
-            <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-8">
-                <div className="text-lg leading-relaxed text-gray-800">
+            <div className="rounded-lg border border-border bg-card shadow-sm p-8">
+                <div className="text-base leading-relaxed text-foreground">
                     {renderPassageWithInputs()}
                 </div>
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-end">
                 <button
                     onClick={() => submitAnswer(answers)}
                     disabled={isSubmitting || answers.filter(answer => answer && answer.trim()).length === 0}
-                    className="px-8 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-lg hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                    {isSubmitting ? 'Submitting…' : 'Submit Answer'}
                 </button>
             </div>
         </div>
