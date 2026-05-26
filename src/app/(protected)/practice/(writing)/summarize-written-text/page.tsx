@@ -1,49 +1,17 @@
 'use client'
 import FilterQuestions from '@/components/Practice/FilterQuestions'
 import useFilteredAPI from '@/hooks/useFilteredAPI'
+import { SummarizeWrittenTextListItem } from '@/types/writing'
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  answer: string
-  wordCount: number
-  totalScore: number | null
-  contentScore: number | null
-  formScore: number | null
-  grammerScore: number | null
-  vocabScore: number | null
-  createdAt: string
-  updatedAt: string
-}
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface EssayQuestion {
-  id: string;
-  questionId: string;
-  textTitle: string;
-  passage: string;
-  difficulty: string;
-  min_word_limit: number,
-  max_word_limit: number,
-  bookmarks: BookMarkData[];
-  answers: AnswerData[];
-}
-
 const SummarizeWrittenTextPage = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<EssayQuestion[]>('/api/v1/practice/writing/summarizeWrittenText');
+  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<SummarizeWrittenTextListItem[]>('/api/v1/practice/writing/summarizeWrittenText');
 
   const filterQuestions = data?.map((q) => ({
     id: q.id,
     questionId: q.questionId,
     title: q.textTitle,
-    difficulty: q.difficulty,
+    difficulty: q.difficulty as string,
     bookmarked: q.bookmarks.length > 0 ? true : false,
     answered: q.answers.length > 0 ? true : false
   }))

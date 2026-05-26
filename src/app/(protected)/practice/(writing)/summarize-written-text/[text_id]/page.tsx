@@ -7,47 +7,7 @@ import useFetch from '@/hooks/useFetch'
 import { useParams } from 'next/navigation'
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  answer: string
-  wordCount: number
-  totalScore: number | null
-  contentScore: number | null
-  formScore: number | null
-  grammerScore: number | null
-  vocabScore: number | null
-  createdAt: string
-  updatedAt: string
-}
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionId: string
-  textTitle: string
-  passage: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  min_word_limit: number
-  max_word_limit: number
-  createdAt: string
-  updatedAt: string
-  isActive: boolean
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { SummarizeWrittenTextDetail, ApiResponse } from '@/types/writing'
 
 const SummarizeWrittenTextDetailPage = () => {
   const params = useParams();
@@ -56,7 +16,7 @@ const SummarizeWrittenTextDetailPage = () => {
   const timeLimit = 10 * 60;
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/summarizeWrittenText/${textId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<SummarizeWrittenTextDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your summary.')

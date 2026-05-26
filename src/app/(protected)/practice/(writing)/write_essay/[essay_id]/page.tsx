@@ -7,56 +7,7 @@ import EssayTextArea from '@/components/Practice/Writing/writeEssay/EssayTextAre
 import WriteEssayAnswer from '@/components/Practice/Writing/writeEssay/WriteEssayAnswer'
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  answer: string
-  wordCount: number
-  totalScore: number | null
-  contentScore: number | null
-  formScore: number | null
-  grammerScore: number | null
-  spellingScore: number | null
-  vocabScore: number | null
-  DSCScore: number | null
-  GLRScore: number | null
-  user: {
-    id: string
-    name: string
-    email: string
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionId: string
-  essayTitle: string
-  essay_description: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  min_word_limit: number
-  max_word_limit: number
-  createdAt: string
-  updatedAt: string
-  isActive: boolean
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { WriteEssayDetail, ApiResponse } from '@/types/writing'
 
 const WriteEssayPage = () => {
   const params = useParams()
@@ -65,7 +16,7 @@ const WriteEssayPage = () => {
   const timeLimit = 20 * 60
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`
-  const { data, loading, error, refetch } = useFetch<ApiResponse>(URL)
+  const { data, loading, error, refetch } = useFetch<ApiResponse<WriteEssayDetail>>(URL)
 
   const handleTimeExceedHandler = () => {
     alert('Time is up! Please submit your essay.')
@@ -117,7 +68,7 @@ const WriteEssayPage = () => {
 
         <Header
           questionType="Write Essay"
-          instruction={`You will have 20 minutes to plan, write and revise an essay about the topic below. Your response will be judged on how well you develop a position, organize your ideas, present supporting details, and control the elements of standard written English. You should write ${questionData.min_word_limit}–${questionData.max_word_limit} words.`}
+          instruction="You will have 20 minutes to plan, write and revise an essay about the topic below. Your response will be judged on how well you develop a position, organize your ideas, present supporting details, and control the elements of standard written English. You should write 200–300 words."
           questionUniqueId={questionData.questionId}
           title={questionData.essayTitle}
           bookMarkURL={`${URL}/bookmark`}
@@ -127,10 +78,6 @@ const WriteEssayPage = () => {
         />
 
         <EssayTextArea essayId={essayId} onSubmitted={async () => { await refetch() }} />
-
-        <div className="rounded-lg border border-border bg-card p-6 shadow-sm mb-6">
-          <EssayTextArea essayId={essayId} />
-        </div>
 
         <WriteEssayAnswer
           answers={questionData.answers}

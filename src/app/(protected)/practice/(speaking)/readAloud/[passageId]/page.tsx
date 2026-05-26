@@ -5,56 +5,14 @@ import Read_Aloud from '@/components/Practice/Speaking/Read_Aloud';
 import useFetch from '@/hooks/useFetch';
 import { useParams } from 'next/navigation';
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  audiourl: string
-  duration: number
-  contentScore: number
-  oralFluencyScore: number
-  pronunciationScore: number
-  totalScore: number
-  user: {
-    id: string
-    name: string
-    email: string
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  passage: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { ReadAloudDetail, ApiResponse } from '@/types/speaking'
 
 const Page = () => {
   const { passageId } = useParams();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
   const URL = `${apiUrl}/api/v1/practice/speaking/read-aloud/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<ReadAloudDetail>>(URL)
 
   if (loading) {
     return (
@@ -103,7 +61,7 @@ const Page = () => {
         <Header
           questionType="Read Aloud"
           instruction="Look at the text below. In 40 seconds, you must read this text aloud as naturally and clearly as possible. You have 40 seconds to read aloud."
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
@@ -116,7 +74,7 @@ const Page = () => {
 
         <SpeakingAnswer
           answers={questionData.answers}
-          questionId={questionData.questionid}
+          questionId={questionData.questionId}
           questionTitle={questionData.title}
         />
       </div>

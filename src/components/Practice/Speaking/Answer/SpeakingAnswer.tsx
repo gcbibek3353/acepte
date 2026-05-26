@@ -5,19 +5,19 @@ interface AnswerData {
   id: string
   userId: string
   questionId: string
-  audiourl: string
-  duration: number
-  contentScore: number
-  oralFluencyScore: number
-  pronunciationScore: number
-  totalScore: number
+  audioUrl: string
+  duration: number | null
+  contentScore: number | null
+  oralFluencyScore: number | null
+  pronunciationScore: number | null
+  totalScore: number | null
   user: {
     id: string
     name: string
     email: string
   }
-  createdAt: string
-  updatedAt: string
+  createdAt: string | Date
+  updatedAt: string | Date
 }
 
 interface SpeakingAnswerProps {
@@ -67,11 +67,11 @@ const SpeakingAnswer = ({ answers, questionId, questionTitle }: SpeakingAnswerPr
             <IndividualSpeakingAnswer
               questionId={questionId}
               questionTitle={questionTitle}
-              audioUrl={answer.audiourl}
-              contentScore={answer.contentScore}
-              oralFluencyScore={answer.oralFluencyScore}
-              pronunciationScore={answer.pronunciationScore}
-              totalScore={answer.totalScore}
+              audioUrl={answer.audioUrl}
+              contentScore={answer.contentScore ?? 0}
+              oralFluencyScore={answer.oralFluencyScore ?? 0}
+              pronunciationScore={answer.pronunciationScore ?? 0}
+              totalScore={answer.totalScore ?? 0}
             />
           </div>
         ))}

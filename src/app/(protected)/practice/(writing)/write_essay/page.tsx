@@ -1,52 +1,17 @@
 'use client'
 import FilterQuestions from '@/components/Practice/FilterQuestions';
 import useFilteredAPI from '@/hooks/useFilteredAPI';
+import { WriteEssayListItem } from '@/types/writing';
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  answer: string
-  wordCount: number
-  totalScore: number | null
-  contentScore: number | null
-  formScore: number | null
-  grammerScore: number | null
-  spellingScore: number | null
-  vocabScore: number | null
-  DSCScore: number | null
-  GLRScore: number | null
-  createdAt: string
-  updatedAt: string
-}
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-interface EssayQuestion {
-  id: string;
-  essayTitle: string;
-  essay_description: string;
-  difficulty: string;
-  questionId: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  bookmarks: BookMarkData[];
-  answers: AnswerData[];
-}
-
 const Page = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<EssayQuestion[]>('/api/v1/practice/writing/writeEssay');
+  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<WriteEssayListItem[]>('/api/v1/practice/writing/writeEssay');
 
   const filterQuestions = data?.map((q) => ({
     id: q.id,
     questionId: q.questionId,
     title: q.essayTitle,
-    difficulty: q.difficulty,
+    difficulty: q.difficulty as string,
     bookmarked: q.bookmarks.length > 0 ? true : false,
     answered: q.answers.length > 0 ? true : false
   }))

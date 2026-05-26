@@ -1,45 +1,20 @@
 'use client';
 import FilterQuestions from '@/components/Practice/FilterQuestions';
 import useFilteredAPI from '@/hooks/useFilteredAPI';
+import { RepeatSentenceListItem } from '@/types/speaking';
 import React from 'react'
 
-interface AnswerData {
-  id: string
-  userId: string
-  passageId: string
-  answers: Record<string, string>
-  totalScore: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionsParams {
-  id: string;
-  questionId: string;
-  title: string;
-  difficulty: string;
-  bookmarks: BookMarkData[];
-  answers: AnswerData[];
-}
-
 const RepeatSentence = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<QuestionsParams[]>('/api/v1/practice/speaking/repeat-sentence');
+  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<RepeatSentenceListItem[]>('/api/v1/practice/speaking/repeat-sentence');
 
   const filterQuestions = data?.map((q) => ({
     id: q.id,
     questionId: q.questionId,
     title: q.title,
-    difficulty: q.difficulty,
+    difficulty: q.difficulty as string,
     bookmarked: q.bookmarks.length > 0,
     answered: q.answers.length > 0,
-  }))
+  })) ?? []
 
   if (loading) {
     return (

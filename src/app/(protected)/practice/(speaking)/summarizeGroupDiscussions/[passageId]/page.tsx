@@ -6,56 +6,13 @@ import React from 'react'
 import Summarize_Group_Discussion from '@/components/Practice/Speaking/SummarizeGroupDiscussion';
 import SpeakingAnswer from '@/components/Practice/Speaking/Answer/SpeakingAnswer';
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  audiourl: string
-  duration: number
-  contentScore: number
-  oralFluencyScore: number
-  pronunciationScore: number
-  totalScore: number
-  user: {
-    id: string
-    name: string
-    email: string
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  audioUrl: string
-  audioTranscribedText: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { GroupDiscussionDetail, ApiResponse } from '@/types/speaking'
 
 const Page = () => {
   const { passageId } = useParams();
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/summarize-group-discussions/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<GroupDiscussionDetail>>(URL)
 
   if (loading) {
     return (
@@ -104,7 +61,7 @@ const Page = () => {
         <Header
           questionType="Summarize Group Discussion"
           instruction="You will hear three people having a discussion. When you hear the beep, summarize the whole discussion. You will have 10 seconds to prepare and 2 minutes to give your response."
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
@@ -117,7 +74,7 @@ const Page = () => {
 
         <SpeakingAnswer
           answers={questionData.answers}
-          questionId={questionData.questionid}
+          questionId={questionData.questionId}
           questionTitle={questionData.title}
         />
       </div>

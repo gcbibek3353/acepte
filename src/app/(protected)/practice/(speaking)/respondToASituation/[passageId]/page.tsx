@@ -5,56 +5,13 @@ import RespondToASituation from '@/components/Practice/Speaking/RespondToASituat
 import useFetch from '@/hooks/useFetch';
 import { useParams } from 'next/navigation';
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  audiourl: string
-  duration: number
-  contentScore: number
-  oralFluencyScore: number
-  pronunciationScore: number
-  totalScore: number
-  user: {
-    id: string
-    name: string
-    email: string
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  situation: string
-  audioUrl: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { RespondSituationDetail, ApiResponse } from '@/types/speaking'
 
 const Page = () => {
   const { passageId } = useParams();
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/respond-to-a-situation/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<RespondSituationDetail>>(URL)
 
   if (loading) {
     return (
@@ -103,7 +60,7 @@ const Page = () => {
         <Header
           questionType="Respond to a Situation"
           instruction="Listen to and read a description of a situation. You will have 10 seconds to think about your answer. Then you will hear a beep. You will have 40 seconds to answer the question. Please answer as completely as you can."
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
@@ -111,12 +68,12 @@ const Page = () => {
         />
 
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm mb-6">
-          <RespondToASituation audioUrl={questionData.audioUrl} questionId={passageId as string} />
+          <RespondToASituation audioUrl={questionData.audioUrl ?? ''} questionId={passageId as string} />
         </div>
 
         <SpeakingAnswer
           answers={questionData.answers}
-          questionId={questionData.questionid}
+          questionId={questionData.questionId}
           questionTitle={questionData.title}
         />
       </div>

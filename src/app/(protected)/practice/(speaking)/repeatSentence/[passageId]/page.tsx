@@ -5,56 +5,13 @@ import Repeat_Sentence from '@/components/Practice/Speaking/Repeat_Sentence'
 import useFetch from '@/hooks/useFetch'
 import { useParams } from 'next/navigation'
 
-interface AnswerData {
-  id: string
-  userId: string
-  questionId: string
-  audiourl: string
-  duration: number
-  contentScore: number
-  oralFluencyScore: number
-  pronunciationScore: number
-  totalScore: number
-  user: {
-    id: string
-    name: string
-    email: string
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-interface BookMarkData {
-  id: string
-  userId: string
-  questionId: string
-  createdAt: string
-}
-
-interface QuestionData {
-  id: string
-  questionid: string
-  title: string
-  audioUrl: string
-  transcript: string
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD'
-  createdAt: string
-  updatedAt: string
-  answers: AnswerData[]
-  bookmarks: BookMarkData[]
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: QuestionData
-}
+import { RepeatSentenceDetail, ApiResponse } from '@/types/speaking'
 
 const Page = () => {
   const { passageId } = useParams();
 
   const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/repeat-sentence/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse>(URL)
+  const { data, loading, error } = useFetch<ApiResponse<RepeatSentenceDetail>>(URL)
 
   if (loading) {
     return (
@@ -103,7 +60,7 @@ const Page = () => {
         <Header
           questionType="Repeat Sentence"
           instruction="You will hear a sentence. Please repeat the sentence exactly as you hear it. You will hear the sentence only once."
-          questionUniqueId={questionData.questionid}
+          questionUniqueId={questionData.questionId}
           title={questionData.title}
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
@@ -116,7 +73,7 @@ const Page = () => {
 
         <SpeakingAnswer
           answers={questionData.answers}
-          questionId={questionData.questionid}
+          questionId={questionData.questionId}
           questionTitle={questionData.title}
         />
       </div>
