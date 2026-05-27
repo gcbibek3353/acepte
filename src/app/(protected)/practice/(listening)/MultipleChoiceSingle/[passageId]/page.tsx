@@ -1,48 +1,43 @@
-"use client"
-import Header from '@/components/Practice/Header'
-import Listening_mcs_answer from '@/components/Practice/listening/Answers/Listening_mcs_answer'
-import ListeningMCS from '@/components/Practice/listening/MultipleChoiceSingle/ListeningMCS'
-import useFetch from '@/hooks/useFetch'
-import { ListeningMcsDetail, ApiResponse } from '@/types/listening'
-import { useParams } from 'next/navigation'
-import React from 'react'
+import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
+import Header from '@/components/Practice/Header';
+import Listening_mcs_answer from '@/components/Practice/listening/Answers/Listening_mcs_answer';
+import ListeningMCS from '@/components/Practice/listening/MultipleChoiceSingle/ListeningMCS';
+import { QuestionListError } from '@/components/Practice/QuestionListState';
+import { ListeningMcsDetail, ApiResponse } from '@/types/listening';
 
-const Page = () => {
-  const { passageId } = useParams();
+const Page = async ({ params }: { params: Promise<{ passageId: string }> }) => {
+  const { passageId } = await params;
+  const cookieStore = await cookies();
 
-  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/multipleChoiceSingle/${passageId}`;
-  const { data, loading, error } = useFetch<ApiResponse<ListeningMcsDetail>>(URL)
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
+  const URL = `${apiUrl}/api/v1/practice/listening/multipleChoiceSingle/${passageId}`;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading question…</span>
-        </div>
-      </div>
-    )
+  let data: ApiResponse<ListeningMcsDetail> | null = null;
+  let fetchError = false;
+
+  try {
+    const res = await fetch(URL, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: 'no-store',
+    });
+
+    if (res.status === 404) notFound();
+
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      fetchError = true;
+    }
+  } catch {
+    fetchError = true;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Error loading question: {error}
-        </div>
-      </div>
-    )
+  if (fetchError) {
+    return <QuestionListError error="Error loading question. Please try again." />;
   }
 
-  if (!data?.success || !data?.data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-border bg-muted px-6 py-4 text-muted-foreground text-sm font-medium">
-          No data found for this question.
-        </div>
-      </div>
-    )
-  }
+  if (!data?.success || !data?.data) notFound();
 
   const questionData = data.data;
 
@@ -68,13 +63,13 @@ const Page = () => {
         />
 
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm mb-6">
-          <ListeningMCS audioUrl={questionData.audioUrl} questionText={questionData.questionText} options={questionData.options} passageId={passageId as string} />
+          <ListeningMCS audioUrl={questionData.audioUrl} questionText={questionData.questionText} options={questionData.options} passageId={passageId} />
         </div>
 
         <Listening_mcs_answer answers={questionData.answers} options={questionData.options} correctOptionIndex={questionData.correctOptionIndex} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;
