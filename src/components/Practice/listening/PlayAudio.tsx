@@ -2,11 +2,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
-    audioUrl = 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3' // TODO: Remove after testing
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
     const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
+    const [error, setError] = useState<string | null>(null)
 
     const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -15,17 +15,26 @@ const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
         if (!audio) return
 
         const updateTime = () => setCurrentTime(audio.currentTime)
-        const updateDuration = () => setDuration(audio.duration)
+        const updateDuration = () => {
+            setDuration(audio.duration)
+            setError(null)
+        }
         const handleEnded = () => setIsPlaying(false)
+        const handleError = () => {
+            setError('Failed to load audio')
+            setIsPlaying(false)
+        }
 
         audio.addEventListener('timeupdate', updateTime)
         audio.addEventListener('loadedmetadata', updateDuration)
         audio.addEventListener('ended', handleEnded)
+        audio.addEventListener('error', handleError)
 
         return () => {
             audio.removeEventListener('timeupdate', updateTime)
             audio.removeEventListener('loadedmetadata', updateDuration)
             audio.removeEventListener('ended', handleEnded)
+            audio.removeEventListener('error', handleError)
         }
     }, [audioUrl])
 
@@ -62,14 +71,20 @@ const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
 
     return (
         <div className="rounded-lg border border-border bg-muted/30 p-5 mb-6">
-            <audio ref={audioRef} src={audioUrl} preload="metadata" />
+            {!audioUrl?.trim() ? (
+                <div className="text-sm text-destructive font-medium">No audio URL provided</div>
+            ) : error ? (
+                <div className="text-sm text-destructive font-medium mb-3">{error}</div>
+            ) : null}
+            <audio ref={audioRef} src={audioUrl} preload="metadata" crossOrigin="anonymous" />
 
             <div className="flex items-center gap-5">
                 {/* Play / Pause */}
                 <button
                     onClick={togglePlayPause}
                     aria-label={isPlaying ? 'Pause' : 'Play'}
-                    className="shrink-0 w-11 h-11 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center transition-colors shadow-sm"
+                    disabled={!audioUrl?.trim() || !!error}
+                    className="shrink-0 w-11 h-11 rounded-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shadow-sm"
                 >
                     {isPlaying ? (
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
