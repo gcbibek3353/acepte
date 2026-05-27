@@ -9,7 +9,7 @@ interface FibDragDropProps {
     passageId: string
     passage: string
     options: string[]
-    blanks: { position: number; correctOptionIndex: number }[]
+    blanks: { position: number; correctOptionIndex: number; explanation?: string | null }[]
 }
 
 const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDropProps) => {
@@ -342,7 +342,7 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                     Correct answer: <span className="text-primary">&ldquo;{getCorrectWord(activeExplanation)}&rdquo;</span>
                                 </p>
                                 <p className="text-sm text-muted-foreground leading-relaxed">
-                                    This is a placeholder for the AI-generated explanation. It will explain why <strong className="text-foreground">&ldquo;{getCorrectWord(activeExplanation)}&rdquo;</strong> is the correct choice for this blank — covering grammar rules, contextual clues, collocations, and vocabulary usage that make it the best fit in this sentence.
+                                    {blanks.find(b => b.position.toString() === activeExplanation)?.explanation ?? 'No explanation available for this blank yet.'}
                                 </p>
                             </div>
                         </div>

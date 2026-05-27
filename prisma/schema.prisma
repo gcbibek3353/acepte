@@ -281,14 +281,15 @@ model FillBlanksDropdownPassage {
 }
 
 model FillBlanksDropdownBlank {
-  id           String                    @id @default(cuid())
-  position     Int // Position/order of the blank in the passage
-  passageId    String
-  passage      FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  id          String                    @id @default(cuid())
+  position    Int // Position/order of the blank in the passage
+  passageId   String
+  passage     FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
   correctIndex Int // Index of correct answer (0-based)
-  options      String[] // Array of options like: ["able", "is", "are", "we"]
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
+  options     String[] // Array of options like: ["able", "is", "are", "we"]
+  explanation String? // Why this option is correct — entered by admin
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
 
   @@map("fill_blanks_dropdown_blank")
 }
@@ -469,6 +470,7 @@ model FillBlanksDragDropBlank {
   passageId          String
   passage            FillBlanksDragDropPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
   correctOptionIndex Int // Index of the correct option in the options pool
+  explanation        String? // Why this option is correct — entered by admin
 
   @@map("fill_blanks_drag_drop_blank")
 }
