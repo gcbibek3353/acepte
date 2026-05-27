@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { uploadAudioFile } from '@/lib/uploadAudio'
 
 interface AnswerShortQuestionProps {
@@ -13,6 +14,7 @@ interface AnswerShortQuestionProps {
 const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/answer-short-question/${questionId}`;
 
@@ -30,6 +32,7 @@ const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      router.refresh();
       alert('Answer submitted successfully!');
     },
     onError: (error) => {

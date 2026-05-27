@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 interface SummarizeSpokenTextComponentProps {
@@ -13,6 +14,7 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText/${passageId}`;
 
@@ -29,6 +31,7 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             setEssay('');
             alert('Summary submitted successfully!');
         },

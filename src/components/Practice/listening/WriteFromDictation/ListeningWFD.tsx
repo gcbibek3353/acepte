@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface ListeningWFDProps {
     audioUrl: string
@@ -12,6 +13,7 @@ const ListeningWFD = ({ audioUrl, passageId }: ListeningWFDProps) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/writeFromDictation/${passageId}`;
 
@@ -28,6 +30,7 @@ const ListeningWFD = ({ audioUrl, passageId }: ListeningWFDProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             setEssay('');
             alert('Answer submitted successfully!');
         },

@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { uploadAudioFile } from '@/lib/uploadAudio'
 
 interface Repeat_SentenceProps {
@@ -13,6 +14,7 @@ interface Repeat_SentenceProps {
 const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/repeat-sentence/${questionId}`;
 
@@ -31,6 +33,7 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      router.refresh();
       alert('Answer submitted successfully!');
     },
     onError: (error) => {

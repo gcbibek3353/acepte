@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface Blanks {
   id: string
@@ -22,6 +23,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
     index: string
   }[]>([])
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDropDown/${passageId}`;
 
@@ -38,6 +40,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      router.refresh();
       alert('Answer submitted successfully!');
     },
     onError: (error) => {

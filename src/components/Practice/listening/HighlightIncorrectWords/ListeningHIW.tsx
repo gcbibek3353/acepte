@@ -2,6 +2,7 @@
 import React from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface ListeningHIWProps {
     audioUrl: string
@@ -17,6 +18,7 @@ interface SelectedWord {
 const ListeningHIW = ({ audioUrl, passage, passageId }: ListeningHIWProps) => {
     const [answer, setAnswer] = React.useState<SelectedWord[]>([]);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/highlightIncorrectWords/${passageId}`;
 
@@ -33,6 +35,7 @@ const ListeningHIW = ({ audioUrl, passage, passageId }: ListeningHIWProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

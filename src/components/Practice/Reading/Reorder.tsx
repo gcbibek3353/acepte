@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface Paragraph {
     id: string
@@ -20,6 +21,7 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
     const [orderedParagraphs, setOrderedParagraphs] = useState<Paragraph[]>([]);
     const [isMounted, setIsMounted] = useState(false);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/reorder/${passageId}`;
 
@@ -36,6 +38,7 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

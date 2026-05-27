@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface ListeningFIBProps {
     audioUrl: string
@@ -12,6 +13,7 @@ interface ListeningFIBProps {
 const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
     const [answers, setAnswers] = useState<string[]>([]);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/fillTheBlanks/${passageId}`;
 
@@ -28,6 +30,7 @@ const ListeningFIB = ({ audioUrl, passage, passageId }: ListeningFIBProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

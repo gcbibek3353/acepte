@@ -2,6 +2,7 @@
 import React from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface ListeningMCSProps {
     audioUrl: string
@@ -13,6 +14,7 @@ interface ListeningMCSProps {
 const ListeningMCS = ({ audioUrl, questionText, options, passageId }: ListeningMCSProps) => {
     const [answerIndex, setAnswerIndex] = React.useState<number | null>(null);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/multipleChoiceSingle/${passageId}`;
 
@@ -29,6 +31,7 @@ const ListeningMCS = ({ audioUrl, questionText, options, passageId }: ListeningM
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

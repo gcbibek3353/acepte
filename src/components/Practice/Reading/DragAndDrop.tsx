@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface FibDragDropProps {
     passageId: string
@@ -15,6 +16,7 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
     const [blankContents, setBlankContents] = useState<{ [key: string]: string }>({});
     const [isMounted, setIsMounted] = useState(false);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/fibDragDrop/${passageId}`;
 
@@ -31,6 +33,7 @@ const FibDragDropComponent = ({ passageId, passage, options }: FibDragDropProps)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

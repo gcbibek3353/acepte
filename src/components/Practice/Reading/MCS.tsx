@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface MCSProps {
     passageId: string
@@ -11,6 +12,7 @@ interface MCSProps {
 const MCS = ({ passageId, passage, options }: MCSProps) => {
     const [answer, setAnswer] = useState<number | null>(null);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/reading/mcs/${passageId}`;
 
@@ -27,6 +29,7 @@ const MCS = ({ passageId, passage, options }: MCSProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {

@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { uploadAudioFile } from '@/lib/uploadAudio'
 
 interface Read_AloudProps {
@@ -12,6 +13,7 @@ interface Read_AloudProps {
 const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
   const detailUrl = `${apiUrl}/api/v1/practice/speaking/read-aloud/${questionId}`;
@@ -33,6 +35,7 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
+      router.refresh();
       alert('Answer submitted successfully!');
     },
     onError: (error) => {

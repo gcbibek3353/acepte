@@ -2,6 +2,7 @@
 import React from 'react'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface ListeningHCSProps {
     audioUrl: string
@@ -13,6 +14,7 @@ interface ListeningHCSProps {
 const ListeningHCS = ({ audioUrl, questionText, options, passageId }: ListeningHCSProps) => {
     const [answerIndex, setAnswerIndex] = React.useState<number | null>(null);
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/highlightCorrectSummary/${passageId}`;
 
@@ -29,6 +31,7 @@ const ListeningHCS = ({ audioUrl, questionText, options, passageId }: ListeningH
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
+            router.refresh();
             alert('Answer submitted successfully!');
         },
         onError: (error) => {
