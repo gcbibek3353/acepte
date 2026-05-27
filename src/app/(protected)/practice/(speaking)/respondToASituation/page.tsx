@@ -1,40 +1,24 @@
-'use client';
-import FilterQuestions from '@/components/Practice/FilterQuestions';
-import useFilteredAPI from '@/hooks/useFilteredAPI';
-import { RespondSituationListItem } from '@/types/speaking';
-import React from 'react'
+import FilterQuestions2 from '@/components/Practice/FilterQuestions2';
+import { cookies } from 'next/headers';
 
-const RespondToASituation = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<RespondSituationListItem[]>('/api/v1/practice/speaking/respond-to-a-situation');
+const RespondToASituation = async () => {
+  const cookieStore = await cookies();
 
-  const filterQuestions = data?.map((q) => ({
-    id: q.id,
-    questionId: q.questionId,
-    title: q.title,
-    difficulty: q.difficulty as string,
-    bookmarked: q.bookmarks.length > 0,
-    answered: q.answers.length > 0,
-  })) ?? []
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading questions…</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Error loading questions: {error}
-        </div>
-      </div>
-    )
+  let initialData;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/respond-to-a-situation?page=1&limit=10`,
+      {
+        headers: { Cookie: cookieStore.toString() },
+        cache: 'no-store',
+      }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      initialData = json.data;
+    }
+  } catch {
+    // server fetch failed — FilterQuestions2 will fetch on the client instead
   }
 
   return (
@@ -51,10 +35,13 @@ const RespondToASituation = () => {
             Listen to and read a situation description, then respond as completely as you can.
           </p>
         </div>
-        <FilterQuestions questions={filterQuestions} queryParams={queryParams} setQueryParams={setQueryParams} />
+        <FilterQuestions2
+          apiPath="/api/v1/practice/speaking/respond-to-a-situation"
+          initialData={initialData}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RespondToASituation
+export default RespondToASituation;

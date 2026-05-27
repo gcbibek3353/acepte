@@ -1,40 +1,24 @@
-'use client';
-import FilterQuestions from '@/components/Practice/FilterQuestions';
-import useFilteredAPI from '@/hooks/useFilteredAPI';
-import { ReadAloudListItem } from '@/types/speaking';
-import React from 'react'
+import FilterQuestions2 from '@/components/Practice/FilterQuestions2';
+import { cookies } from 'next/headers';
 
-const ReadAloud = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<ReadAloudListItem[]>('/api/v1/practice/speaking/read-aloud');
+const ReadAloud = async () => {
+  const cookieStore = await cookies();
 
-  const filterQuestions = data?.map((q) => ({
-    id: q.id,
-    questionId: q.questionId,
-    title: q.title,
-    difficulty: q.difficulty as string,
-    bookmarked: q.bookmarks.length > 0,
-    answered: q.answers.length > 0,
-  })) ?? []
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading questions…</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Error loading questions: {error}
-        </div>
-      </div>
-    )
+  let initialData;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/speaking/read-aloud?page=1&limit=10`,
+      {
+        headers: { Cookie: cookieStore.toString() },
+        cache: 'no-store',
+      }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      initialData = json.data;
+    }
+  } catch {
+    // server fetch failed — FilterQuestions2 will fetch on the client instead
   }
 
   return (
@@ -51,10 +35,13 @@ const ReadAloud = () => {
             Read a text passage aloud as naturally and clearly as possible within 40 seconds.
           </p>
         </div>
-        <FilterQuestions questions={filterQuestions} queryParams={queryParams} setQueryParams={setQueryParams} />
+        <FilterQuestions2
+          apiPath="/api/v1/practice/speaking/read-aloud"
+          initialData={initialData}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ReadAloud
+export default ReadAloud;

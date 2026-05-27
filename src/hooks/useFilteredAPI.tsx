@@ -9,7 +9,7 @@ interface FilterParams {
     answered?: boolean | null;
 }
 
-const useFilteredAPI = <T = any>(baseURL: string) => {
+const useFilteredAPI = <T = any>(baseURL: string, options?: { initialData?: T }) => {
     const [queryParams, setQueryParams] = useState<FilterParams>({
         page: 1,
         limit: 10,
@@ -39,6 +39,13 @@ const useFilteredAPI = <T = any>(baseURL: string) => {
         return `${fullURL}?${params.toString()}`;
     }, [baseURL, queryParams]);
 
+    const isDefaultParams =
+        queryParams.page === 1 &&
+        queryParams.limit === 10 &&
+        queryParams.difficulty == null &&
+        queryParams.bookmarked == null &&
+        queryParams.answered == null;
+
     const { data: response, isLoading, error } = useQuery<{ data: T }>({
         queryKey: [baseURL, queryParams],
         queryFn: async () => {
@@ -46,6 +53,8 @@ const useFilteredAPI = <T = any>(baseURL: string) => {
             if (!res.ok) throw new Error(`Error: ${res.status}`);
             return res.json();
         },
+        initialData: options?.initialData !== undefined && isDefaultParams ? { data: options.initialData } : undefined,
+        staleTime: options?.initialData !== undefined && isDefaultParams ? 30_000 : 0,
     });
 
     return {
