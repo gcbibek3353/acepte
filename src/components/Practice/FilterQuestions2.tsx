@@ -6,7 +6,9 @@ import { QuestionListLoading, QuestionListError } from './QuestionListState';
 interface RawQuestion {
     id: string;
     questionId: string;
-    title: string;
+    title?: string;
+    textTitle?: string;
+    essayTitle?: string;
     difficulty: string;
     bookmarks: unknown[];
     answers: unknown[];
@@ -23,7 +25,7 @@ const FilterQuestions2 = ({ apiPath, initialData }: FilterQuestions2Props) => {
     const questions = data?.map((q) => ({
         id: q.id,
         questionId: q.questionId,
-        title: q.title,
+        title: q.title ?? q.textTitle ?? q.essayTitle ?? '',
         difficulty: q.difficulty,
         bookmarked: q.bookmarks.length > 0,
         answered: q.answers.length > 0,
