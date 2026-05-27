@@ -63,7 +63,7 @@ const FIBDragAndDrop = async ({ params }: { params: Promise<{ passageId: string 
         />
 
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm mb-6">
-          <DragAndDrop passage={questionData.content} passageId={questionData.id} options={questionData.options} />
+          <DragAndDrop passage={questionData.content} passageId={questionData.id} options={questionData.options} blanks={questionData.blanks} />
         </div>
 
         <Fib_dd_answer answers={questionData.answers} blanks={questionData.blanks} options={questionData.options} />
