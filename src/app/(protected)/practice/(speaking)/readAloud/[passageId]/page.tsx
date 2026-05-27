@@ -9,7 +9,7 @@ interface AnswerData {
   id: string
   userId: string
   questionId: string
-  audiourl: string
+  audioUrl: string
   duration: number
   contentScore: number
   oralFluencyScore: number

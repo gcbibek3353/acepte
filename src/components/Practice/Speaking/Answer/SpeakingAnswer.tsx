@@ -5,7 +5,7 @@ interface AnswerData {
   id: string
   userId: string
   questionId: string
-  audiourl: string
+  audioUrl: string
   duration: number
   contentScore: number
   oralFluencyScore: number
@@ -67,7 +67,7 @@ const SpeakingAnswer = ({ answers, questionId, questionTitle }: SpeakingAnswerPr
             <IndividualSpeakingAnswer
               questionId={questionId}
               questionTitle={questionTitle}
-              audioUrl={answer.audiourl}
+              audioUrl={answer.audioUrl}
               contentScore={answer.contentScore}
               oralFluencyScore={answer.oralFluencyScore}
               pronunciationScore={answer.pronunciationScore}
