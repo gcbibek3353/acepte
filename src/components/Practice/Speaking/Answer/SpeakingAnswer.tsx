@@ -7,10 +7,10 @@ interface AnswerData {
   questionId: string
   audioUrl: string
   duration: number | null
-  contentScore: number | null
-  oralFluencyScore: number | null
-  pronunciationScore: number | null
-  totalScore: number | null
+  contentScore?: number | null
+  oralFluencyScore?: number | null
+  pronunciationScore?: number | null
+  totalScore?: number | null
   user: {
     id: string
     name: string

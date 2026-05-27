@@ -1,3 +1,4 @@
+'use client';
 import { userContext } from '@/app/(protected)/layout'
 import React, { useContext, useEffect } from 'react'
 
