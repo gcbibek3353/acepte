@@ -1,9 +1,10 @@
+'use client';
 import { convertSecondsToMinutesAndSeconds } from '@/lib/utils';
 import React, { useEffect, useState } from 'react'
 
 type TimerProps = {
     countDownTime: number;
-    callbackFn: () => void;
+    callbackFn?: () => void;
     title?: string;
 }
 
@@ -12,7 +13,7 @@ const Timer = ({ countDownTime, callbackFn, title }: TimerProps) => {
 
     useEffect(() => {
         if (timeLeft <= 0) {
-            callbackFn();
+            callbackFn?.();
             return;
         }
         const timer = setInterval(() => {

@@ -1,10 +1,13 @@
+'use client';
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 const EssayTextArea = ({ essayId, onSubmitted }: { essayId: string, onSubmitted?: () => Promise<void> }) => {
     const [essay, setEssay] = useState('')
     const [wordCount, setWordCount] = useState(0)
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const detailUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`;
 
@@ -28,6 +31,7 @@ const EssayTextArea = ({ essayId, onSubmitted }: { essayId: string, onSubmitted?
             }
             setEssay('');
             alert('Essay submitted and evaluated successfully!');
+            router.refresh();
             if (onSubmitted) await onSubmitted();
         },
         onError: (error) => {

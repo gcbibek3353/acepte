@@ -1,59 +1,46 @@
-"use client"
-import Header from '@/components/Practice/Header'
-import Timer from '@/components/Practice/Timer'
-import useFetch from '@/hooks/useFetch'
-import { useParams } from 'next/navigation'
-import EssayTextArea from '@/components/Practice/Writing/writeEssay/EssayTextArea'
-import WriteEssayAnswer from '@/components/Practice/Writing/writeEssay/WriteEssayAnswer'
-import React from 'react'
+import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
+import Header from '@/components/Practice/Header';
+import Timer from '@/components/Practice/Timer';
+import EssayTextArea from '@/components/Practice/Writing/writeEssay/EssayTextArea';
+import WriteEssayAnswer from '@/components/Practice/Writing/writeEssay/WriteEssayAnswer';
+import { QuestionListError } from '@/components/Practice/QuestionListState';
+import { WriteEssayDetail, ApiResponse } from '@/types/writing';
 
-import { WriteEssayDetail, ApiResponse } from '@/types/writing'
+const WriteEssayDetailPage = async ({ params }: { params: Promise<{ essay_id: string }> }) => {
+  const { essay_id } = await params;
+  const cookieStore = await cookies();
 
-const WriteEssayPage = () => {
-  const params = useParams()
-  const essayId = params.essay_id as string
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
+  const URL = `${apiUrl}/api/v1/practice/writing/writeEssay/${essay_id}`;
 
-  const timeLimit = 20 * 60
+  let data: ApiResponse<WriteEssayDetail> | null = null;
+  let fetchError = false;
 
-  const URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/writing/writeEssay/${essayId}`
-  const { data, loading, error, refetch } = useFetch<ApiResponse<WriteEssayDetail>>(URL)
+  try {
+    const res = await fetch(URL, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: 'no-store',
+    });
 
-  const handleTimeExceedHandler = () => {
-    alert('Time is up! Please submit your essay.')
+    if (res.status === 404) notFound();
+
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      fetchError = true;
+    }
+  } catch {
+    fetchError = true;
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading question…</span>
-        </div>
-      </div>
-    )
+  if (fetchError) {
+    return <QuestionListError error="Error loading question. Please try again." />;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Error loading question: {error}
-        </div>
-      </div>
-    )
-  }
+  if (!data?.success || !data?.data) notFound();
 
-  if (!data?.success || !data?.data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-border bg-muted px-6 py-4 text-muted-foreground text-sm font-medium">
-          No data found for this question.
-        </div>
-      </div>
-    )
-  }
-
-  const questionData = data.data
+  const questionData = data.data;
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +64,9 @@ const WriteEssayPage = () => {
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
         />
 
-        <EssayTextArea essayId={essayId} onSubmitted={async () => { await refetch() }} />
+        <Timer countDownTime={20 * 60} title="Remaining time" />
+
+        <EssayTextArea essayId={essay_id} />
 
         <WriteEssayAnswer
           answers={questionData.answers}
@@ -86,7 +75,7 @@ const WriteEssayPage = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WriteEssayPage
+export default WriteEssayDetailPage;

@@ -1,3 +1,4 @@
+'use client';
 import { useMemo, useState } from 'react'
 
 interface AnswerData {
@@ -19,8 +20,8 @@ interface AnswerData {
         name: string
         email: string
     }
-    createdAt: string
-    updatedAt: string
+    createdAt: string | Date
+    updatedAt: string | Date
 }
 
 interface WriteEssayAnswerProps {
@@ -29,7 +30,7 @@ interface WriteEssayAnswerProps {
     questionTitle: string
 }
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | Date) => {
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
