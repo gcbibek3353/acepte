@@ -1,72 +1,47 @@
-"use client"
-import FilterQuestions from '@/components/Practice/FilterQuestions'
-import useFilteredAPI from '@/hooks/useFilteredAPI'
-import { SstListItem } from '@/types/listening'
-import React from 'react'
+import FilterQuestions2 from '@/components/Practice/FilterQuestions2';
+import { cookies } from 'next/headers';
 
-const SummarizeSpokenText = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<SstListItem[]>('/api/v1/practice/listening/summarizeSpokenText');
+const SummarizeSpokenText = async () => {
+  const cookieStore = await cookies();
 
-  const filterQuestions = data?.map((q) => ({
-    id: q.id,
-    questionId: q.questionId,
-    title: q.title,
-    difficulty: q.difficulty as string,
-    bookmarked: q.bookmarks.length > 0 ? true : false,
-    answered: q.answers.length > 0 ? true : false
-  }))
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading questions…</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Failed to load questions. Please try again.
-        </div>
-      </div>
-    )
+  let initialData;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/summarizeSpokenText?page=1&limit=10`,
+      {
+        headers: { Cookie: cookieStore.toString() },
+        cache: 'no-store',
+      }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      initialData = json.data;
+    }
+  } catch {
+    // server fetch failed — FilterQuestions2 will fetch on the client instead
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-4xl px-4 py-8 sm:px-6">
-
-        {/* Page header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               Listening
             </span>
-            <span className="text-xs text-muted-foreground font-mono">
-              {filterQuestions?.length ?? 0} questions
-            </span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Summarize Spoken Text
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Summarize Spoken Text</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Listen to a short lecture and write a 50–70 word summary.
           </p>
         </div>
-
-        <FilterQuestions
-          questions={filterQuestions ?? []}
-          queryParams={queryParams}
-          setQueryParams={setQueryParams}
+        <FilterQuestions2
+          apiPath="/api/v1/practice/listening/summarizeSpokenText"
+          initialData={initialData}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default SummarizeSpokenText;

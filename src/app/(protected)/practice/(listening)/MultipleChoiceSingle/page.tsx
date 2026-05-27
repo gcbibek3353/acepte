@@ -1,40 +1,24 @@
-"use client"
-import FilterQuestions from '@/components/Practice/FilterQuestions'
-import useFilteredAPI from '@/hooks/useFilteredAPI'
-import { ListeningMcsListItem } from '@/types/listening'
-import React from 'react'
+import FilterQuestions2 from '@/components/Practice/FilterQuestions2';
+import { cookies } from 'next/headers';
 
-const MultipleChoiceSinglePage = () => {
-  const { data, loading, error, queryParams, setQueryParams } = useFilteredAPI<ListeningMcsListItem[]>('/api/v1/practice/listening/multipleChoiceSingle');
+const MultipleChoiceSinglePage = async () => {
+  const cookieStore = await cookies();
 
-  const filterQuestions = data?.map((q) => ({
-    id: q.id,
-    questionId: q.questionId,
-    title: q.title,
-    difficulty: q.difficulty as string,
-    bookmarked: q.bookmarks.length > 0 ? true : false,
-    answered: q.answers.length > 0 ? true : false
-  }))
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span className="text-base font-medium">Loading questions…</span>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-4 text-destructive text-sm font-medium">
-          Failed to load questions. Please try again.
-        </div>
-      </div>
-    )
+  let initialData;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/practice/listening/multipleChoiceSingle?page=1&limit=10`,
+      {
+        headers: { Cookie: cookieStore.toString() },
+        cache: 'no-store',
+      }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      initialData = json.data;
+    }
+  } catch {
+    // server fetch failed — FilterQuestions2 will fetch on the client instead
   }
 
   return (
@@ -45,19 +29,19 @@ const MultipleChoiceSinglePage = () => {
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               Listening
             </span>
-            <span className="text-xs text-muted-foreground font-mono">
-              {filterQuestions?.length ?? 0} questions
-            </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Multiple Choice (Single)</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Listen and select the single correct response.
           </p>
         </div>
-        <FilterQuestions questions={filterQuestions ?? []} queryParams={queryParams} setQueryParams={setQueryParams} />
+        <FilterQuestions2
+          apiPath="/api/v1/practice/listening/multipleChoiceSingle"
+          initialData={initialData}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default MultipleChoiceSinglePage;
