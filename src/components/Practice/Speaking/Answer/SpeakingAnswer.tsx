@@ -35,6 +35,7 @@ const SpeakingAnswer = ({ answers, questionId, questionTitle }: SpeakingAnswerPr
       </div>
     )
   }
+  answers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="mt-6 rounded-lg border border-border bg-card shadow-sm overflow-hidden">

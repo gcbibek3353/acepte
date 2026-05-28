@@ -35,45 +35,35 @@ const Fib_dd_answer = ({ answers, blanks, options }: Props) => {
           const sorted = [...selectedAnswers].sort((a, b) => parseInt(a.position) - parseInt(b.position))
 
           return (
-            <div key={answer.id} className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                  Submission #{index + 1}
-                </span>
-                <span className="text-xs text-muted-foreground font-mono">
-                  {new Date(answer.createdAt).toLocaleDateString()} at {new Date(answer.createdAt).toLocaleTimeString()}
-                </span>
-              </div>
-
+            <div key={answer.id} className="px-5 py-3 flex items-center gap-3 flex-wrap">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
+                #{index + 1}
+              </span>
+              <span className="text-xs text-muted-foreground font-mono shrink-0">
+                {new Date(answer.createdAt).toLocaleDateString()}
+              </span>
               {answer.totalScore != null && (
-                <div className="flex justify-end">
-                  <span className="text-sm font-bold text-primary">Total Score: {answer.totalScore}</span>
-                </div>
+                <span className="text-xs font-semibold text-primary shrink-0">
+                  {answer.totalScore} pts
+                </span>
               )}
-
-              <div className="space-y-2">
+              <div className="flex flex-wrap gap-1.5 ml-auto">
                 {sorted.map((sel) => {
                   const blank = blanks.find(b => b.position === parseInt(sel.position))
                   const selectedOption = options[sel.index] ?? 'Unknown'
                   const isCorrect = blank ? blank.correctOptionIndex === sel.index : null
 
                   return (
-                    <div
+                    <span
                       key={sel.position}
-                      className={`flex items-center justify-between p-3 rounded-lg border text-sm ${isCorrect ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900/40' : 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900/40'}`}
+                      title={!isCorrect && blank ? `Correct: ${options[blank.correctOptionIndex]}` : undefined}
+                      className={`text-xs px-2.5 py-1 rounded-full font-medium border ${isCorrect ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-900/40 dark:text-green-400' : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400'}`}
                     >
-                      <span className="font-medium text-muted-foreground">Blank {sel.position}</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`font-semibold ${isCorrect ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-                          {selectedOption}
-                        </span>
-                        {isCorrect !== null && (
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isCorrect ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                            {isCorrect ? 'Correct' : `Incorrect — ${options[blank!.correctOptionIndex]}`}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                      {selectedOption}
+                      {isCorrect === false && blank && (
+                        <span className="ml-1 opacity-60">→ {options[blank.correctOptionIndex]}</span>
+                      )}
+                    </span>
                   )
                 })}
               </div>

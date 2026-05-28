@@ -18,6 +18,8 @@ interface MCMProps {
 
 const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
     const [answer, setAnswer] = useState<string[]>([]);
+    const [submitted, setSubmitted] = useState(false);
+    const [submittedAnswers, setSubmittedAnswers] = useState<string[]>([]);
     const queryClient = useQueryClient();
     const router = useRouter();
 
@@ -35,9 +37,10 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
             return result;
         },
         onSuccess: () => {
+            setSubmittedAnswers(answer);
+            setSubmitted(true);
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
             router.refresh();
-            alert('Answer submitted successfully!');
         },
         onError: (error) => {
             alert(`Error: ${error.message}`);
@@ -45,6 +48,7 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
     });
 
     const handleOptionSelect = (optionId: string) => {
+        if (submitted) return;
         setAnswer(prevAnswer => {
             if (prevAnswer.includes(optionId)) {
                 return prevAnswer.filter(id => id !== optionId)
@@ -52,6 +56,22 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
                 return [...prevAnswer, optionId]
             }
         })
+    }
+
+    const getOptionStyle = (option: Options) => {
+        if (!submitted) {
+            return answer.includes(option.id)
+                ? 'border-primary/40 bg-primary/5'
+                : 'border-border hover:bg-muted/50'
+        }
+        const wasSelected = submittedAnswers.includes(option.id);
+        if (option.isCorrect) {
+            return 'border-green-300 bg-green-50 dark:bg-green-950/20 dark:border-green-800'
+        }
+        if (wasSelected) {
+            return 'border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800'
+        }
+        return 'border-border'
     }
 
     return (
@@ -68,17 +88,14 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
                     {options.map((option, index) => (
                         <label
                             key={option.id}
-                            className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-colors ${
-                                answer.includes(option.id)
-                                    ? 'border-primary/40 bg-primary/5'
-                                    : 'border-border hover:bg-muted/50'
-                            }`}
+                            className={`flex items-start gap-3 p-3.5 rounded-lg border transition-colors ${submitted ? 'cursor-default' : 'cursor-pointer'} ${getOptionStyle(option)}`}
                             onClick={() => handleOptionSelect(option.id)}
                         >
                             <input
                                 type="checkbox"
-                                checked={answer.includes(option.id)}
+                                checked={submitted ? submittedAnswers.includes(option.id) : answer.includes(option.id)}
                                 onChange={() => handleOptionSelect(option.id)}
+                                disabled={submitted}
                                 className="mt-0.5 w-4 h-4 accent-primary rounded shrink-0"
                             />
                             <div className="flex-1 text-sm text-foreground leading-relaxed">
@@ -95,10 +112,10 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
             <div className="flex justify-end">
                 <button
                     onClick={() => submitAnswer(answer)}
-                    disabled={answer.length === 0 || isSubmitting}
+                    disabled={answer.length === 0 || isSubmitting || submitted}
                     className="px-5 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting…' : `Submit Answer (${answer.length} selected)`}
+                    {isSubmitting ? 'Submitting…' : submitted ? 'Submitted' : `Submit Answer (${answer.length} selected)`}
                 </button>
             </div>
         </div>

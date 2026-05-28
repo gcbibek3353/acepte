@@ -30,7 +30,7 @@ const IndividualSpeakingAnswer = (props: SpeakingAnswerProps) => {
     <div className="rounded-lg border border-border overflow-hidden">
       <div className="px-4 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Score</span>
-        <span className="text-sm font-bold text-primary">{totalScore ?? 0} / 30</span>
+        <span className="text-sm font-bold text-primary">{totalScore.toFixed(2) ?? 0} / 30</span>
       </div>
 
       <div className="p-4 flex items-start gap-6">
@@ -55,7 +55,7 @@ const IndividualSpeakingAnswer = (props: SpeakingAnswerProps) => {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-sm font-bold text-foreground">{totalScore ?? 0}</span>
+            <span className="text-sm font-bold text-foreground">{totalScore.toFixed(2) ?? 0}</span>
             <span className="text-xs text-muted-foreground">/ 30</span>
           </div>
         </div>
