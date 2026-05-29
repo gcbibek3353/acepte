@@ -44,7 +44,7 @@ const Retell_Lecture = ({ audioUrl, questionId }: Retell_LectureProps) => {
     <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={10} />
 
       <div className="flex justify-end">
         <button

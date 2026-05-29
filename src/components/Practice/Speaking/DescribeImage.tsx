@@ -4,7 +4,6 @@ import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import ImageWithFallback from '@/components/ImageWithFallBack';
-import { uploadAudioFile } from '@/lib/uploadAudio';
 
 interface Describe_imageProps {
   imageUrl: string;
@@ -54,7 +53,7 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
         <ImageWithFallback src={imageUrl} alt='' />
       </div>
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={25} />
 
       <div className="flex justify-end">
         <button

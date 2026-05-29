@@ -45,7 +45,7 @@ const Repeat_Sentence = ({ audioUrl, questionId }: Repeat_SentenceProps) => {
     <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={1} />
 
       <div className="flex justify-end">
         <button

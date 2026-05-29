@@ -44,7 +44,7 @@ const RespondToASituation = ({ audioUrl, questionId }: RespondToASituationProps)
     <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={20} />
 
       <div className="flex justify-end">
         <button

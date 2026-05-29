@@ -44,7 +44,7 @@ const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps)
     <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} />
+      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={3} />
 
       <div className="flex justify-end">
         <button
