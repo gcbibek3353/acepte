@@ -7,7 +7,6 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { blanks, ...passageData } = body;
-        console.log("body", body);
 
         await admin_auth_middleware(req);
 
