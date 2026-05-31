@@ -123,7 +123,7 @@ function PasswordSection() {
 
     setSaving(true)
     try {
-      const res = await fetch('/api/user/password', {
+      const res = await fetch('/api/v1/user/password', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
@@ -266,14 +266,13 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const res = await fetch('/api/user/profile', { credentials: 'include' })
+        const res = await fetch('/api/v1/user/profile', { credentials: 'include' })
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}))
           throw new Error(errData?.error ?? `HTTP ${res.status}`)
         }
         const data = await res.json()
         const u: UserProfile = data.user;
-        console.log(u);
 
         setProfile(u)
         setName(u.name ?? '')
@@ -299,7 +298,7 @@ export default function ProfilePage() {
     setSaving(true)
     setSuccess(false)
     try {
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch('/api/v1/user/profile', {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

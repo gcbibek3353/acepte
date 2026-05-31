@@ -108,6 +108,8 @@ model User {
   speakingRespondSituationAnswers   SpeakingRespondSituationAnswer[]
   speakingRespondSituationBookmarks SpeakingRespondSituationBookmark[]
 
+  activityLogs UserActivityLog[]
+
   @@unique([email])
   @@map("user")
 }
@@ -1403,4 +1405,24 @@ enum Difficulty {
   EASY
   MEDIUM
   HARD
+}
+
+enum PteSection {
+  SPEAKING
+  WRITING
+  READING
+  LISTENING
+}
+
+model UserActivityLog {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  section      PteSection
+  questionType String
+  submittedAt  DateTime   @default(now())
+
+  @@index([userId, submittedAt])
+  @@index([userId, section])
+  @@map("user_activity_log")
 }
