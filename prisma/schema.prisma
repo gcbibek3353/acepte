@@ -14,6 +14,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
 model User {
   id            String    @id
   name          String
@@ -22,6 +29,15 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+
+  // Profile fields
+  phone       String?
+  gender      Gender?
+  dateOfBirth DateTime?
+  country     String?
+  targetScore Int?
+  examDate    DateTime?
+
   sessions      Session[]
   accounts      Account[]
 
