@@ -133,3 +133,122 @@ This project is proprietary software developed for PTE exam preparation.
 ---
 
 **Ready to ace your PTE exam?** Start practicing with Acepte today! 🎯
+
+
+temporary text for reference
+
+Mock Test Frontend — Implementation Plan
+Existing Assets Available for Reuse
+Timer.tsx — countdown with color transitions, callback on expire ✓
+AudioRecorder.tsx — full prep/record/playback cycle ✓
+All practice question components (MCM, MCS, FillBlanks, DragDrop, etc.) ✓
+@hello-pangea/dnd — already installed for reorder ✓
+React Query v5 (@tanstack/react-query) ✓
+Pages
+User Pages
+Route	File	Description
+/mocktest	(protected)/mocktest/page.tsx	List published tests — already exists as placeholder, needs implementation
+/mocktest/[testId]	(protected)/mocktest/[testId]/page.tsx	Test overview + instructions + Start button
+/mocktest/[testId]/exam	(protected)/mocktest/[testId]/exam/page.tsx	Main exam interface — the big one
+/mocktest/[testId]/result/[attemptId]	(protected)/mocktest/[testId]/result/[attemptId]/page.tsx	Final scores + per-question breakdown
+/mocktest/attempts	(protected)/mocktest/attempts/page.tsx	User's past attempts with scores
+Admin Pages
+Route	File	Description
+/admin_dashboard/mocktest	(admin)/admin_dashboard/mocktest/page.tsx	List all tests (DRAFT/PUBLISHED/ARCHIVED)
+/admin_dashboard/mocktest/create	(admin)/admin_dashboard/mocktest/create/page.tsx	Create new test
+/admin_dashboard/mocktest/[testId]	(admin)/admin_dashboard/mocktest/[testId]/page.tsx	Edit test — add sections, add/reorder questions
+Components to Build
+1. Shared Mock Test Components
+src/components/MockTest/
+
+Component	Purpose
+TestCard.tsx	Card shown in listing — title, duration, section pills, attempt count, Start/Continue button
+SectionPill.tsx	Color-coded badge (Speaking=blue, Writing=violet, Reading=emerald, Listening=amber) matching CLAUDE.md tokens
+AttemptHistoryRow.tsx	Row in past attempts table — test name, date, overall score, skill scores
+2. Exam Interface Components
+src/components/MockTest/Exam/
+
+Component	Purpose
+ExamShell.tsx	Root container — manages active section, overall timer, keyboard shortcuts (no accidental navigation)
+ExamHeader.tsx	Top bar: test title, global time remaining (uses existing Timer.tsx), current section label
+SectionTransition.tsx	Modal shown between sections — "Reading section starts now. 30 minutes. Click to begin."
+QuestionNavigator.tsx	Side panel grid of numbered question bubbles — grey (not visited), white (visited/answered), blue (current)
+QuestionRenderer.tsx	Polymorphic switch — maps MockTestQuestionType → correct practice component, passes onAnswer callback
+SectionTimer.tsx	Section-level countdown (only shown for Reading) — auto-calls completeSection on expire
+ExamProgressBar.tsx	Linear bar showing answered/total within current section
+3. Results Components
+src/components/MockTest/Results/
+
+Component	Purpose
+ScoreCard.tsx	Hero card with overall score + four skill score chips
+SkillBreakdown.tsx	Four-column grid with per-skill score + progress bar
+ResponseReview.tsx	Per-question row: question type, your answer, correct answer, score (for objective questions)
+PendingEvalBanner.tsx	Banner shown when speaking/writing responses are still awaiting AI evaluation
+4. Admin Components
+src/components/MockTest/Admin/
+
+Component	Purpose
+MockTestForm.tsx	Create/Edit form: title, description, totalTime
+SectionCard.tsx	Collapsible section with timeLimit, question list, "Add Question" button
+QuestionPickerModal.tsx	Modal to search and select a question by type — fetches from existing practice endpoints, shows title preview
+QuestionRow.tsx	Row in section: question title, type badge, drag handle for reorder, remove button
+StatusToggle.tsx	DRAFT → PUBLISHED → ARCHIVED toggle with publish validation feedback
+Exam State Machine (what ExamShell.tsx manages)
+
+Load attempt state
+       ↓
+currentSection = first non-completed section
+       ↓
+POST /section/[section]/start
+       ↓
+Render questions sequentially
+ ↳ User answers → POST /response (debounced for text, immediate for MCQ)
+ ↳ QuestionNavigator tracks answered count
+       ↓
+User clicks "Next Section" or SectionTimer expires
+       ↓
+POST /section/[section]/complete
+       ↓
+SectionTransition modal for next section
+       ↓
+Repeat until last section
+       ↓
+POST /attempt/[attemptId]/complete
+       ↓
+Redirect to /result/[attemptId]
+QuestionRenderer.tsx — The Key Component
+This is the most important component. It maps each MockTestQuestionType to the correct existing component:
+
+Question Type	Component to reuse
+READ_ALOUD	Practice/Speaking/Read_Aloud.tsx
+REPEAT_SENTENCE	Practice/Speaking/RepeatSentence.tsx
+DESCRIBE_IMAGE	Practice/Speaking/DescribeImage.tsx
+RETELL_LECTURE	Practice/Speaking/RetellLecture.tsx
+ANSWER_SHORT_QUESTION	Practice/Speaking/AnswerShortQuestion.tsx
+WRITE_ESSAY	Practice/Writing/writeEssay/WriteEssayAnswer.tsx
+SUMMARIZE_WRITTEN_TEXT	Practice/Writing/summarizeWrittenText/summarizeTextArea.tsx
+READING_MCM	Practice/Reading/MCM.tsx
+READING_MCS	Practice/Reading/MCS.tsx
+REORDER_PARAGRAPHS	Practice/Reading/DragAndDrop.tsx
+READING_FILL_BLANKS_DRAG_DROP	Practice/Reading/FibDragDrop.tsx
+READING_FILL_BLANKS_DROPDOWN	Practice/Reading/FibDropDown.tsx
+SUMMARIZE_SPOKEN_TEXT	Practice/Listening/SummarizeSpokenText.tsx
+LISTENING_MCM	Practice/Listening/MCM.tsx
+LISTENING_MCS	Practice/Listening/MCS.tsx
+...all others	corresponding Practice/Listening/ component
+Each component gets an onAnswer(answerData) callback prop. When the user answers, ExamShell calls POST /response with the data.
+
+Data Fetching Strategy
+Page/Component	Strategy
+/mocktest listing	SSR fetch (server component) + pass as initialData to React Query
+Test overview /mocktest/[testId]	SSR fetch
+Exam state (resume)	Client fetch via React Query on mount — GET /attempt/[attemptId]
+Submit response	useMutation — optimistic update to mark question answered in navigator
+Results page	SSR fetch (attempt is completed, data is stable)
+Admin listing	Client fetch via React Query
+Build Order
+Admin pages first (create test → add sections → add questions → publish)
+Test listing + overview (user sees test, reads instructions)
+ExamShell + QuestionRenderer (the core exam experience)
+Results page
+Attempt history page
