@@ -195,6 +195,12 @@ const Navbar = () => {
             <SectionDropdown title="Writing" items={DropdownValues.writing} accent="bg-violet-500" />
             <SectionDropdown title="Reading" items={DropdownValues.reading} accent="bg-emerald-500" />
             <SectionDropdown title="Listening" items={DropdownValues.listening} accent="bg-amber-500" />
+            <Link
+              href="/mocktest"
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-md hover:bg-muted"
+            >
+              Mock Test
+            </Link>
           </div>
 
           {/* Auth area */}
