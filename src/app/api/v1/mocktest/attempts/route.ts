@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth_middleware } from "@/lib/auth-middleware";
-import { getPublishedMockTests } from "./mocktest.user.controller";
+import { getUserAttempts } from "../mocktest.user.controller";
 
-// GET /api/v1/mocktest — list all published mock tests
+// GET /api/v1/mocktest/attempts — list the logged-in user's past attempts with scores
 export async function GET(req: NextRequest) {
   try {
     const authCheck = await auth_middleware(req);
@@ -14,11 +14,11 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
 
-    const result = await getPublishedMockTests(authCheck.user.id, { page, limit });
+    const result = await getUserAttempts(authCheck.user.id, { page, limit });
 
-    return NextResponse.json({ success: true, message: "Mock tests fetched successfully", data: result }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Attempts fetched successfully", data: result }, { status: 200 });
   } catch (error) {
-    console.error("GET /mocktest:", error);
+    console.error("GET /mocktest/attempts:", error);
     return NextResponse.json({ success: false, message: "Internal server error", data: null }, { status: 500 });
   }
 }
