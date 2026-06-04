@@ -22,7 +22,7 @@ enum Gender {
 }
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
   email         String
   emailVerified Boolean
@@ -38,8 +38,8 @@ model User {
   targetScore Int?
   examDate    DateTime?
 
-  sessions      Session[]
-  accounts      Account[]
+  sessions Session[]
+  accounts Account[]
 
   write_essay_answers WriteEssayAnswer[]
   writeEssayBookmark  WriteEssayBookMark[]
@@ -109,6 +109,8 @@ model User {
   speakingRespondSituationBookmarks SpeakingRespondSituationBookmark[]
 
   activityLogs UserActivityLog[]
+
+  mockTestAttempts MockTestAttempt[]
 
   @@unique([email])
   @@map("user")
@@ -299,15 +301,15 @@ model FillBlanksDropdownPassage {
 }
 
 model FillBlanksDropdownBlank {
-  id          String                    @id @default(cuid())
-  position    Int // Position/order of the blank in the passage
-  passageId   String
-  passage     FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  id           String                    @id @default(cuid())
+  position     Int // Position/order of the blank in the passage
+  passageId    String
+  passage      FillBlanksDropdownPassage @relation(fields: [passageId], references: [id], onDelete: Cascade)
   correctIndex Int // Index of correct answer (0-based)
-  options     String[] // Array of options like: ["able", "is", "are", "we"]
-  explanation String? // Why this option is correct — entered by admin
-  createdAt   DateTime                  @default(now())
-  updatedAt   DateTime                  @updatedAt
+  options      String[] // Array of options like: ["able", "is", "are", "we"]
+  explanation  String? // Why this option is correct — entered by admin
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
 
   @@map("fill_blanks_dropdown_blank")
 }
@@ -1414,6 +1416,7 @@ enum PteSection {
   LISTENING
 }
 
+// TO display the analytics of the user 
 model UserActivityLog {
   id           String     @id @default(cuid())
   userId       String
@@ -1425,4 +1428,195 @@ model UserActivityLog {
   @@index([userId, submittedAt])
   @@index([userId, section])
   @@map("user_activity_log")
+}
+
+// mock test related schema
+
+enum MockTestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MockTestAttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+  TIMED_OUT
+}
+
+enum MockTestQuestionType {
+  // Speaking
+  READ_ALOUD
+  REPEAT_SENTENCE
+  DESCRIBE_IMAGE
+  RETELL_LECTURE
+  ANSWER_SHORT_QUESTION
+  // Writing
+  SUMMARIZE_WRITTEN_TEXT
+  WRITE_ESSAY
+  // Reading
+  READING_MCM
+  READING_MCS
+  REORDER_PARAGRAPHS
+  READING_FILL_BLANKS_DRAG_DROP
+  READING_FILL_BLANKS_DROPDOWN
+  // Listening
+  SUMMARIZE_SPOKEN_TEXT
+  LISTENING_MCM
+  LISTENING_MCS
+  LISTENING_FILL_BLANKS
+  LISTENING_HIGHLIGHT_SUMMARY
+  LISTENING_SELECT_MISSING_WORD
+  LISTENING_HIGHLIGHT_INCORRECT_WORDS
+  WRITE_FROM_DICTATION
+}
+
+model MockTest {
+  id          String         @id @default(cuid())
+  title       String
+  description String?        @db.Text
+  status      MockTestStatus @default(DRAFT)
+  totalTime   Int // Total duration in minutes (usually 120)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  isActive    Boolean        @default(true)
+
+  sections MockTestSection[]
+  attempts MockTestAttempt[]
+
+  @@map("mock_test")
+}
+
+// One entry per PTE section, defines order and time limit
+model MockTestSection {
+  id           String     @id @default(cuid())
+  mockTestId   String
+  mockTest     MockTest   @relation(fields: [mockTestId], references: [id], onDelete: Cascade)
+  section      PteSection
+  order        Int // 1=Speaking&Writing, 2=Reading, 3=Listening
+  timeLimit    Int // Minutes allocated for this section
+  instructions String?    @db.Text
+
+  questions MockTestQuestion[]
+
+  @@unique([mockTestId, section])
+  @@map("mock_test_section")
+}
+
+// Links a section to a specific question from any question model
+model MockTestQuestion {
+  id           String               @id @default(cuid())
+  sectionId    String
+  section      MockTestSection      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  order        Int // Sequence within the section
+  questionType MockTestQuestionType // Which question model to look up
+  questionId   String // The actual `id` (cuid) from the question model — no FK constraint due to polymorphism
+
+  responses MockTestResponse[]
+
+  @@unique([sectionId, order])
+  @@map("mock_test_question")
+}
+
+// One row per user per test attempt
+model MockTestAttempt {
+  id          String                @id @default(cuid())
+  userId      String
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mockTestId  String
+  mockTest    MockTest              @relation(fields: [mockTestId], references: [id], onDelete: Cascade)
+  status      MockTestAttemptStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  sectionAttempts MockTestSectionAttempt[]
+  responses       MockTestResponse[]
+  score           MockTestScore?
+
+  @@map("mock_test_attempt")
+}
+
+// Tracks per-section timing (important for Reading's countdown timer)
+model MockTestSectionAttempt {
+  id          String                @id @default(cuid())
+  attemptId   String
+  attempt     MockTestAttempt       @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  section     PteSection
+  status      MockTestAttemptStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  timeSpent   Int? // Actual seconds spent in this section
+
+  @@unique([attemptId, section])
+  @@map("mock_test_section_attempt")
+}
+
+// One row per question answered in an attempt
+model MockTestResponse {
+  id                 String           @id @default(cuid())
+  attemptId          String
+  attempt            MockTestAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  mockTestQuestionId String
+  mockTestQuestion   MockTestQuestion @relation(fields: [mockTestQuestionId], references: [id], onDelete: Cascade)
+
+  // Answer storage — format depends on questionType:
+  //   Speaking tasks:       audioUrl + duration
+  //   MCM/MCS/Highlight:    answerData = { selectedOptions: string[] }
+  //   Fill Blanks:          answerData = [{ pos: string, index: number }]
+  //   Essay/Summary:        answerData = { text: string, wordCount: number }
+  //   Reorder Paragraphs:   answerData = { order: string[] }
+  //   Write from Dictation: answerData = { text: string }
+  answerData Json?
+  audioUrl   String? // For speaking tasks
+  duration   Int? // Audio duration in seconds
+
+  // Sub-scores (not all apply to every question type)
+  totalScore         Float?
+  contentScore       Float?
+  formScore          Float?
+  grammarScore       Float?
+  vocabularyScore    Float?
+  spellingScore      Float?
+  oralFluencyScore   Float?
+  pronunciationScore Float?
+
+  isEvaluated Boolean   @default(false)
+  evaluatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([attemptId, mockTestQuestionId])
+  @@map("mock_test_response")
+}
+
+// Final scores after all responses are evaluated
+model MockTestScore {
+  id        String          @id @default(cuid())
+  attemptId String          @unique
+  attempt   MockTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  // Communicative skill scores (10–90 PTE scale)
+  speakingScore  Float?
+  writingScore   Float?
+  readingScore   Float?
+  listeningScore Float?
+  overallScore   Float?
+
+  // Enabling skill scores
+  grammarScore       Float?
+  oralFluencyScore   Float?
+  pronunciationScore Float?
+  spellingScore      Float?
+  vocabularyScore    Float?
+  writtenDiscourse   Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mock_test_score")
 }
