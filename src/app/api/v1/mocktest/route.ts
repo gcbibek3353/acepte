@@ -1,0 +1,1 @@
+// route to get all the mock tests in paginated form
