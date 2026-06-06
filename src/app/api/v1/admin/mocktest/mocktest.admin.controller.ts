@@ -50,12 +50,12 @@ async function getQuestionPreview(questionType: MockTestQuestionType, questionId
 
 // ── Mock Test CRUD ─────────────────────────────────────────────────────────────
 
-async function createMockTest(data: { title: string; description?: string; totalTime: number }) {
+async function createMockTest(data: { title: string; description?: string }) {
   return prisma.mockTest.create({
     data: {
       title: data.title,
       description: data.description,
-      totalTime: data.totalTime,
+      totalTime: 0,
     },
   });
 }
@@ -124,7 +124,7 @@ async function getMockTestById(testId: string) {
   return { ...test, sections: enrichedSections };
 }
 
-async function updateMockTest(testId: string, data: { title?: string; description?: string; totalTime?: number }) {
+async function updateMockTest(testId: string, data: { title?: string; description?: string }) {
   const test = await prisma.mockTest.findUnique({ where: { id: testId }, select: { id: true } });
   if (!test) throw new Error("Mock test not found");
 
@@ -133,7 +133,6 @@ async function updateMockTest(testId: string, data: { title?: string; descriptio
     data: {
       ...(data.title !== undefined && { title: data.title }),
       ...(data.description !== undefined && { description: data.description }),
-      ...(data.totalTime !== undefined && { totalTime: data.totalTime }),
     },
   });
 }

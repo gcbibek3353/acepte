@@ -5,9 +5,9 @@ type PteSection = "SPEAKING" | "WRITING" | "READING" | "LISTENING";
 
 interface Props {
   testTitle: string;
-  section: PteSection;
-  questionNumber: number;
-  totalQuestions: number;
+  section: PteSection | null;
+  questionNumber?: number;
+  totalQuestions?: number;
   examRemainingSeconds: number;
 }
 
@@ -40,12 +40,22 @@ export default function ExamHeader({ testTitle, section, questionNumber, totalQu
 
           {/* Centre: section + question counter */}
           <div className="flex items-center gap-3">
-            <span className={cn("rounded-full px-3 py-1 text-xs font-medium", sectionColors[section])}>
-              {section.charAt(0) + section.slice(1).toLowerCase()}
-            </span>
-            <span className="text-sm text-muted-foreground font-medium">
-              Question <span className="text-foreground font-semibold">{questionNumber}</span> / {totalQuestions}
-            </span>
+            {section ? (
+              <>
+                <span className={cn("rounded-full px-3 py-1 text-xs font-medium", sectionColors[section])}>
+                  {section.charAt(0) + section.slice(1).toLowerCase()}
+                </span>
+                {questionNumber !== undefined && totalQuestions !== undefined && (
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Question <span className="text-foreground font-semibold">{questionNumber}</span> / {totalQuestions}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="rounded-full px-3 py-1 text-xs font-medium bg-secondary text-secondary-foreground">
+                Introduction
+              </span>
+            )}
           </div>
 
           {/* Right: overall exam timer */}

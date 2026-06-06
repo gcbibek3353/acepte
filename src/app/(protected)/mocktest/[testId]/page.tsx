@@ -25,7 +25,6 @@ interface MockTest {
   id: string;
   title: string;
   description: string | null;
-  totalTime: number;
   sections: Section[];
 }
 
@@ -192,7 +191,7 @@ export default function MockTestOverviewPage() {
           {/* Stats row */}
           <div className="mt-4 flex flex-wrap gap-3">
             <div className="rounded-md bg-primary/10 px-3 py-1 text-sm font-semibold text-primary inline-flex items-center gap-1.5">
-              <Clock size={13} /> {test.totalTime} min
+              <Clock size={13} /> {test.sections.reduce((s, x) => s + x.timeLimit, 0)} min
             </div>
             <div className="rounded-md bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground inline-flex items-center gap-1.5">
               <BookOpen size={13} /> {totalQuestions} questions

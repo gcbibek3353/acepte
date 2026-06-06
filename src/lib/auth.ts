@@ -12,7 +12,7 @@ export const auth = betterAuth({
     session: {
         cookieCache: {
             enabled: true,
-            maxAge: 5 * 60, // 5 minutes — skip DB lookup on repeated requests
+            maxAge: 7 * 24 * 60 * 60, // 5 minutes — skip DB lookup on repeated requests
         },
     },
 });
