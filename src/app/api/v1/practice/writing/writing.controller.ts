@@ -162,7 +162,7 @@ const postWriteEssayAnswer = async (questionId: string, essay: string, userId: s
                 GLRScore: evaluation.GLRScore,
             }
         })
-
+        prisma.userActivityLog.create({ data: { userId, section: 'WRITING', questionType: 'WRITE_ESSAY' } }).catch(() => {});
         return essayAnswer;
 
     } catch (error) {
@@ -320,6 +320,7 @@ const postSummarizeWrittenTextAnswer = async (questionId: string, summarizedText
                 vocabScore: evaluation.vocabScore,
             }
         })
+        prisma.userActivityLog.create({ data: { userId, section: 'WRITING', questionType: 'SUMMARIZE_WRITTEN_TEXT' } }).catch(() => {});
         return summarizeWrittenTextAnswer;
 
     } catch (error) {

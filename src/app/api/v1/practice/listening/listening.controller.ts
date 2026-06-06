@@ -146,6 +146,7 @@ const postSummarizeSpokenTextAnswer = async (userId: string, questionId: string,
                 totalScore: evaluation.totalScore,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'SUMMARIZE_SPOKEN_TEXT' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -304,7 +305,7 @@ const postMCMAnswer = async (userId: string, questionId: string, answer: string[
                 totalScore: score,
             }
         });
-
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'MCM' } }).catch(() => {});
         return mcmAnswer;
 
     } catch (error) {
@@ -470,7 +471,7 @@ const postFIBAnswer = async (userId: string, questionId: string, answer: string[
                 totalScore: score,
             }
         });
-
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'FIB' } }).catch(() => {});
         return fibAnswer;
 
     } catch (error) {
@@ -614,6 +615,7 @@ const postHCSAnswer = async (userId: string, questionId: string, answerIndex: nu
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'HCS' } }).catch(() => {});
         return HCSAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -755,6 +757,7 @@ const postMCSAnswer = async (userId: string, questionId: string, answerIndex: nu
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'MCS' } }).catch(() => {});
         return MCSAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -892,6 +895,7 @@ const postSMWAnswer = async (userId: string, questionId: string, answerIndex: nu
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'SMW' } }).catch(() => {});
         return SMWAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -1058,7 +1062,7 @@ const postHIWAnswer = async (userId: string, questionId: string, answer: {
                 totalScore: score,
             }
         });
-
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'HIW' } }).catch(() => {});
         return savedAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -1200,6 +1204,7 @@ const postWfDAnswer = async (userId: string, questionId: string, answer: string)
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'LISTENING', questionType: 'WFD' } }).catch(() => {});
         return wfdAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);

@@ -141,6 +141,7 @@ const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl:
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'READ_ALOUD' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -277,6 +278,7 @@ const postRepeatSentenceAnswer = async (userId: string, questionId: string, audi
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'REPEAT_SENTENCE' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -414,6 +416,7 @@ const postDescribeImageAnswer = async (userId: string, questionId: string, audio
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'DESCRIBE_IMAGE' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -551,6 +554,7 @@ const postRetellLectureAnswer = async (userId: string, questionId: string, audio
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'RETELL_LECTURE' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -688,6 +692,7 @@ const postAnswerShortAnswer = async (userId: string, questionId: string, audioUr
                 // totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'ANSWER_SHORT' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -824,6 +829,7 @@ const postSummarizeGroupDiscussionAnswer = async (userId: string, questionId: st
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'GROUP_DISCUSSION' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
@@ -960,6 +966,7 @@ const postRespondToASituationAnswer = async (userId: string, questionId: string,
                 totalScore: totalScore ? totalScore : null
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'SPEAKING', questionType: 'RESPOND_SITUATION' } }).catch(() => {});
         return newAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);

@@ -158,6 +158,7 @@ const postFibDropdownPassageAnswer = async (userId: string, questionId: string, 
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'READING', questionType: 'FIB_DROPDOWN' } }).catch(() => {});
         return fibDropdownAnswer;
     } catch (error) {
         console.log("Errror submitting answer", error);
@@ -311,7 +312,7 @@ const postMcmqPassageAnswer = async (userId: string, questionId: string, answer:
                 totalScore: score,
             }
         });
-
+        prisma.userActivityLog.create({ data: { userId, section: 'READING', questionType: 'MCM' } }).catch(() => {});
         return mcmAnswer;
 
     } catch (error) {
@@ -464,7 +465,7 @@ const postReorderParagraphAnswer = async (userId: string, questionId: string, an
                 totalScore: score
             }
         });
-
+        prisma.userActivityLog.create({ data: { userId, section: 'READING', questionType: 'REORDER_PARAGRAPH' } }).catch(() => {});
         return savedAnswer;
     } catch (error) {
         console.log("Errror submitting answer", error);
@@ -618,6 +619,7 @@ const postFibDragDropPassageAnswer = async (userId: string, questionId: string, 
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'READING', questionType: 'FIB_DRAG_DROP' } }).catch(() => {});
         return fibDragDropAnswer;
     } catch (error) {
         console.log("Errror submitting answer", error);
@@ -753,6 +755,7 @@ const postMcsqPassageAnswer = async (userId: string, questionId: string, answerI
                 totalScore: score,
             }
         });
+        prisma.userActivityLog.create({ data: { userId, section: 'READING', questionType: 'MCS' } }).catch(() => {});
         return MCSAnswer;
     } catch (error) {
         console.error("Error submitting answer:", error);
