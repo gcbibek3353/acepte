@@ -10,7 +10,6 @@ export default function CreateMockTestPage() {
 
   const [title, setTitle]           = useState("");
   const [description, setDescription] = useState("");
-  const [totalTime, setTotalTime]   = useState("120");
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState<string | null>(null);
 
@@ -18,16 +17,14 @@ export default function CreateMockTestPage() {
     e.preventDefault();
     setError(null);
 
-    const time = parseInt(totalTime);
     if (!title.trim()) { setError("Title is required"); return; }
-    if (!time || time <= 0) { setError("Total time must be a positive number"); return; }
 
     setLoading(true);
     try {
       const res = await fetch("/api/v1/admin/mocktest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined, totalTime: time }),
+        body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined }),
       });
       const json = await res.json();
       if (!res.ok) { setError(json.message ?? "Failed to create test"); return; }
@@ -90,27 +87,6 @@ export default function CreateMockTestPage() {
                 disabled={loading}
               />
               <p className="text-xs text-muted-foreground">Shown to students on the test overview page.</p>
-            </div>
-
-            {/* Total time */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Total Duration (minutes) <span className="text-destructive">*</span>
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  value={totalTime}
-                  onChange={(e) => setTotalTime(e.target.value)}
-                  min="1"
-                  className="w-32 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  disabled={loading}
-                />
-                <span className="text-sm text-muted-foreground">minutes</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Standard PTE Academic is 120 minutes. This is the overall timer shown to students.
-              </p>
             </div>
 
             {/* Error */}

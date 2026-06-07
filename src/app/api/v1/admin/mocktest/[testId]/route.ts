@@ -30,13 +30,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ te
 
     const { testId } = await params;
     const body = await req.json();
-    const { title, description, totalTime } = body;
+    const { title, description } = body;
 
-    if (totalTime !== undefined && (typeof totalTime !== "number" || totalTime <= 0)) {
-      return NextResponse.json({ success: false, message: "totalTime must be a positive number (minutes)", data: null }, { status: 400 });
-    }
-
-    const test = await updateMockTest(testId, { title, description, totalTime });
+    const test = await updateMockTest(testId, { title, description });
 
     return NextResponse.json({ success: true, message: "Mock test updated successfully", data: test }, { status: 200 });
   } catch (error: any) {

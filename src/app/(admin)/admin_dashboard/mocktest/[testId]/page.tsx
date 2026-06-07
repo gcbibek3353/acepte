@@ -54,7 +54,6 @@ export default function AdminMockTestEditPage() {
   const [editingMeta, setEditingMeta] = useState(false);
   const [metaTitle, setMetaTitle]     = useState("");
   const [metaDesc, setMetaDesc]       = useState("");
-  const [metaTime, setMetaTime]       = useState("");
   const [savingMeta, setSavingMeta]   = useState(false);
   const [metaError, setMetaError]     = useState<string | null>(null);
 
@@ -77,7 +76,6 @@ export default function AdminMockTestEditPage() {
       setTest(json.data);
       setMetaTitle(json.data.title);
       setMetaDesc(json.data.description ?? "");
-      setMetaTime(String(json.data.totalTime));
     } catch {
       setError("Network error");
     } finally {
@@ -98,12 +96,11 @@ export default function AdminMockTestEditPage() {
         body: JSON.stringify({
           title: metaTitle.trim(),
           description: metaDesc.trim() || null,
-          totalTime: parseInt(metaTime),
         }),
       });
       const json = await res.json();
       if (!res.ok) { setMetaError(json.message); return; }
-      setTest((prev) => prev ? { ...prev, title: json.data.title, description: json.data.description, totalTime: json.data.totalTime } : prev);
+      setTest((prev) => prev ? { ...prev, title: json.data.title, description: json.data.description } : prev);
       setEditingMeta(false);
     } catch {
       setMetaError("Network error");
@@ -261,16 +258,6 @@ export default function AdminMockTestEditPage() {
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                 placeholder="Description (optional)"
               />
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  value={metaTime}
-                  onChange={(e) => setMetaTime(e.target.value)}
-                  min="1"
-                  className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-                <span className="text-sm text-muted-foreground">minutes total</span>
-              </div>
               {metaError && <p className="text-sm text-destructive">{metaError}</p>}
               <div className="flex gap-2">
                 <Button onClick={handleSaveMeta} disabled={savingMeta} className="gap-2">
@@ -293,7 +280,7 @@ export default function AdminMockTestEditPage() {
                   <p className="text-sm text-muted-foreground mb-2">{test.description}</p>
                 )}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{test.totalTime} min total</span>
+                  <span>{test.sections.reduce((s, x) => s + x.timeLimit, 0)} min total</span>
                   <span>{test._count.attempts} attempt{test._count.attempts !== 1 ? "s" : ""}</span>
                   <span>{test.sections.length} section{test.sections.length !== 1 ? "s" : ""}</span>
                 </div>

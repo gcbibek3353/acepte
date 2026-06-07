@@ -1,11 +1,65 @@
+import "dotenv/config"
+import fs from "fs"
+import path from "path"
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import { v4 as uuid } from "uuid"
 import prisma from "@/lib/prisma"
+
+const AUDIO_DIR = path.resolve(__dirname, "fillTheBlanks")
+const SUBDIR = "listening-fill-blanks"
+
+const accessKeyId = process.env.AWS_ACCESS_KEY_ID!
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY!
+const bucketName = process.env.BUCKET_NAME!
+const region = process.env.AWS_REGION || "us-east-1"
+const endpoint = process.env.S3_ENDPOINT?.replace(/\/$/, "")
+
+const s3Client = new S3Client({
+  region,
+  endpoint: endpoint || undefined,
+  credentials: { accessKeyId, secretAccessKey },
+})
+
+const buildObjectUrl = (key: string) => {
+  if (endpoint) return `${endpoint}/${bucketName}/${key}`
+  if (region === "us-east-1") return `https://${bucketName}.s3.amazonaws.com/${key}`
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`
+}
+
+const CONTENT_TYPES: Record<string, string> = {
+  ".mp3": "audio/mpeg",
+  ".webm": "audio/webm",
+  ".wav": "audio/wav",
+  ".m4a": "audio/mp4",
+  ".ogg": "audio/ogg",
+}
+
+async function uploadAudioToS3(audioFile: string): Promise<string> {
+  const filePath = path.join(AUDIO_DIR, audioFile)
+  const ext = path.extname(audioFile).toLowerCase()
+  const contentType = CONTENT_TYPES[ext] ?? "audio/mpeg"
+
+  const buffer = fs.readFileSync(filePath)
+  const key = `${SUBDIR}/${uuid()}${ext}`
+
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    })
+  )
+
+  return buildObjectUrl(key)
+}
 
 const questions = [
   {
     questionId: "FIB001",
     title: "Climate Change Impact",
     audioTranscribedText: "Climate change is having a significant impact on our planet. Rising temperatures are causing ice caps to melt, leading to higher sea levels. Extreme weather events are becoming more frequent and severe. Scientists agree that human activities are the primary cause of these changes. We must take immediate action to reduce carbon emissions and protect our environment for future generations.",
-    audioUrl: "https://example.com/audio/climate-impact.mp3",
+    audioFile: "climate-impact.mp3",
     passage: "Climate change is having a {1} impact on our planet. Rising temperatures are causing ice caps to {2}, leading to higher sea levels. Extreme weather events are becoming more {3} and severe. Scientists agree that human activities are the primary {4} of these changes. We must take immediate action to reduce carbon emissions and {5} our environment for future generations.",
     difficulty: "MEDIUM" as const,
     blanks: [
@@ -20,7 +74,7 @@ const questions = [
     questionId: "FIB002",
     title: "Benefits of Exercise",
     audioTranscribedText: "Regular exercise provides numerous benefits for both physical and mental health. It helps strengthen muscles and bones, improving overall fitness. Exercise also boosts the immune system, making the body more resistant to diseases. Additionally, physical activity releases endorphins, which are natural mood enhancers that reduce stress and anxiety.",
-    audioUrl: "https://example.com/audio/exercise-benefits.mp3",
+    audioFile: "exercise-benefits.mp3",
     passage: "Regular exercise provides numerous {1} for both physical and mental health. It helps {2} muscles and bones, improving overall fitness. Exercise also boosts the {3} system, making the body more resistant to diseases. Additionally, physical activity releases {4}, which are natural mood enhancers that reduce stress and {5}.",
     difficulty: "EASY" as const,
     blanks: [
@@ -35,7 +89,7 @@ const questions = [
     questionId: "FIB003",
     title: "Technology in Education",
     audioTranscribedText: "Technology has revolutionized the way students learn and teachers educate. Digital platforms enable interactive learning experiences that engage students more effectively. Online resources provide access to vast amounts of information and educational materials. However, the integration of technology requires proper training for educators and adequate infrastructure to ensure successful implementation.",
-    audioUrl: "https://example.com/audio/tech-education.mp3",
+    audioFile: "tech-education.mp3",
     passage: "Technology has {1} the way students learn and teachers educate. Digital platforms enable {2} learning experiences that engage students more effectively. Online resources provide {3} to vast amounts of information and educational materials. However, the integration of technology requires proper {4} for educators and adequate infrastructure to ensure successful {5}.",
     difficulty: "HARD" as const,
     blanks: [
@@ -50,7 +104,7 @@ const questions = [
     questionId: "FIB004",
     title: "Healthy Eating Habits",
     audioTranscribedText: "Maintaining a balanced diet is essential for good health. Fresh fruits and vegetables provide important vitamins and minerals that our bodies need. Whole grains offer fiber and sustained energy throughout the day. It's important to limit processed foods and sugary drinks. Drinking plenty of water helps maintain proper hydration and supports bodily functions.",
-    audioUrl: "https://example.com/audio/healthy-eating.mp3",
+    audioFile: "healthy-eating.mp3",
     passage: "Maintaining a {1} diet is essential for good health. Fresh fruits and vegetables provide important {2} and minerals that our bodies need. Whole grains offer fiber and sustained {3} throughout the day. It's important to limit {4} foods and sugary drinks. Drinking plenty of water helps maintain proper {5} and supports bodily functions.",
     difficulty: "EASY" as const,
     blanks: [
@@ -65,7 +119,7 @@ const questions = [
     questionId: "FIB005",
     title: "Space Exploration",
     audioTranscribedText: "Space exploration has led to numerous scientific discoveries and technological advancements. Satellites orbiting Earth provide crucial data for weather forecasting and communication systems. The International Space Station serves as a laboratory for conducting experiments in microgravity. Future missions to Mars and other planets will expand our understanding of the universe and potentially discover signs of extraterrestrial life.",
-    audioUrl: "https://example.com/audio/space-exploration.mp3",
+    audioFile: "space-exploration.mp3",
     passage: "Space exploration has led to numerous scientific {1} and technological advancements. Satellites {2} Earth provide crucial data for weather forecasting and communication systems. The International Space Station serves as a {3} for conducting experiments in microgravity. Future missions to Mars and other planets will expand our {4} of the universe and potentially discover signs of {5} life.",
     difficulty: "HARD" as const,
     blanks: [
@@ -80,7 +134,7 @@ const questions = [
     questionId: "FIB006",
     title: "Renewable Energy Sources",
     audioTranscribedText: "Renewable energy sources are becoming increasingly important for sustainable development. Solar panels convert sunlight into electricity without producing harmful emissions. Wind turbines generate clean energy by harnessing the power of moving air. Hydroelectric dams use flowing water to produce electricity. These renewable sources help reduce our dependence on fossil fuels and combat climate change.",
-    audioUrl: "https://example.com/audio/renewable-energy.mp3",
+    audioFile: "renewable-energy.mp3",
     passage: "Renewable energy sources are becoming increasingly {1} for sustainable development. Solar panels {2} sunlight into electricity without producing harmful emissions. Wind turbines generate clean energy by {3} the power of moving air. Hydroelectric dams use flowing water to produce {4}. These renewable sources help reduce our {5} on fossil fuels and combat climate change.",
     difficulty: "MEDIUM" as const,
     blanks: [
@@ -95,7 +149,7 @@ const questions = [
     questionId: "FIB007",
     title: "Ocean Conservation",
     audioTranscribedText: "Ocean conservation is critical for maintaining marine ecosystems and biodiversity. Pollution from plastic waste poses a serious threat to marine life. Overfishing has depleted many fish populations worldwide. Marine protected areas help preserve important habitats and allow fish stocks to recover. Individual actions such as reducing plastic use and supporting sustainable seafood can make a significant difference.",
-    audioUrl: "https://example.com/audio/ocean-conservation.mp3",
+    audioFile: "ocean-conservation.mp3",
     passage: "Ocean conservation is {1} for maintaining marine ecosystems and biodiversity. Pollution from plastic waste poses a serious {2} to marine life. Overfishing has {3} many fish populations worldwide. Marine protected areas help preserve important {4} and allow fish stocks to recover. Individual actions such as reducing plastic use and supporting sustainable seafood can make a significant {5}.",
     difficulty: "MEDIUM" as const,
     blanks: [
@@ -110,7 +164,7 @@ const questions = [
     questionId: "FIB008",
     title: "Artificial Intelligence",
     audioTranscribedText: "Artificial intelligence is transforming various industries and aspects of daily life. Machine learning algorithms can analyze vast amounts of data to identify patterns and make predictions. AI applications include voice assistants, autonomous vehicles, and medical diagnostic tools. However, the development of AI also raises ethical concerns about privacy, employment, and decision-making transparency that society must address.",
-    audioUrl: "https://example.com/audio/artificial-intelligence.mp3",
+    audioFile: "artificial-intelligence.mp3",
     passage: "Artificial intelligence is {1} various industries and aspects of daily life. Machine learning algorithms can {2} vast amounts of data to identify patterns and make predictions. AI applications include voice assistants, {3} vehicles, and medical diagnostic tools. However, the development of AI also raises {4} concerns about privacy, employment, and decision-making {5} that society must address.",
     difficulty: "HARD" as const,
     blanks: [
@@ -126,47 +180,55 @@ const questions = [
 const createQuestions = async () => {
   try {
     console.log("Starting to add Fill in the Blanks questions to the database...")
-    
+
     for (const question of questions) {
       const existingQuestion = await prisma.listeningFillBlankPassage.findUnique({
         where: { questionId: question.questionId }
       })
-      
+
       if (existingQuestion) {
         console.log(`Question ${question.questionId} already exists, skipping...`)
         continue
       }
-      
-      // Separate blanks from main question data
-      const { blanks, ...passageData } = question
-      
-      // Create the passage first
+
+      console.log(`⬆️  Uploading audio for ${question.questionId}: ${question.audioFile}`)
+      const audioUrl = await uploadAudioToS3(question.audioFile)
+      console.log(`   → ${audioUrl}`)
+
+      const { blanks } = question
+      const passageData = {
+        questionId: question.questionId,
+        title: question.title,
+        audioTranscribedText: question.audioTranscribedText,
+        passage: question.passage,
+        difficulty: question.difficulty,
+        audioUrl,
+      }
+
       const createdPassage = await prisma.listeningFillBlankPassage.create({
         data: passageData
       })
-      
-      // Then create each blank separately
+
       for (const blank of blanks) {
         await prisma.listeningFillBlank.create({
           data: {
             passageId: createdPassage.id,
             position: blank.position,
-            correctWord: blank.correctWord.trim().toLowerCase() // Store trimmed and lowercased
+            correctWord: blank.correctWord.trim().toLowerCase()
           }
         })
       }
-      
+
       console.log(`✅ Created question: ${createdPassage.questionId} - ${createdPassage.title} with ${blanks.length} blanks`)
     }
-    
+
     console.log("✅ All Fill in the Blanks questions have been processed successfully!")
-    
-    // Display summary
+
     const totalQuestions = await prisma.listeningFillBlankPassage.count()
     const totalBlanks = await prisma.listeningFillBlank.count()
     console.log(`📊 Total Fill in the Blanks questions in database: ${totalQuestions}`)
     console.log(`📊 Total blanks in database: ${totalBlanks}`)
-    
+
   } catch (error) {
     console.error("❌ Error creating questions:", error)
   } finally {
@@ -174,5 +236,4 @@ const createQuestions = async () => {
   }
 }
 
-// Execute the function
 createQuestions()

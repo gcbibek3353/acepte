@@ -30,17 +30,13 @@ export async function POST(req: NextRequest) {
     if (authResult instanceof NextResponse) return authResult;
 
     const body = await req.json();
-    const { title, description, totalTime } = body;
+    const { title, description } = body;
 
-    if (!title || !totalTime) {
-      return NextResponse.json({ success: false, message: "title and totalTime are required", data: null }, { status: 400 });
+    if (!title) {
+      return NextResponse.json({ success: false, message: "title is required", data: null }, { status: 400 });
     }
 
-    if (typeof totalTime !== "number" || totalTime <= 0) {
-      return NextResponse.json({ success: false, message: "totalTime must be a positive number (minutes)", data: null }, { status: 400 });
-    }
-
-    const test = await createMockTest({ title, description, totalTime });
+    const test = await createMockTest({ title, description });
 
     return NextResponse.json({ success: true, message: "Mock test created successfully", data: test }, { status: 201 });
   } catch (error) {

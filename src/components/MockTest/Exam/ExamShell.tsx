@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ExamHeader from "./ExamHeader";
+import ExamIntro from "./ExamIntro";
 import SectionTransition from "./SectionTransition";
 import QuestionNavigator from "./QuestionNavigator";
 import QuestionRenderer from "./QuestionRenderer";
@@ -37,7 +38,7 @@ interface AttemptState {
   id: string;
   status: string;
   startedAt: string | null;
-  mockTest: { id: string; title: string; totalTime: number; sections: SectionData[] };
+  mockTest: { id: string; title: string; sections: SectionData[] };
   sectionAttempts: SectionAttempt[];
   responses: { mockTestQuestionId: string; answerData: any; audioUrl: string | null }[];
 }
@@ -80,6 +81,9 @@ export default function ExamShell({ testId, attemptId }: Props) {
   // current answer being built (resets when question changes)
   const [pendingAnswer, setPendingAnswer] = useState<any>(null);
   const pendingAudioRef = useRef<File | null>(null);
+
+  // ── Intro screen (shown once before any section starts) ──────────────────
+  const [showIntro, setShowIntro] = useState(false);
 
   // ── Section transition ────────────────────────────────────────────────────
   const [showTransition, setShowTransition] = useState(false);
@@ -137,7 +141,12 @@ export default function ExamShell({ testId, attemptId }: Props) {
       const activeSectionAttempt = data.sectionAttempts.find((s) => s.section === sorted[activeSectionIdx]?.section);
       if (activeSection && (!activeSectionAttempt || activeSectionAttempt.status === "NOT_STARTED")) {
         setTransitionSection(activeSection);
-        setShowTransition(true);
+        // Show intro screen if nothing has started yet; otherwise go straight to section transition
+        if (data.sectionAttempts.length === 0) {
+          setShowIntro(true);
+        } else {
+          setShowTransition(true);
+        }
       }
     } catch {
       setLoadError("Network error. Please refresh.");
@@ -150,15 +159,17 @@ export default function ExamShell({ testId, attemptId }: Props) {
 
   // ── Exam-level countdown (ticks every second) ─────────────────────────────
   useEffect(() => {
-    if (!attempt?.startedAt || !attempt.mockTest.totalTime) return;
+    if (!attempt?.startedAt) return;
+    const totalMinutes = attempt.mockTest.sections.reduce((s, x) => s + x.timeLimit, 0);
+    if (!totalMinutes) return;
     const calcRemaining = () => {
       const elapsed = Math.floor((Date.now() - new Date(attempt.startedAt!).getTime()) / 1000);
-      return Math.max(0, attempt.mockTest.totalTime * 60 - elapsed);
+      return Math.max(0, totalMinutes * 60 - elapsed);
     };
     setExamRemaining(calcRemaining());
     const id = setInterval(() => setExamRemaining(calcRemaining()), 1000);
     return () => clearInterval(id);
-  }, [attempt?.startedAt, attempt?.mockTest.totalTime]);
+  }, [attempt?.startedAt, attempt?.mockTest.sections]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -332,7 +343,36 @@ export default function ExamShell({ testId, attemptId }: Props) {
     );
   }
 
-  const isSpeakingOrWriting = ["SPEAKING", "WRITING"].includes(currentSection.section);
+  // ── Intro screen — same exam layout, intro content instead of a question ──
+  if (showIntro) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <ExamHeader
+          testTitle={attempt.mockTest.title}
+          section={null}
+          examRemainingSeconds={0}
+        />
+        <div className="flex-1 container mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <div className="flex gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="rounded-lg border border-border bg-card shadow-sm p-6 mb-4">
+                <ExamIntro onNext={() => { setShowIntro(false); setShowTransition(true); }} />
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => { setShowIntro(false); setShowTransition(true); }}
+                  className="gap-2"
+                >
+                  Next <ChevronRight size={14} />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isReading = currentSection.section === "READING";
   const qNumber = questionIdx + 1;
   const totalQ  = currentSection.questions.length;

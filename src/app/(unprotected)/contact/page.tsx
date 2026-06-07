@@ -43,19 +43,19 @@ const contactDetails = [
   {
     icon: Phone,
     label: "Call us",
-    value: "+61 2 9876 5432",
-    href: "tel:+61298765432",
+    value: "+977 1 4567 890",
+    href: "tel:+97714567890",
   },
   {
     icon: MapPin,
     label: "Visit us",
-    value: "Level 5, 123 George Street\nSydney NSW 2000, Australia",
+    value: "Durbarmarg, Kathmandu 44600\nBagmati Province, Nepal",
     href: null,
   },
   {
     icon: Clock,
     label: "Business hours",
-    value: "Mon–Fri, 9am–6pm AEST",
+    value: "Sun–Fri, 9am–6pm NST",
     href: null,
   },
 ]
@@ -147,7 +147,7 @@ export default function ContactPage() {
                 </blockquote>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   We work with universities, colleges, and language schools across
-                  Australia and beyond. Our team will create a tailored plan that fits
+                  Nepal and beyond. Our team will create a tailored plan that fits
                   your institution&apos;s needs.
                 </p>
               </div>
@@ -251,7 +251,7 @@ export default function ContactPage() {
                           name="institutionName"
                           type="text"
                           required
-                          placeholder="e.g. Sydney Language Academy"
+                          placeholder="e.g. Kathmandu Language Academy"
                           value={form.institutionName}
                           onChange={handleChange}
                           className={INPUT_CLASS}
@@ -289,7 +289,7 @@ export default function ContactPage() {
                           name="email"
                           type="email"
                           required
-                          placeholder="you@institution.edu"
+                          placeholder="you@institution.edu.np"
                           value={form.email}
                           onChange={handleChange}
                           className={INPUT_CLASS}
@@ -305,7 +305,7 @@ export default function ContactPage() {
                           id="phone"
                           name="phone"
                           type="tel"
-                          placeholder="+61 2 0000 0000"
+                          placeholder="+977 98XXXXXXXX"
                           value={form.phone}
                           onChange={handleChange}
                           className={INPUT_CLASS}
