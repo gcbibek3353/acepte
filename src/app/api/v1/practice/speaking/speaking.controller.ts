@@ -1,6 +1,6 @@
 
 import { SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion } from "@/generated/prisma";
-import { evaluateAudioWithAudio, evaluateAudioWithImage, evaluateaudioWithText } from "@/lib/ai/google-voice";
+import { evaluateAudioWithAudio, evaluateAudioWithImage, evaluateaudioWithText, evaluateReadALoud } from "@/lib/ai/google-voice";
 import prisma from "@/lib/prisma";
 
 interface QuestionQuery {
@@ -127,7 +127,8 @@ const postReadAloudAnswer = async (userId: string, questionId: string, audioUrl:
         if (!question) {
             throw new Error("Question not found");
         }
-        const { contentScore, fluencyScore, pronunciationScore } = await evaluateaudioWithText(audioUrl, question.passage);
+        const { contentScore, fluencyScore, pronunciationScore } = await evaluateReadALoud(audioUrl, question.passage);
+        console.log("contentScore:", contentScore, "fluencyScore:", fluencyScore, "pronunciationScore:", pronunciationScore);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
         const newAnswer = await prisma.speakingReadAloudAnswer.create({
             data: {
