@@ -1,10 +1,16 @@
+import "dotenv/config"
+import path from "path"
 import prisma from "@/lib/prisma"
+import { uploadAudioToS3 } from "./uploadAudio"
+
+const AUDIO_DIR = path.resolve(__dirname, "MultipleChoiceSingle")
+const S3_SUBDIR = "listening-multiple-choice-single"
 
 const questions = [
   {
     questionId: "MCS001",
     title: "Climate Change Discussion",
-    audioUrl: "https://example.com/audio/climate-change-discussion.mp3",
+    audioFile: "climate-change-discussion.mp3",
     questionText: "What is the main concern about climate change mentioned in the recording?",
     options: [
       "Economic impacts on developing countries",
@@ -18,7 +24,7 @@ const questions = [
   {
     questionId: "MCS002",
     title: "University Library Services",
-    audioUrl: "https://example.com/audio/library-services.mp3",
+    audioFile: "library-services.mp3",
     questionText: "According to the librarian, what is the best way to access digital resources?",
     options: [
       "Visit the library in person",
@@ -32,7 +38,7 @@ const questions = [
   {
     questionId: "MCS003",
     title: "Renewable Energy Research",
-    audioUrl: "https://example.com/audio/renewable-energy-research.mp3",
+    audioFile: "renewable-energy-research.mp3",
     questionText: "What does the researcher say is the biggest challenge in solar energy adoption?",
     options: [
       "High initial installation costs",
@@ -46,7 +52,7 @@ const questions = [
   {
     questionId: "MCS004",
     title: "Student Accommodation Options",
-    audioUrl: "https://example.com/audio/student-accommodation.mp3",
+    audioFile: "student-accommodation.mp3",
     questionText: "What type of accommodation does the advisor recommend for first-year students?",
     options: [
       "Private rental apartments",
@@ -60,7 +66,7 @@ const questions = [
   {
     questionId: "MCS005",
     title: "Artificial Intelligence in Medicine",
-    audioUrl: "https://example.com/audio/ai-medicine.mp3",
+    audioFile: "ai-medicine.mp3",
     questionText: "According to the speaker, what is the primary benefit of AI in medical diagnosis?",
     options: [
       "Reduces healthcare costs significantly",
@@ -74,7 +80,7 @@ const questions = [
   {
     questionId: "MCS006",
     title: "Campus Transportation System",
-    audioUrl: "https://example.com/audio/campus-transportation.mp3",
+    audioFile: "campus-transportation.mp3",
     questionText: "What is the recommended way to travel between campus buildings?",
     options: [
       "Walking on designated pathways",
@@ -88,7 +94,7 @@ const questions = [
   {
     questionId: "MCS007",
     title: "Urban Planning Strategies",
-    audioUrl: "https://example.com/audio/urban-planning.mp3",
+    audioFile: "urban-planning.mp3",
     questionText: "What does the urban planner identify as the most effective strategy for reducing traffic congestion?",
     options: [
       "Building more highways and roads",
@@ -102,7 +108,7 @@ const questions = [
   {
     questionId: "MCS008",
     title: "Academic Writing Workshop",
-    audioUrl: "https://example.com/audio/academic-writing.mp3",
+    audioFile: "academic-writing.mp3",
     questionText: "What does the instructor emphasize as the most important aspect of academic writing?",
     options: [
       "Using complex vocabulary and sentence structures",
@@ -116,7 +122,7 @@ const questions = [
   {
     questionId: "MCS009",
     title: "Environmental Conservation Project",
-    audioUrl: "https://example.com/audio/conservation-project.mp3",
+    audioFile: "conservation-project.mp3",
     questionText: "What is the primary goal of the conservation project mentioned in the recording?",
     options: [
       "Protecting endangered wildlife species",
@@ -130,7 +136,7 @@ const questions = [
   {
     questionId: "MCS010",
     title: "Technology in Education",
-    audioUrl: "https://example.com/audio/tech-education.mp3",
+    audioFile: "tech-education.mp3",
     questionText: "According to the education expert, what is the main advantage of online learning platforms?",
     options: [
       "They are cheaper than traditional education",
@@ -144,7 +150,7 @@ const questions = [
   {
     questionId: "MCS011",
     title: "Health and Nutrition Advice",
-    audioUrl: "https://example.com/audio/health-nutrition.mp3",
+    audioFile: "health-nutrition.mp3",
     questionText: "What does the nutritionist recommend as the best approach to maintaining a healthy diet?",
     options: [
       "Following strict calorie counting",
@@ -158,7 +164,7 @@ const questions = [
   {
     questionId: "MCS012",
     title: "Space Exploration Mission",
-    audioUrl: "https://example.com/audio/space-mission.mp3",
+    audioFile: "space-mission.mp3",
     questionText: "What is the main objective of the upcoming Mars mission discussed in the recording?",
     options: [
       "Establishing a permanent human colony",
@@ -174,30 +180,41 @@ const questions = [
 const createQuestions = async () => {
   try {
     console.log("Starting to add Multiple Choice Single Answer questions to the database...")
-    
+
     for (const question of questions) {
       const existingQuestion = await prisma.listeningMCSPassage.findUnique({
         where: { questionId: question.questionId }
       })
-      
+
       if (existingQuestion) {
         console.log(`Question ${question.questionId} already exists, skipping...`)
         continue
       }
-      
+
+      console.log(`⬆️  Uploading audio for ${question.questionId}: ${question.audioFile}`)
+      const audioUrl = await uploadAudioToS3(AUDIO_DIR, question.audioFile, S3_SUBDIR)
+      console.log(`   → ${audioUrl}`)
+
       const createdQuestion = await prisma.listeningMCSPassage.create({
-        data: question
+        data: {
+          questionId: question.questionId,
+          title: question.title,
+          questionText: question.questionText,
+          options: question.options,
+          correctOptionIndex: question.correctOptionIndex,
+          difficulty: question.difficulty,
+          audioUrl,
+        }
       })
-      
+
       console.log(`✅ Created question: ${createdQuestion.questionId} - ${createdQuestion.title}`)
     }
-    
+
     console.log("✅ All Multiple Choice Single Answer questions have been processed successfully!")
-    
-    // Display summary
+
     const totalQuestions = await prisma.listeningMCSPassage.count()
     console.log(`📊 Total Multiple Choice Single Answer questions in database: ${totalQuestions}`)
-    
+
   } catch (error) {
     console.error("❌ Error creating questions:", error)
   } finally {
@@ -205,5 +222,4 @@ const createQuestions = async () => {
   }
 }
 
-// Execute the function
 createQuestions()

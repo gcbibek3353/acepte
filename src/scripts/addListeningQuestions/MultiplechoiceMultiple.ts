@@ -1,4 +1,10 @@
+import "dotenv/config"
+import path from "path"
 import prisma from "@/lib/prisma"
+import { uploadAudioToS3 } from "./uploadAudio"
+
+const AUDIO_DIR = path.resolve(__dirname, "MultiplechoiceMultiple")
+const S3_SUBDIR = "listening-multiple-choice-multiple"
 
 const questions = [
   {
@@ -6,7 +12,7 @@ const questions = [
     title: "Climate Change Solutions",
     questionText: "Based on the audio, which of the following are mentioned as solutions to climate change? Select all that apply.",
     audioTranscribedText: "To combat climate change, experts recommend several key strategies. First, transitioning to renewable energy sources like solar and wind power can significantly reduce carbon emissions. Second, improving energy efficiency in buildings and transportation systems helps minimize overall energy consumption. Third, protecting and restoring forests acts as natural carbon sinks. Fourth, developing carbon capture technologies can remove existing CO2 from the atmosphere. Finally, implementing carbon pricing policies encourages businesses to reduce their emissions. These combined efforts are essential for limiting global temperature rise.",
-    audioUrl: "https://example.com/audio/climate-solutions.mp3",
+    audioFile: "climate-solutions.mp3",
     difficulty: "MEDIUM" as const,
     options: [
       { text: "Transitioning to renewable energy sources", isCorrect: true },
@@ -22,7 +28,7 @@ const questions = [
     title: "Benefits of Remote Work",
     questionText: "According to the speaker, what are the advantages of remote work? Choose all correct answers.",
     audioTranscribedText: "Remote work has transformed the modern workplace and offers numerous benefits. Employees enjoy increased flexibility in their schedules, allowing for better work-life balance. Companies save money on office space and utilities, reducing overhead costs. Workers eliminate daily commuting, which saves time and reduces stress. Productivity often increases as employees have fewer office distractions. Access to a global talent pool allows companies to hire the best candidates regardless of location. However, remote work also presents challenges such as potential isolation and communication difficulties.",
-    audioUrl: "https://example.com/audio/remote-work.mp3",
+    audioFile: "remote-work.mp3",
     difficulty: "EASY" as const,
     options: [
       { text: "Increased flexibility for employees", isCorrect: true },
@@ -38,7 +44,7 @@ const questions = [
     title: "Healthy Eating Habits",
     questionText: "Which foods and practices are recommended for maintaining a healthy diet? Select all that are mentioned.",
     audioTranscribedText: "Maintaining a healthy diet involves several key principles. First, include plenty of fruits and vegetables in your daily meals, aiming for at least five servings per day. Whole grains should replace refined grains whenever possible. Lean proteins such as fish, chicken, and legumes are essential for muscle health. Staying hydrated by drinking adequate water throughout the day is crucial. Limiting processed foods and added sugars helps prevent various health issues. Regular meal timing and portion control also play important roles in maintaining good nutrition.",
-    audioUrl: "https://example.com/audio/healthy-eating.mp3",
+    audioFile: "healthy-eating.mp3",
     difficulty: "EASY" as const,
     options: [
       { text: "Eating plenty of fruits and vegetables", isCorrect: true },
@@ -54,7 +60,7 @@ const questions = [
     title: "Artificial Intelligence Applications",
     questionText: "What are the current applications of artificial intelligence mentioned in the audio? Choose all correct options.",
     audioTranscribedText: "Artificial intelligence is revolutionizing various industries with diverse applications. In healthcare, AI assists in medical diagnosis and drug discovery, improving patient outcomes. The automotive industry uses AI for developing autonomous vehicles and advanced driver assistance systems. Financial services employ AI for fraud detection and algorithmic trading. In education, AI powers personalized learning platforms and automated grading systems. Entertainment platforms use AI for content recommendation and creation. However, concerns about job displacement and ethical implications require careful consideration as AI technology advances.",
-    audioUrl: "https://example.com/audio/ai-applications.mp3",
+    audioFile: "ai-applications.mp3",
     difficulty: "HARD" as const,
     options: [
       { text: "Medical diagnosis and drug discovery", isCorrect: true },
@@ -71,7 +77,7 @@ const questions = [
     title: "Sustainable Transportation",
     questionText: "Based on the audio, which transportation methods are considered environmentally sustainable? Select all that apply.",
     audioTranscribedText: "Sustainable transportation is crucial for reducing environmental impact and creating livable cities. Public transportation systems like buses, trains, and light rail significantly reduce per-capita emissions compared to private vehicles. Cycling and walking are zero-emission options that also promote physical health. Electric vehicles powered by renewable energy sources offer a cleaner alternative to gasoline cars. Car-sharing and ride-sharing services can reduce the total number of vehicles needed. However, traditional gasoline and diesel vehicles remain major contributors to air pollution and greenhouse gas emissions.",
-    audioUrl: "https://example.com/audio/sustainable-transport.mp3",
+    audioFile: "sustainable-transport.mp3",
     difficulty: "MEDIUM" as const,
     options: [
       { text: "Public transportation systems", isCorrect: true },
@@ -87,7 +93,7 @@ const questions = [
     title: "Digital Privacy and Security",
     questionText: "What measures are mentioned for protecting digital privacy and security? Choose all correct answers.",
     audioTranscribedText: "Protecting digital privacy and security requires multiple layers of defense. Using strong, unique passwords for each account is fundamental. Two-factor authentication adds an extra security layer. Regular software updates patch security vulnerabilities. Being cautious about sharing personal information on social media prevents identity theft. Using secure, encrypted communication tools protects sensitive conversations. Avoiding public Wi-Fi for sensitive activities reduces exposure to hackers. Additionally, being aware of phishing attempts and suspicious links helps prevent malware infections.",
-    audioUrl: "https://example.com/audio/digital-security.mp3",
+    audioFile: "digital-security.mp3",
     difficulty: "MEDIUM" as const,
     options: [
       { text: "Using strong, unique passwords", isCorrect: true },
@@ -104,7 +110,7 @@ const questions = [
     title: "Space Exploration Benefits",
     questionText: "According to the audio, what benefits does space exploration provide? Select all that are mentioned.",
     audioTranscribedText: "Space exploration has yielded numerous benefits for humanity beyond scientific discovery. Satellite technology enables global communications, weather forecasting, and GPS navigation. Medical research conducted in space has led to new treatments and medical devices. Advanced materials developed for spacecraft have found applications in everyday products. Earth observation satellites help monitor climate change and natural disasters. The International Space Station serves as a platform for scientific experiments impossible on Earth. Additionally, space exploration inspires future generations to pursue science and engineering careers.",
-    audioUrl: "https://example.com/audio/space-exploration.mp3",
+    audioFile: "space-exploration.mp3",
     difficulty: "HARD" as const,
     options: [
       { text: "Global communications through satellites", isCorrect: true },
@@ -121,7 +127,7 @@ const questions = [
     title: "Mental Health Awareness",
     questionText: "What factors contribute to good mental health according to the speaker? Choose all correct options.",
     audioTranscribedText: "Maintaining good mental health requires attention to multiple factors. Regular physical exercise releases endorphins and reduces stress hormones. Quality sleep is essential for emotional regulation and cognitive function. Strong social connections and supportive relationships provide emotional resilience. Mindfulness practices and meditation can reduce anxiety and improve focus. Professional counseling or therapy offers valuable support when needed. Limiting excessive social media use helps prevent comparison and anxiety. Additionally, pursuing hobbies and interests contributes to personal fulfillment and stress relief.",
-    audioUrl: "https://example.com/audio/mental-health.mp3",
+    audioFile: "mental-health.mp3",
     difficulty: "EASY" as const,
     options: [
       { text: "Regular physical exercise", isCorrect: true },
@@ -138,26 +144,33 @@ const questions = [
 const createQuestions = async () => {
   try {
     console.log("Starting to add Multiple Choice Multiple Answer questions to the database...")
-    
+
     for (const question of questions) {
       const existingQuestion = await prisma.listeningMCMPassage.findUnique({
         where: { questionId: question.questionId }
       })
-      
+
       if (existingQuestion) {
         console.log(`Question ${question.questionId} already exists, skipping...`)
         continue
       }
-      
-      // Separate options from main question data
-      const { options, ...passageData } = question
-      
-      // Create the passage first
+
+      console.log(`⬆️  Uploading audio for ${question.questionId}: ${question.audioFile}`)
+      const audioUrl = await uploadAudioToS3(AUDIO_DIR, question.audioFile, S3_SUBDIR)
+      console.log(`   → ${audioUrl}`)
+
+      const { options } = question
       const createdPassage = await prisma.listeningMCMPassage.create({
-        data: passageData
+        data: {
+          questionId: question.questionId,
+          title: question.title,
+          questionText: question.questionText,
+          audioTranscribedText: question.audioTranscribedText,
+          difficulty: question.difficulty,
+          audioUrl,
+        }
       })
-      
-      // Then create each option separately
+
       for (const option of options) {
         await prisma.listeningMCMOption.create({
           data: {
@@ -167,18 +180,17 @@ const createQuestions = async () => {
           }
         })
       }
-      
+
       console.log(`✅ Created question: ${createdPassage.questionId} - ${createdPassage.title} with ${options.length} options`)
     }
-    
+
     console.log("✅ All Multiple Choice Multiple Answer questions have been processed successfully!")
-    
-    // Display summary
+
     const totalQuestions = await prisma.listeningMCMPassage.count()
     const totalOptions = await prisma.listeningMCMOption.count()
     console.log(`📊 Total Multiple Choice Multiple Answer questions in database: ${totalQuestions}`)
     console.log(`📊 Total options in database: ${totalOptions}`)
-    
+
   } catch (error) {
     console.error("❌ Error creating questions:", error)
   } finally {
@@ -186,5 +198,4 @@ const createQuestions = async () => {
   }
 }
 
-// Execute the function
 createQuestions()
