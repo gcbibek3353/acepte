@@ -21,7 +21,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Mock Tests**: Full-length practice exams simulating real PTE conditions
 - **Performance Analytics**: Dashboard with detailed performance insights
 
-### 🎨 User Experience
+### 🎨 User Experience 
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with clear practice module organization
 - **Real-time Feedback**: Immediate scoring and feedback on practice attempts
