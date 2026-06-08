@@ -1,21 +1,16 @@
 "use client"
 import { authClient } from '@/lib/auth-client'
+import { userContext } from '@/context/userContext'
 import { useRouter } from 'next/navigation'
-import React, { createContext, ReactNode, useEffect } from 'react'
-
-// Define the user context type based on the session user type
-type UserContextType = NonNullable<Awaited<ReturnType<typeof authClient.useSession>>['data']>['user'] | null;
-
-export const userContext = createContext<UserContextType>(null);
+import React, { ReactNode, useEffect } from 'react'
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
     const router = useRouter();
 
     const {
         data: session,
-        isPending, //loading state
-        error, //error object
-        refetch //refetch the session
+        isPending,
+        error,
     } = authClient.useSession()
 
     // Handle redirect when user is not authenticated

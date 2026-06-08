@@ -953,6 +953,9 @@ const postRespondToASituationAnswer = async (userId: string, questionId: string,
         if (!question) {
             throw new Error("Question not found");
         }
+        if (!question.audioUrl) {
+            throw new Error("Question has no audio");
+        }
         const { contentScore, fluencyScore, pronunciationScore } = await evaluateAudioWithAudio(audioUrl, question.audioUrl);
         const totalScore = (contentScore + fluencyScore + pronunciationScore) / 3;
         const newAnswer = await prisma.speakingRespondSituationAnswer.create({

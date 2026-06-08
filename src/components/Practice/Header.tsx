@@ -1,5 +1,5 @@
 'use client';
-import { userContext } from '@/app/(protected)/layout'
+import { userContext } from '@/context/userContext'
 import React, { useContext, useEffect } from 'react'
 
 interface BookMarkData {
