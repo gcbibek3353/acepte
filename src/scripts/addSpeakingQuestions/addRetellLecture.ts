@@ -1,52 +1,61 @@
+import "dotenv/config"
+import path from "path"
 import prisma from "@/lib/prisma"
+import { uploadAudioToS3 } from "./uploadAudio"
+import { uploadImageToS3 } from "./uploadImage"
+
+const AUDIO_DIR = path.resolve(__dirname, "retellLecture/audio")
+const IMAGE_DIR = path.resolve(__dirname, "retellLecture/images")
+const AUDIO_S3_SUBDIR = "speaking-retell-lecture"
+const IMAGE_S3_SUBDIR = "speaking-retell-lecture-images"
 
 const questions = [
   {
     questionId: "RL001",
     title: "Psychology - Memory and Learning",
-    audioUrl: "https://example.com/audio/psychology-memory.mp3",
+    audioFile: "psychology-memory.mp3",
     audioTranscribedText: "Today's lecture focuses on the relationship between memory formation and learning processes. Research has shown that the hippocampus plays a crucial role in converting short-term memories into long-term storage. The process of consolidation involves repeated neural firing patterns that strengthen synaptic connections. Students can improve their learning by utilizing spaced repetition techniques and creating meaningful associations with new information.",
-    imageUrl: "https://example.com/images/brain-memory-diagram.jpg",
+    imageFile: "brain-memory-diagram.jpg",
     difficulty: "MEDIUM" as const
   },
   {
-    questionId: "RL002", 
+    questionId: "RL002",
     title: "Environmental Science - Renewable Energy",
-    audioUrl: "https://example.com/audio/renewable-energy.mp3",
+    audioFile: "renewable-energy.mp3",
     audioTranscribedText: "The transition to renewable energy sources represents one of the most significant challenges of our time. Solar and wind technologies have experienced dramatic cost reductions, making them competitive with fossil fuels in many markets. However, intermittency issues require advanced storage solutions and smart grid technologies. Government policies and carbon pricing mechanisms are essential drivers for accelerating the adoption of clean energy systems.",
-    imageUrl: "https://example.com/images/renewable-energy-chart.jpg",
+    imageFile: "renewable-energy-chart.jpg",
     difficulty: "HARD" as const
   },
   {
     questionId: "RL003",
     title: "Economics - Market Dynamics",
-    audioUrl: "https://example.com/audio/market-dynamics.mp3", 
+    audioFile: "market-dynamics.mp3",
     audioTranscribedText: "Market dynamics are influenced by the fundamental forces of supply and demand. When demand exceeds supply, prices typically rise, encouraging producers to increase output. Conversely, when supply exceeds demand, prices tend to fall. External factors such as government regulations, technological innovations, and consumer preferences can significantly impact these basic market mechanisms.",
-    imageUrl: null,
+    imageFile: null,
     difficulty: "EASY" as const
   },
   {
     questionId: "RL004",
     title: "History - Industrial Revolution Impact",
-    audioUrl: "https://example.com/audio/industrial-revolution.mp3",
+    audioFile: "industrial-revolution.mp3",
     audioTranscribedText: "The Industrial Revolution fundamentally transformed human society from agricultural-based economies to manufacturing-centered systems. This period saw unprecedented technological innovations, including steam engines, mechanized textile production, and improved transportation networks. While these changes increased productivity and living standards for some, they also created new social challenges including urbanization problems and labor exploitation.",
-    imageUrl: "https://example.com/images/industrial-revolution-timeline.jpg", 
+    imageFile: "industrial-revolution-timeline.jpg",
     difficulty: "MEDIUM" as const
   },
   {
     questionId: "RL005",
     title: "Biology - Cellular Respiration",
-    audioUrl: "https://example.com/audio/cellular-respiration.mp3",
+    audioFile: "cellular-respiration.mp3",
     audioTranscribedText: "Cellular respiration is the process by which cells convert glucose and oxygen into carbon dioxide, water, and ATP energy. This complex biochemical process occurs in three main stages: glycolysis in the cytoplasm, the citric acid cycle in the mitochondrial matrix, and the electron transport chain in the inner mitochondrial membrane. Understanding this process is fundamental to comprehending how organisms obtain and utilize energy.",
-    imageUrl: "https://example.com/images/cellular-respiration-diagram.jpg",
+    imageFile: "cellular-respiration-diagram.jpg",
     difficulty: "HARD" as const
   },
   {
     questionId: "RL006",
-    title: "Literature - Modernist Movement", 
-    audioUrl: "https://example.com/audio/modernist-literature.mp3",
+    title: "Literature - Modernist Movement",
+    audioFile: "modernist-literature.mp3",
     audioTranscribedText: "The modernist literary movement emerged in the early 20th century as writers sought to break away from traditional narrative structures and themes. Authors like James Joyce and Virginia Woolf experimented with stream-of-consciousness techniques and fragmented storytelling. This movement reflected the social and cultural upheavals of the time, including world wars and rapid technological change.",
-    imageUrl: null,
+    imageFile: null,
     difficulty: "MEDIUM" as const
   }
 ]
@@ -56,7 +65,6 @@ const createRetellLectureQuestions = async () => {
     console.log("Starting to add Retell Lecture questions to the database...")
 
     for (const questionData of questions) {
-      // Check if question already exists
       const existingQuestion = await prisma.speakingRetellLectureQuestion.findUnique({
         where: { questionId: questionData.questionId }
       })
@@ -66,14 +74,24 @@ const createRetellLectureQuestions = async () => {
         continue
       }
 
-      // Create the question
-      const question = await prisma.speakingRetellLectureQuestion.create({
+      console.log(`⬆️  Uploading audio for ${questionData.questionId}: ${questionData.audioFile}`)
+      const audioUrl = await uploadAudioToS3(AUDIO_DIR, questionData.audioFile, AUDIO_S3_SUBDIR)
+      console.log(`   → ${audioUrl}`)
+
+      let imageUrl: string | null = null
+      if (questionData.imageFile) {
+        console.log(`⬆️  Uploading image for ${questionData.questionId}: ${questionData.imageFile}`)
+        imageUrl = await uploadImageToS3(IMAGE_DIR, questionData.imageFile, IMAGE_S3_SUBDIR)
+        console.log(`   → ${imageUrl}`)
+      }
+
+      await prisma.speakingRetellLectureQuestion.create({
         data: {
           questionId: questionData.questionId,
           title: questionData.title,
-          audioUrl: questionData.audioUrl,
+          audioUrl,
           audioTranscribedText: questionData.audioTranscribedText,
-          imageUrl: questionData.imageUrl,
+          imageUrl,
           difficulty: questionData.difficulty
         }
       })
@@ -83,7 +101,6 @@ const createRetellLectureQuestions = async () => {
 
     console.log("✅ All Retell Lecture questions have been processed successfully!")
 
-    // Display summary
     const totalQuestions = await prisma.speakingRetellLectureQuestion.count()
     console.log(`📊 Total Retell Lecture questions in database: ${totalQuestions}`)
 
@@ -94,5 +111,4 @@ const createRetellLectureQuestions = async () => {
   }
 }
 
-// Execute the function
 createRetellLectureQuestions()

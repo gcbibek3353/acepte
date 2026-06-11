@@ -1,18 +1,24 @@
+import "dotenv/config"
+import path from "path"
 import prisma from "@/lib/prisma"
+import { uploadAudioToS3 } from "./uploadAudio"
+
+const AUDIO_DIR = path.resolve(__dirname, "answerShortQuestions")
+const S3_SUBDIR = "speaking-answer-short"
 
 const questions = [
   {
     questionId: "ASQ001",
     title: "Geography - Capital Cities",
-    audioUrl: "https://example.com/audio/capital-cities.mp3",
+    audioFile: "capital-cities.mp3",
     questionText: "What is the capital city of Australia?",
     sampleAnswer: "Canberra",
     difficulty: "EASY" as const
   },
   {
     questionId: "ASQ002",
-    title: "Science - Basic Physics", 
-    audioUrl: "https://example.com/audio/physics-basic.mp3",
+    title: "Science - Basic Physics",
+    audioFile: "physics-basic.mp3",
     questionText: "What force causes objects to fall towards the Earth?",
     sampleAnswer: "Gravity",
     difficulty: "EASY" as const
@@ -20,7 +26,7 @@ const questions = [
   {
     questionId: "ASQ003",
     title: "Mathematics - Geometry",
-    audioUrl: "https://example.com/audio/geometry.mp3",
+    audioFile: "geometry.mp3",
     questionText: "How many sides does a hexagon have?",
     sampleAnswer: "Six",
     difficulty: "EASY" as const
@@ -28,7 +34,7 @@ const questions = [
   {
     questionId: "ASQ004",
     title: "History - World Wars",
-    audioUrl: "https://example.com/audio/world-wars.mp3", 
+    audioFile: "world-wars.mp3",
     questionText: "In which year did World War II end?",
     sampleAnswer: "1945",
     difficulty: "MEDIUM" as const
@@ -36,7 +42,7 @@ const questions = [
   {
     questionId: "ASQ005",
     title: "Biology - Human Body",
-    audioUrl: "https://example.com/audio/human-body.mp3",
+    audioFile: "human-body.mp3",
     questionText: "Which organ in the human body produces insulin?",
     sampleAnswer: "Pancreas",
     difficulty: "MEDIUM" as const
@@ -44,15 +50,15 @@ const questions = [
   {
     questionId: "ASQ006",
     title: "Literature - Famous Authors",
-    audioUrl: "https://example.com/audio/famous-authors.mp3",
-    questionText: "Who wrote the novel 'Pride and Prejudice'?", 
+    audioFile: "famous-authors.mp3",
+    questionText: "Who wrote the novel 'Pride and Prejudice'?",
     sampleAnswer: "Jane Austen",
     difficulty: "MEDIUM" as const
   },
   {
     questionId: "ASQ007",
     title: "Chemistry - Periodic Table",
-    audioUrl: "https://example.com/audio/periodic-table.mp3",
+    audioFile: "periodic-table.mp3",
     questionText: "What is the chemical symbol for gold?",
     sampleAnswer: "Au",
     difficulty: "MEDIUM" as const
@@ -60,7 +66,7 @@ const questions = [
   {
     questionId: "ASQ008",
     title: "Economics - Currency",
-    audioUrl: "https://example.com/audio/currency.mp3",
+    audioFile: "currency.mp3",
     questionText: "What is the currency used in Japan?",
     sampleAnswer: "Yen",
     difficulty: "EASY" as const
@@ -72,7 +78,6 @@ const createAnswerShortQuestions = async () => {
     console.log("Starting to add Answer Short questions to the database...")
 
     for (const questionData of questions) {
-      // Check if question already exists
       const existingQuestion = await prisma.speakingAnswerShortQuestion.findUnique({
         where: { questionId: questionData.questionId }
       })
@@ -82,12 +87,15 @@ const createAnswerShortQuestions = async () => {
         continue
       }
 
-      // Create the question
-      const question = await prisma.speakingAnswerShortQuestion.create({
+      console.log(`⬆️  Uploading audio for ${questionData.questionId}: ${questionData.audioFile}`)
+      const audioUrl = await uploadAudioToS3(AUDIO_DIR, questionData.audioFile, S3_SUBDIR)
+      console.log(`   → ${audioUrl}`)
+
+      await prisma.speakingAnswerShortQuestion.create({
         data: {
           questionId: questionData.questionId,
           title: questionData.title,
-          audioUrl: questionData.audioUrl,
+          audioUrl,
           questionText: questionData.questionText,
           sampleAnswer: questionData.sampleAnswer,
           difficulty: questionData.difficulty
@@ -99,7 +107,6 @@ const createAnswerShortQuestions = async () => {
 
     console.log("✅ All Answer Short questions have been processed successfully!")
 
-    // Display summary
     const totalQuestions = await prisma.speakingAnswerShortQuestion.count()
     console.log(`📊 Total Answer Short questions in database: ${totalQuestions}`)
 
@@ -110,5 +117,4 @@ const createAnswerShortQuestions = async () => {
   }
 }
 
-// Execute the function
 createAnswerShortQuestions()
