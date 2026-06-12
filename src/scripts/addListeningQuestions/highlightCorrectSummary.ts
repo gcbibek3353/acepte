@@ -1,8 +1,11 @@
 import "dotenv/config";
 import path from "path";
+import { fileURLToPath } from "url";
 import prisma from "@/lib/prisma";
 import { uploadAudioToS3 } from "./uploadAudio";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const AUDIO_DIR = path.resolve(__dirname, "highlightCorrectSummary");
 const S3_SUBDIR = "listening-highlight-correct-summary";
 
@@ -24,9 +27,8 @@ const questions = [
     correctOptionIndex: 3,
     difficulty: "MEDIUM" as const,
   },
-  [
-    {
-      questionId: "HCS002",
+  {
+    questionId: "HCS002",
       title: "Mountains",
       audioFile: "audio-b23d06dd-5f59-4be5-8905-0e834783d08f.mp3",
       passage:
@@ -359,8 +361,7 @@ const questions = [
       correctOptionIndex: 0,
       difficulty: "MEDIUM" as const,
     },
-  ],
-];
+  ];
 
 const createQuestions = async () => {
   try {

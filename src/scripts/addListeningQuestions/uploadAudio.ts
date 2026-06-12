@@ -31,10 +31,27 @@ const buildObjectUrl = (key: string): string => {
 }
 
 export async function uploadAudioToS3(audioDir: string, audioFile: string, s3Subdir: string): Promise<string> {
-  const filePath = path.join(audioDir, audioFile)
-  const ext = path.extname(audioFile).toLowerCase()
+  let buffer: Buffer
+  let ext = path.extname(audioFile).toLowerCase()
+
+  if (/^https?:\/\//i.test(audioFile)) {
+    const response = await fetch(audioFile)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch remote audio: ${response.status} ${response.statusText}`)
+    }
+
+    const arrayBuffer = await response.arrayBuffer()
+    buffer = Buffer.from(arrayBuffer)
+
+    const url = new URL(audioFile)
+    const urlExt = path.extname(url.pathname).toLowerCase()
+    if (urlExt) ext = urlExt
+  } else {
+    const filePath = path.join(audioDir, audioFile)
+    buffer = fs.readFileSync(filePath)
+  }
+
   const contentType = CONTENT_TYPES[ext] ?? "audio/mpeg"
-  const buffer = fs.readFileSync(filePath)
   const key = `${s3Subdir}/${uuid()}${ext}`
 
   await s3Client.send(

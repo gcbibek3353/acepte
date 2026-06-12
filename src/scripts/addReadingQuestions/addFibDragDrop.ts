@@ -15,7 +15,7 @@ const questions = [
       },
       {
         position: 2,
-        correctOptionIndex: 7,
+        correctOptionIndex: 6,
         explanation:
           "'Chlorophyll' is correct because it is the green pigment inside chloroplasts that captures light energy and initiates the photosynthesis reaction. Without chlorophyll, plants cannot absorb the sunlight needed to drive the process.",
       },
@@ -365,13 +365,13 @@ const questions = [
       },
       {
         position: 2,
-        correctOptionIndex: 0,
+        correctOptionIndex: 4,
         explanation:
           "'What' is correct because it refers to the actions performed during sleepwalking that the person cannot remember afterward.",
       },
       {
         position: 3,
-        correctOptionIndex: 0,
+        correctOptionIndex: 8,
         explanation:
           "'Others' is correct because it refers to other types of unusual sleep behaviors besides sleepwalking.",
       },
@@ -925,12 +925,12 @@ const questions = [
     },
     {
       position: 3,
-      correctOptionIndex: 15,
+      correctOptionIndex: 11,
       explanation: "'Attend' is correct because teachers attend or conduct classes."
     },
     {
       position: 4,
-      correctOptionIndex: 17,
+      correctOptionIndex: 13,
       explanation: "'Happy' is correct because the sentence highlights his willingness and eagerness despite illness."
     }
   ],
@@ -1071,37 +1071,41 @@ const createFibDragDropQuestions = async () => {
         continue;
       }
 
-      const result = await prisma.$transaction(async (tx) => {
-        const passage = await tx.fillBlanksDragDropPassage.create({
-          data: {
-            questionId: questionData.questionId,
-            title: questionData.title,
-            content: questionData.content,
-            difficulty: questionData.difficulty,
-            options: questionData.options,
-          },
-        });
-
-        const blanks = [];
-        for (const blankData of questionData.blanks) {
-          if (blankData.correctOptionIndex >= questionData.options.length) {
-            throw new Error(
-              `Invalid correctOptionIndex ${blankData.correctOptionIndex} for question ${questionData.questionId}.`,
-            );
-          }
-          const blank = await tx.fillBlanksDragDropBlank.create({
+      const result = await prisma.$transaction(
+        async (tx) => {
+          const passage = await tx.fillBlanksDragDropPassage.create({
             data: {
-              position: blankData.position,
-              passageId: passage.id,
-              correctOptionIndex: blankData.correctOptionIndex,
-              explanation: blankData.explanation,
+              questionId: questionData.questionId,
+              title: questionData.title,
+              content: questionData.content,
+              difficulty: questionData.difficulty,
+              options: questionData.options,
             },
           });
-          blanks.push(blank);
-        }
 
-        return { passage, blanks };
-      });
+          const blanks = await Promise.all(
+            questionData.blanks.map(async (blankData) => {
+              if (blankData.correctOptionIndex >= questionData.options.length) {
+                throw new Error(
+                  `Invalid correctOptionIndex ${blankData.correctOptionIndex} for question ${questionData.questionId}.`,
+                );
+              }
+
+              return tx.fillBlanksDragDropBlank.create({
+                data: {
+                  position: blankData.position,
+                  passageId: passage.id,
+                  correctOptionIndex: blankData.correctOptionIndex,
+                  explanation: blankData.explanation,
+                },
+              });
+            }),
+          );
+
+          return { passage, blanks };
+        },
+        { timeout: 60000, maxWait: 60000 },
+      );
 
       console.log(
         `✅ Created question: ${questionData.questionId} - ${questionData.title}`,
