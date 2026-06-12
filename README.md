@@ -37,7 +37,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Deployment**: Vercel-ready
 
 ## 📁 Project Structure
-
+ 
 ```
 src/
 ├── app/                     # Next.js App Router
