@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph'
 
 interface FibDragDropProps {
     passageId: string
@@ -139,19 +140,17 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                             const correctWord = getCorrectWord(position);
                             return (
                                 <span key={`blank-${position}`} className="inline-flex items-center gap-1.5 mx-1 align-middle">
-                                    <span className={`inline-block min-w-[110px] min-h-[36px] px-3 py-1.5 border-2 rounded-md ${
-                                        content
-                                            ? isCorrect
-                                                ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
-                                                : 'border-red-400 bg-red-50 dark:bg-red-950/20'
-                                            : 'border-border bg-muted/30'
-                                    }`}>
+                                    <span className={`inline-block min-w-[110px] min-h-[36px] px-3 py-1.5 border-2 rounded-md ${content
+                                        ? isCorrect
+                                            ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
+                                            : 'border-red-400 bg-red-50 dark:bg-red-950/20'
+                                        : 'border-border bg-muted/30'
+                                        }`}>
                                         {content ? (
-                                            <span className={`inline-block px-2 py-0.5 border text-sm rounded font-medium ${
-                                                isCorrect
-                                                    ? 'bg-green-100 border-green-400 text-green-800 dark:bg-green-950/30 dark:text-green-300'
-                                                    : 'bg-red-100 border-red-400 text-red-800 dark:bg-red-950/30 dark:text-red-300'
-                                            }`}>
+                                            <span className={`inline-block px-2 py-0.5 border text-sm rounded font-medium ${isCorrect
+                                                ? 'bg-green-100 border-green-400 text-green-800 dark:bg-green-950/30 dark:text-green-300'
+                                                : 'bg-red-100 border-red-400 text-red-800 dark:bg-red-950/30 dark:text-red-300'
+                                                }`}>
                                                 {content}
                                             </span>
                                         ) : (
@@ -175,7 +174,7 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                 </span>
                             );
                         }
-                        return <span key={index}>{part}</span>;
+                        return <MeaningfulParagraph key={index} paragraph={part} inline />;
                     })}
                 </div>
             );
@@ -194,13 +193,12 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                     <span
                                         ref={provided.innerRef}
                                         {...provided.droppableProps}
-                                        className={`inline-block min-w-[110px] min-h-[36px] mx-1 px-3 py-1.5 border-2 border-dashed rounded-md transition-colors ${
-                                            snapshot.isDraggingOver
-                                                ? 'border-primary/50 bg-primary/5'
-                                                : content
-                                                    ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20'
-                                                    : 'border-border bg-muted/30'
-                                        }`}
+                                        className={`inline-block min-w-[110px] min-h-[36px] mx-1 px-3 py-1.5 border-2 border-dashed rounded-md transition-colors ${snapshot.isDraggingOver
+                                            ? 'border-primary/50 bg-primary/5'
+                                            : content
+                                                ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20'
+                                                : 'border-border bg-muted/30'
+                                            }`}
                                     >
                                         {content && (
                                             <Draggable draggableId={`blank-${position}-${content}`} index={0} isDragDisabled={false}>
@@ -209,9 +207,8 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
-                                                        className={`inline-block px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-sm rounded cursor-move font-medium ${
-                                                            snapshot.isDragging ? 'opacity-60' : ''
-                                                        }`}
+                                                        className={`inline-block px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-sm rounded cursor-move font-medium ${snapshot.isDragging ? 'opacity-60' : ''
+                                                            }`}
                                                     >
                                                         {content}
                                                     </span>
@@ -227,7 +224,7 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                             </Droppable>
                         );
                     }
-                    return <span key={index}>{part}</span>;
+                    return <MeaningfulParagraph key={index} paragraph={part} inline />;
                 })}
             </div>
         );
@@ -257,11 +254,10 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                 <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className={`flex flex-wrap gap-2 p-4 border-2 border-dashed rounded-lg min-h-[72px] transition-colors ${
-                                        snapshot.isDraggingOver
-                                            ? 'border-primary/50 bg-primary/5'
-                                            : 'border-border bg-muted/20'
-                                    }`}
+                                    className={`flex flex-wrap gap-2 p-4 border-2 border-dashed rounded-lg min-h-[72px] transition-colors ${snapshot.isDraggingOver
+                                        ? 'border-primary/50 bg-primary/5'
+                                        : 'border-border bg-muted/20'
+                                        }`}
                                 >
                                     {availableOptions.map((option, index) => (
                                         <Draggable
@@ -275,11 +271,10 @@ const FibDragDropComponent = ({ passageId, passage, options, blanks }: FibDragDr
                                                     ref={provided.innerRef}
                                                     {...provided.draggableProps}
                                                     {...provided.dragHandleProps}
-                                                    className={`px-3 py-1.5 bg-card border border-border rounded-md cursor-move text-sm text-foreground transition-all ${
-                                                        snapshot.isDragging
-                                                            ? 'shadow-md opacity-60 border-primary/40'
-                                                            : 'hover:border-primary/40 hover:shadow-sm'
-                                                    }`}
+                                                    className={`px-3 py-1.5 bg-card border border-border rounded-md cursor-move text-sm text-foreground transition-all ${snapshot.isDragging
+                                                        ? 'shadow-md opacity-60 border-primary/40'
+                                                        : 'hover:border-primary/40 hover:shadow-sm'
+                                                        }`}
                                                 >
                                                     {option}
                                                 </div>

@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph'
 
 interface Blanks {
   id: string
@@ -87,7 +88,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
 
   const renderPassageWithDropdowns = () => {
     if (!blanks || blanks.length === 0) {
-      return <p className="text-foreground text-base leading-relaxed">{passage}</p>
+      return <MeaningfulParagraph paragraph={passage} />
     }
 
     let modifiedPassage = passage
@@ -119,13 +120,12 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
                     handleOptionSelect(position, value === '' ? -1 : parseInt(value))
                   }}
                   disabled={!!submittedResult}
-                  className={`px-2 py-1 border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed ${
-                    submittedResult
+                  className={`px-2 py-1 border rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed ${submittedResult
                       ? isCorrect
                         ? 'border-green-400 bg-green-50 text-green-800 dark:bg-green-950/20 dark:text-green-300'
                         : 'border-red-400 bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-300'
                       : 'border-border'
-                  }`}
+                    }`}
                 >
                   <option value="">Select…</option>
                   {blank.options.map((option, optionIndex) => (
@@ -154,7 +154,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
               </span>
             )
           }
-          return <span key={index}>{part}</span>
+          return <MeaningfulParagraph key={index} paragraph={part} inline />
         })}
       </div>
     )

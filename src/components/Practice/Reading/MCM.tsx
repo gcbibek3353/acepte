@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
 
 interface Options {
     id: string
@@ -78,7 +79,7 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
         <div className="space-y-6">
             <div className="bg-muted/30 border border-border rounded-lg p-6">
                 <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                    {passage}
+                    <MeaningfulParagraph paragraph={passage} />
                 </div>
             </div>
 
