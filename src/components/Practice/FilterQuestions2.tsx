@@ -34,7 +34,7 @@ const FilterQuestions2 = ({ apiPath, initialData }: FilterQuestions2Props) => {
     if (loading) return <QuestionListLoading />;
     if (error) return <QuestionListError error={error} />;
 
-    return <FilterQuestions questions={questions} queryParams={queryParams} setQueryParams={setQueryParams} />;
+    return <FilterQuestions questions={questions} queryParams={queryParams} setQueryParams={setQueryParams} isLoading={loading} />;
 };
 
 export default FilterQuestions2;
