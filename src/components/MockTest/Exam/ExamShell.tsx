@@ -226,6 +226,9 @@ export default function ExamShell({ testId, attemptId }: Props) {
     setSubmitError(null);
 
     try {
+      // Track locally so handleCompleteSection sees the updated map immediately
+      let latestAnsweredMap = answeredMap;
+
       // Capture answer (skip means move without saving)
       if (!skip) {
         let audioUrl: string | undefined;
@@ -246,7 +249,8 @@ export default function ExamShell({ testId, attemptId }: Props) {
               audioUrl,
             }),
           });
-          setAnsweredMap((prev) => new Map(prev).set(currentQuestion.id, pendingAnswer));
+          latestAnsweredMap = new Map(answeredMap).set(currentQuestion.id, pendingAnswer);
+          setAnsweredMap(latestAnsweredMap);
         }
       }
 
@@ -259,8 +263,8 @@ export default function ExamShell({ testId, attemptId }: Props) {
       if (!isLastQ) {
         setQuestionIdx((q) => q + 1);
       } else {
-        // Last question — complete the section
-        await handleCompleteSection(false);
+        // Last question — complete the section, passing the up-to-date map
+        await handleCompleteSection(false, latestAnsweredMap);
       }
     } catch (e: any) {
       setSubmitError(e.message ?? "Failed to save answer. Please try again.");
@@ -270,11 +274,13 @@ export default function ExamShell({ testId, attemptId }: Props) {
   }
 
   // ── Complete current section ───────────────────────────────────────────────
-  async function handleCompleteSection(timerExpired = false) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function handleCompleteSection(timerExpired = false, latestAnsweredMap?: Map<string, any>) {
     if (!currentSection) return;
 
     if (!timerExpired) {
-      const unanswered = currentSection.questions.filter((q) => !answeredMap.has(q.id)).length;
+      const map = latestAnsweredMap ?? answeredMap;
+      const unanswered = currentSection.questions.filter((q) => !map.has(q.id)).length;
       if (unanswered > 0) {
         const ok = confirm(`You have ${unanswered} unanswered question${unanswered !== 1 ? "s" : ""}. Complete the section anyway?`);
         if (!ok) return;

@@ -165,12 +165,22 @@ export default function ResultPage() {
         {/* Skill scores */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">Communicative Skills</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <ScoreChip label="Speaking"  score={score?.speakingScore  ?? null} colorClass="border-l-blue-500" />
-            <ScoreChip label="Writing"   score={score?.writingScore   ?? null} colorClass="border-l-violet-500" />
-            <ScoreChip label="Reading"   score={score?.readingScore   ?? null} colorClass="border-l-emerald-500" />
-            <ScoreChip label="Listening" score={score?.listeningScore ?? null} colorClass="border-l-amber-500" />
-          </div>
+          {score === null ? (
+            <div className="rounded-lg border border-border bg-card shadow-sm p-6 flex flex-col items-center gap-3 text-center">
+              <AlertCircle size={28} className="text-muted-foreground opacity-60" />
+              <p className="text-sm font-medium text-foreground">Scores not available yet</p>
+              <p className="text-xs text-muted-foreground max-w-xs">
+                Your responses are still being processed. Please check back in a few minutes.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <ScoreChip label="Speaking"  score={score.speakingScore}  colorClass="border-l-blue-500" />
+              <ScoreChip label="Writing"   score={score.writingScore}   colorClass="border-l-violet-500" />
+              <ScoreChip label="Reading"   score={score.readingScore}   colorClass="border-l-emerald-500" />
+              <ScoreChip label="Listening" score={score.listeningScore} colorClass="border-l-amber-500" />
+            </div>
+          )}
         </div>
 
         {/* Section timing */}

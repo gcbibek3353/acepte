@@ -27,11 +27,11 @@ interface ApiResponse {
 const STATUS_FILTERS: (Status | "ALL")[] = ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
 
 export default function AdminMockTestListPage() {
-  const [data, setData]           = useState<ApiResponse | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<Status | "ALL">("ALL");
-  const [page, setPage]           = useState(1);
+  const [page, setPage] = useState(1);
 
   async function fetchTests() {
     setLoading(true);
@@ -66,7 +66,7 @@ export default function AdminMockTestListPage() {
             <Button variant="secondary" size="sm" onClick={fetchTests} disabled={loading}>
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             </Button>
-            <Link href="/admin_dashboard/mocktest/create">
+            <Link href="/admin/mocktest/create">
               <Button className="gap-2">
                 <Plus size={16} /> New Test
               </Button>
@@ -80,11 +80,10 @@ export default function AdminMockTestListPage() {
             <button
               key={s}
               onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                statusFilter === s
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${statusFilter === s
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
             >
               {s}
             </button>
@@ -110,7 +109,7 @@ export default function AdminMockTestListPage() {
         {!loading && !error && data?.tests.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
             <p className="text-sm">No mock tests found.</p>
-            <Link href="/admin_dashboard/mocktest/create">
+            <Link href="/admin/mocktest/create">
               <Button variant="secondary" className="gap-2"><Plus size={14} /> Create your first test</Button>
             </Link>
           </div>
@@ -149,7 +148,7 @@ export default function AdminMockTestListPage() {
                         <td className="px-4 py-4 text-muted-foreground">{test._count.attempts}</td>
                         <td className="px-4 py-4"><StatusBadge status={test.status} /></td>
                         <td className="px-4 py-4">
-                          <Link href={`/admin_dashboard/mocktest/${test.id}`}>
+                          <Link href={`/admin/mocktest/${test.id}`}>
                             <Button variant="secondary" size="sm" className="gap-1.5">
                               <Pencil size={13} /> Manage
                             </Button>
