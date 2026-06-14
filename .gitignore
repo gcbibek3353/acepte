@@ -47,3 +47,7 @@ fillTheBlanks
 highlightCorrectSummary
 highlightIncorrect
 MultiplechoiceMultiple
+MultipleChoiceSingle
+selectMissingword
+summarizeSpokenText
+writeFromDictation

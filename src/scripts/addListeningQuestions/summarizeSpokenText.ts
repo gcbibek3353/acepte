@@ -1,87 +1,165 @@
-import "dotenv/config"
-import path from "path"
-import prisma from "@/lib/prisma"
-import { uploadAudioToS3 } from "./uploadAudio"
+import "dotenv/config";
+import path from "path";
+import prisma from "@/lib/prisma";
+import { uploadAudioToS3 } from "./uploadAudio";
+import { fileURLToPath } from "url";
 
-const AUDIO_DIR = path.resolve(__dirname, "summarizeSpokenText")
-const S3_SUBDIR = "listening-summarize-spoken-text"
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const AUDIO_DIR = path.resolve(__dirname, "summarizeSpokenText");
+const S3_SUBDIR = "listening-summarize-spoken-text";
 
 const questions = [
   {
     questionId: "SST001",
-    title: "Climate Change and Global Warming",
-    audioTranscribedText: "Climate change refers to long-term shifts in global temperatures and weather patterns. While climate change is a natural phenomenon, scientific evidence shows that human activities have been the main driver since the 1800s. The burning of fossil fuels like coal, oil, and gas produces greenhouse gas emissions that trap heat in the atmosphere. These gases include carbon dioxide from burning fossil fuels, methane from agriculture and waste, and other industrial gases. The effects of climate change include rising sea levels, extreme weather events, droughts, and shifts in wildlife habitats. To address this challenge, countries worldwide are implementing renewable energy solutions, improving energy efficiency, and developing new technologies to reduce emissions.",
-    audioFile: "climate-change.mp3",
-    difficulty: "MEDIUM" as const
+    title: "Melatonin",
+    audioTranscribedText:
+      "I’m just going to take on where we left off. The hormone I want to now talk about is called melatonin. The synthesis is in the pineal gland, which is very small. It is the size of a pea in your brain. Descartes called it the “seat of the soul,” and it is where melatonin is made. It also has a rhythm. In a sense, it is the opposite of cortisol. It peaks at night. We call it the “darkness hormone.” In every species that we have studied, melatonin occurs at night. It is a hormone that prepares you for the things that your species does at night. So, of course, in humans we sleep, but animals like rodents are awake. So, it is a hormone that is related to darkness behavior.",
+    audioFile: "audio-934e5c6b-14b3-4401-99f2-c899b1e85188.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST002",
-    title: "The Impact of Technology on Education",
-    audioTranscribedText: "Technology has revolutionized education in numerous ways over the past few decades. Digital learning platforms have made education more accessible to students worldwide, breaking down geographical barriers. Interactive whiteboards, tablets, and educational software have transformed traditional classrooms into dynamic learning environments. Online courses and MOOCs have enabled millions of people to acquire new skills and knowledge from the comfort of their homes. However, technology in education also presents challenges. The digital divide means that not all students have equal access to technological resources. Additionally, excessive screen time and reduced face-to-face interaction may impact social development. Teachers must now adapt to new teaching methods and continuously update their technical skills.",
-    audioFile: "technology-education.mp3",
-    difficulty: "HARD" as const
+    title: "Waste Food",
+    audioTranscribedText:
+      "In the USA and in Oceania, which Australia is a part of, we're not only the biggest wasters and losers of food in the world, but around 60% of it is at the consumption end. Much of this waste occurs in supermarkets because of an obsession with use-by dates. People also tend to buy more food than they need and have lost respect for food as a valuable resource.",
+    audioFile: "audio-1a013909-d968-4a50-9395-76d8774eb898.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST003",
-    title: "Benefits of Regular Exercise",
-    audioTranscribedText: "Regular physical exercise provides numerous benefits for both physical and mental health. Exercise strengthens the cardiovascular system, reducing the risk of heart disease and stroke. It helps maintain healthy body weight and builds muscle strength and bone density. Physical activity also boosts the immune system, making the body more resistant to illnesses. Beyond physical benefits, exercise has significant positive effects on mental health. It releases endorphins, which are natural mood elevators that help reduce stress and anxiety. Regular exercise can improve sleep quality and increase energy levels throughout the day. Even moderate activities like walking, swimming, or cycling for 30 minutes daily can make a substantial difference in overall health and well-being.",
-    audioFile: "exercise-benefits.mp3",
-    difficulty: "EASY" as const
+    title: "Nuts",
+    audioTranscribedText:
+      "Nuts are filling, nutritious foods rich in protein, minerals, and essential fats, making them a healthy snack. However, because they are calorie-dense, eating large quantities of foods like almonds, cashews, or avocados can make it difficult for people to maintain a healthy weight and keep fat intake under control.",
+    audioFile: "audio-8fea5b51-6756-48ba-8992-bccb2bfdde5f.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST004",
-    title: "The Future of Renewable Energy",
-    audioTranscribedText: "Renewable energy sources are becoming increasingly important as the world transitions away from fossil fuels. Solar and wind power have seen dramatic cost reductions and efficiency improvements over the past decade. Advanced battery storage systems are solving the intermittency challenges associated with renewable sources. Countries like Denmark and Costa Rica have demonstrated that high percentages of renewable energy are achievable. Electric vehicles are driving demand for clean electricity and creating new opportunities for grid integration. Smart grid technologies are enabling better management of distributed energy resources. However, challenges remain in terms of infrastructure investment, policy frameworks, and ensuring energy security during the transition period.",
-    audioFile: "renewable-energy.mp3",
-    difficulty: "HARD" as const
+    title: "Andrew Carnegie",
+    audioTranscribedText:
+      "Andrew Carnegie was born in Scotland in 1835 and later moved to America. After working in several industries and investing successfully, he built a highly profitable steel business. He devoted much of his fortune to philanthropy, funding libraries, universities, hospitals, museums, and Carnegie Hall, giving away around 90% of his wealth.",
+    audioFile: "audio-ec23db30-5707-4fc2-9902-217ed5184295.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST005",
-    title: "The Importance of Reading",
-    audioTranscribedText: "Reading is one of the most fundamental skills that benefits people throughout their lives. Regular reading improves vocabulary, comprehension, and communication skills. It enhances critical thinking abilities and helps develop analytical skills. Reading exposes individuals to different perspectives, cultures, and ideas, promoting empathy and understanding. Studies show that people who read regularly have better memory retention and cognitive function as they age. Reading also provides entertainment and stress relief, offering an escape from daily pressures. Whether through books, newspapers, or digital content, reading keeps the mind active and engaged. Parents and educators play crucial roles in fostering reading habits from an early age.",
-    audioFile: "importance-reading.mp3",
-    difficulty: "EASY" as const
+    title: "Clone",
+    audioTranscribedText:
+      "The word clone comes from an ancient Greek term meaning a twig or small branch. The concept originated from horticulture, where twigs from one tree are grafted onto another rootstock to produce genetically identical copies of the original tree. The term was first used to describe groups of cultivated plants reproduced in this way.",
+    audioFile: "audio-01711602-c34a-4dc0-bc18-4af625d73645.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST006",
-    title: "Urban Planning and Sustainability",
-    audioTranscribedText: "Sustainable urban planning is essential for creating livable cities that can accommodate growing populations while minimizing environmental impact. Green building standards and energy-efficient designs are becoming standard practice in modern construction. Public transportation systems reduce traffic congestion and air pollution while providing affordable mobility options. Urban green spaces, including parks and community gardens, improve air quality and provide recreational opportunities for residents. Mixed-use development reduces the need for long commutes and creates vibrant neighborhoods. Water management systems, including rainwater harvesting and greywater recycling, help cities become more resilient to climate change. Smart city technologies can optimize traffic flow, energy consumption, and waste management.",
-    audioFile: "urban-planning.mp3",
-    difficulty: "HARD" as const
+    title: "Speech-Language Therapy",
+    audioTranscribedText:
+      "Speech-language therapists can work with children or adults experiencing communication difficulties in settings such as hospitals, charities, or private practice. Educational programs combine academic knowledge with clinical training and emphasize reflective learning and case-based problem solving to prepare students for professional practice.",
+    audioFile: "audio-b5b16b88-bd79-43b7-bf6f-d8318a955ebd.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST007",
-    title: "The Role of Social Media in Modern Communication",
-    audioTranscribedText: "Social media platforms have fundamentally changed how people communicate and share information. These platforms enable instant global communication and have democratized access to information sharing. Businesses use social media for marketing, customer service, and brand building. Social movements can organize and spread awareness more effectively through these networks. However, social media also presents challenges including privacy concerns, cyberbullying, and the spread of misinformation. The addictive nature of these platforms can negatively impact mental health and productivity. Digital literacy has become increasingly important to help users navigate these platforms responsibly and critically evaluate information sources.",
-    audioFile: "social-media.mp3",
-    difficulty: "MEDIUM" as const
+    title: "Credit Card Experiment",
+    audioTranscribedText:
+      "Research shows that people dislike losses more than they appreciate equivalent gains. This asymmetry creates framing effects, causing individuals to make different decisions depending on whether outcomes are presented as losses or gains, even when the logical situation remains unchanged.",
+    audioFile: "audio-7b95191c-0b43-4b29-927a-eda6bb374d2f.mp3",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "SST008",
-    title: "Benefits of Learning Multiple Languages",
-    audioTranscribedText: "Learning multiple languages provides cognitive, cultural, and professional advantages. Bilingual and multilingual individuals often demonstrate enhanced problem-solving skills and improved multitasking abilities. Language learning strengthens memory and may delay the onset of age-related cognitive decline. From a cultural perspective, knowing multiple languages opens doors to understanding different societies and worldviews. It enables deeper travel experiences and cross-cultural communication. Professionally, multilingual skills are increasingly valuable in the global economy. Many employers actively seek candidates who can communicate with international clients and partners. Modern language learning apps and online resources have made acquiring new languages more accessible than ever before.",
-    audioFile: "multiple-languages.mp3",
-    difficulty: "MEDIUM" as const
-  }
-]
+    title: "History of Green Tea",
+    audioTranscribedText:
+      "Green tea originated in China around 2737 BC and was accidentally discovered by Emperor Shennong. It later became more widely available and was documented in 'The Classic of Tea' by Lu Yu. Eventually, green tea spread to Europe and America, playing a notable role in events such as the Boston Tea Party before becoming globally popular.",
+    audioFile: "audio-8bfb21e0-3870-4e08-be16-e3b782a3277d.mp3",
+    difficulty: "MEDIUM" as const,
+  },
+  {
+    questionId: "SST009",
+    title: "Cognitive Efficiency",
+    audioTranscribedText:
+      "Cognitive efficiency refers to how quickly and accurately a person processes information. It develops significantly during childhood and is important because humans have limited information-processing capacity. Efficient thinking improves problem solving and memory by making better use of these limited cognitive resources.",
+    audioFile: "audio-0d28ca9e-b629-4273-a3b5-dd42966bccd8.mp3",
+    difficulty: "MEDIUM" as const,
+  },
+  {
+    questionId: "SST010",
+    title: "Smaller Brains",
+    audioTranscribedText:
+      "Human brains have gradually become smaller over thousands of years. While some theories attribute this to energy efficiency or heat management, another explanation suggests that humans have evolved from generalists into specialists who depend on one another, reducing the need for every individual to master all survival skills.",
+    audioFile: "audio-5ea69d5a-79a6-4983-93a7-989d3490714a.mp3",
+    difficulty: "MEDIUM" as const,
+  },
+  {
+    questionId: "SST011",
+    title: "What Causes Literature to Emerge?",
+    audioTranscribedText:
+      "Literary theory asks not only what literature is but also what causes literature and what effects it has. These questions naturally lead to inquiries about the role of the author and the reader. The field explores whether literature is shaped by language, the human psyche, or broader social, economic, and historical forces.",
+    audioFile: "audio-7a93cf28-1bc1-4e45-9faf-31c1a32fa697.mp3",
+    difficulty: "HARD" as const,
+  },
+  {
+    questionId: "SST012",
+    title: "Glass Cliff",
+    audioTranscribedText:
+      "The glass ceiling refers to barriers preventing women from reaching senior positions, while the glass cliff describes women being appointed to unstable leadership roles with a high risk of failure. Research by Michelle Ryan and Alex Haslam found that women are often placed in precarious positions across many industries, making them more vulnerable to criticism and removal.",
+    audioFile: "audio-5f48d10f-fc48-49fe-861c-cd284a3b0bfc.mp3",
+    difficulty: "HARD" as const,
+  },
+  {
+    questionId: "SST013",
+    title: "Advancements in Telescopes",
+    audioTranscribedText:
+      "Larger telescopes collect more light, allowing astronomers to observe fainter objects and produce clearer images by reducing diffraction effects. Modern digital detectors are nearly one hundred times more efficient than the human eye at capturing light, greatly enhancing the capabilities of optical astronomy over recent decades.",
+    audioFile: "audio-20888596-e85a-4ee8-8903-fa81a292146f.mp3",
+    difficulty: "HARD" as const,
+  },
+  {
+    questionId: "SST014",
+    title: "Water and Growth of Los Angeles",
+    audioTranscribedText:
+      "Los Angeles was established in 1781 and experienced rapid population growth following the California Gold Rush. As demand for water increased, the city sought new supplies beyond the Los Angeles River. Under the leadership of William Holland, officials chose Owens Valley as a major water source, enabling further urban expansion while creating significant environmental consequences.",
+    audioFile: "audio-88e8e7bd-2010-40bb-96bf-f2da69fddfd0.mp3",
+    difficulty: "HARD" as const,
+  },
+  {
+    questionId: "SST015",
+    title: "Approach and Avoidance Motivation",
+    audioTranscribedText:
+      "Approach and avoidance motivation consists of three key concepts: approach, avoidance, and motivation. Approach drives people toward desirable outcomes, whereas avoidance encourages movement away from undesirable situations to reduce anxiety. Motivation provides the energy and direction for behavior, with positive stimuli typically encouraging approach and negative stimuli encouraging avoidance.",
+    audioFile: "audio-e11c0fae-427d-4024-9264-5a379a95c339.mp3",
+    difficulty: "HARD" as const,
+  },
+];
 
 const createQuestions = async () => {
   try {
-    console.log("Starting to add Summarize Spoken Text questions to the database...")
+    console.log(
+      "Starting to add Summarize Spoken Text questions to the database...",
+    );
 
     for (const question of questions) {
-      const existingQuestion = await prisma.summarizeSpokenTextQuestion.findUnique({
-        where: { questionId: question.questionId }
-      })
+      const existingQuestion =
+        await prisma.summarizeSpokenTextQuestion.findUnique({
+          where: { questionId: question.questionId },
+        });
 
       if (existingQuestion) {
-        console.log(`Question ${question.questionId} already exists, skipping...`)
-        continue
+        console.log(
+          `Question ${question.questionId} already exists, skipping...`,
+        );
+        continue;
       }
 
-      console.log(`⬆️  Uploading audio for ${question.questionId}: ${question.audioFile}`)
-      const audioUrl = await uploadAudioToS3(AUDIO_DIR, question.audioFile, S3_SUBDIR)
-      console.log(`   → ${audioUrl}`)
+      console.log(
+        `⬆️  Uploading audio for ${question.questionId}: ${question.audioFile}`,
+      );
+      const audioUrl = await uploadAudioToS3(
+        AUDIO_DIR,
+        question.audioFile,
+        S3_SUBDIR,
+      );
+      console.log(`   → ${audioUrl}`);
 
       const createdQuestion = await prisma.summarizeSpokenTextQuestion.create({
         data: {
@@ -90,22 +168,27 @@ const createQuestions = async () => {
           audioTranscribedText: question.audioTranscribedText,
           difficulty: question.difficulty,
           audioUrl,
-        }
-      })
+        },
+      });
 
-      console.log(`✅ Created question: ${createdQuestion.questionId} - ${createdQuestion.title}`)
+      console.log(
+        `✅ Created question: ${createdQuestion.questionId} - ${createdQuestion.title}`,
+      );
     }
 
-    console.log("✅ All Summarize Spoken Text questions have been processed successfully!")
+    console.log(
+      "✅ All Summarize Spoken Text questions have been processed successfully!",
+    );
 
-    const totalQuestions = await prisma.summarizeSpokenTextQuestion.count()
-    console.log(`📊 Total Summarize Spoken Text questions in database: ${totalQuestions}`)
-
+    const totalQuestions = await prisma.summarizeSpokenTextQuestion.count();
+    console.log(
+      `📊 Total Summarize Spoken Text questions in database: ${totalQuestions}`,
+    );
   } catch (error) {
-    console.error("❌ Error creating questions:", error)
+    console.error("❌ Error creating questions:", error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
-}
+};
 
-createQuestions()
+createQuestions();

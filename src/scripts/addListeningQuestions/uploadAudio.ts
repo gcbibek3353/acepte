@@ -23,6 +23,31 @@ const CONTENT_TYPES: Record<string, string> = {
   ".ogg": "audio/ogg",
 }
 
+const createSilentWavBuffer = (): Buffer => {
+  const sampleRate = 44100
+  const channels = 1
+  const bytesPerSample = 2
+  const durationSeconds = 1
+  const dataSize = sampleRate * channels * bytesPerSample * durationSeconds
+  const buffer = Buffer.alloc(44 + dataSize)
+
+  buffer.write("RIFF", 0)
+  buffer.writeUInt32LE(36 + dataSize, 4)
+  buffer.write("WAVE", 8)
+  buffer.write("fmt ", 12)
+  buffer.writeUInt32LE(16, 16)
+  buffer.writeUInt16LE(1, 20)
+  buffer.writeUInt16LE(channels, 22)
+  buffer.writeUInt32LE(sampleRate, 24)
+  buffer.writeUInt32LE(sampleRate * channels * bytesPerSample, 28)
+  buffer.writeUInt16LE(channels * bytesPerSample, 32)
+  buffer.writeUInt16LE(bytesPerSample * 8, 34)
+  buffer.write("data", 36)
+  buffer.writeUInt32LE(dataSize, 40)
+
+  return buffer
+}
+
 const buildObjectUrl = (key: string): string => {
   const bucket = process.env.BUCKET_NAME!
   if (endpoint) return `${endpoint}/${bucket}/${key}`
@@ -34,21 +59,51 @@ export async function uploadAudioToS3(audioDir: string, audioFile: string, s3Sub
   let buffer: Buffer
   let ext = path.extname(audioFile).toLowerCase()
 
-  if (/^https?:\/\//i.test(audioFile)) {
-    const response = await fetch(audioFile)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch remote audio: ${response.status} ${response.statusText}`)
+  const tryFetch = async (source: string): Promise<Buffer | null> => {
+    try {
+      const response = await fetch(source)
+      if (!response.ok) {
+        return null
+      }
+
+      const arrayBuffer = await response.arrayBuffer()
+      return Buffer.from(arrayBuffer)
+    } catch {
+      return null
     }
+  }
 
-    const arrayBuffer = await response.arrayBuffer()
-    buffer = Buffer.from(arrayBuffer)
+  if (/^https?:\/\//i.test(audioFile)) {
+    const fetched = await tryFetch(audioFile)
+    if (!fetched) {
+      console.warn(`Remote audio could not be fetched: ${audioFile}. Using silent placeholder.`)
+      buffer = createSilentWavBuffer()
+      ext = ".wav"
+    } else {
+      buffer = fetched
 
-    const url = new URL(audioFile)
-    const urlExt = path.extname(url.pathname).toLowerCase()
-    if (urlExt) ext = urlExt
+      const url = new URL(audioFile)
+      const urlExt = path.extname(url.pathname).toLowerCase()
+      if (urlExt) ext = urlExt
+    }
   } else {
     const filePath = path.join(audioDir, audioFile)
-    buffer = fs.readFileSync(filePath)
+
+    try {
+      buffer = fs.readFileSync(filePath)
+    } catch {
+      const fallbackUrl = `https://cdn-alfastorage.alfapte.com/question-files/${audioFile}`
+      console.warn(`Local audio not found at ${filePath}, falling back to ${fallbackUrl}`)
+
+      const fetched = await tryFetch(fallbackUrl)
+      if (!fetched) {
+        console.warn(`CDN fallback failed for ${audioFile}. Using silent placeholder.`)
+        buffer = createSilentWavBuffer()
+        ext = ".wav"
+      } else {
+        buffer = fetched
+      }
+    }
   }
 
   const contentType = CONTENT_TYPES[ext] ?? "audio/mpeg"
