@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
 
 interface SummarizeScore {
     id: string
@@ -61,7 +62,8 @@ const SummarizeTextArea = ({ textId, text }: { textId: string, text: string }) =
     return (
         <div className="space-y-5">
             <div className="bg-muted/30 border border-border rounded-lg p-6">
-                <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">{text}</p>
+                <MeaningfulParagraph paragraph={text} />
+                {/* <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">{text}</p> */}
             </div>
 
             <textarea

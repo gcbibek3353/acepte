@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
 
 interface MCSProps {
     passageId: string
@@ -41,7 +42,7 @@ const MCS = ({ passageId, passage, options }: MCSProps) => {
         <div className="space-y-6">
             <div className="bg-muted/30 border border-border rounded-lg p-6">
                 <div className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                    {passage}
+                    <MeaningfulParagraph paragraph={passage} />
                 </div>
             </div>
 
@@ -51,11 +52,10 @@ const MCS = ({ passageId, passage, options }: MCSProps) => {
                     {options.map((option, index) => (
                         <label
                             key={index}
-                            className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-colors ${
-                                answer === index
+                            className={`flex items-start gap-3 p-3.5 rounded-lg border cursor-pointer transition-colors ${answer === index
                                     ? 'border-primary/40 bg-primary/5'
                                     : 'border-border hover:bg-muted/50'
-                            }`}
+                                }`}
                             onClick={() => setAnswer(index)}
                         >
                             <input

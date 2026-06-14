@@ -38,9 +38,10 @@ interface WordData {
 
 interface ParagraphProps {
     paragraph: string;
+    inline?: boolean;
 }
 
-const MeaningfulParagraph = ({ paragraph }: ParagraphProps) => {
+const MeaningfulParagraph = ({ paragraph, inline }: ParagraphProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [wordData, setWordData] = useState<WordData | null>(null);
@@ -91,9 +92,11 @@ const MeaningfulParagraph = ({ paragraph }: ParagraphProps) => {
 
     const tokens = paragraph.split(/(\b[a-zA-Z][a-zA-Z'-]*\b)/g);
 
+    const Wrapper = inline ? 'span' : 'p';
+
     return (
         <>
-            <p className="leading-relaxed text-gray-800">
+            <Wrapper className={inline ? undefined : 'leading-relaxed text-gray-800'}>
                 {tokens.map((token, index) =>
                     /^[a-zA-Z][a-zA-Z'-]*$/.test(token) ? (
                         <span
@@ -107,7 +110,7 @@ const MeaningfulParagraph = ({ paragraph }: ParagraphProps) => {
                         <span key={index}>{token}</span>
                     )
                 )}
-            </p>
+            </Wrapper>
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">

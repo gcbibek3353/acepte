@@ -4,6 +4,7 @@ import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { uploadAudioFile } from '@/lib/uploadAudio'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph'
 
 interface Read_AloudProps {
   passage: string;
@@ -47,7 +48,8 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
   return (
     <div className="space-y-6">
       <div className="bg-muted/30 border border-border rounded-lg p-6">
-        <p className="text-base leading-relaxed text-foreground">{passage}</p>
+        <MeaningfulParagraph paragraph={passage} />
+        {/* <p className="text-base leading-relaxed text-foreground">{passage}</p> */}
       </div>
 
       <AudioRecorder key={recordingKey} audioFile={audioFile} setAudioFile={setAudioFile} prepTime={40} />

@@ -15,13 +15,24 @@ interface QuestionsProps {
 interface FilterQuestionsProps {
     questions: QuestionsProps[],
     queryParams: FilterParams,
-    setQueryParams: React.Dispatch<React.SetStateAction<FilterParams>>
+    setQueryParams: React.Dispatch<React.SetStateAction<FilterParams>>,
+    isLoading?: boolean,
 }
 
 const selectClass = "px-3 py-1.5 text-sm border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
 
-const FilterQuestions = ({ questions, queryParams, setQueryParams }: FilterQuestionsProps) => {
+const FilterQuestions = ({ questions, queryParams, setQueryParams, isLoading }: FilterQuestionsProps) => {
     const pathname = usePathname();
+
+    const currentPage = queryParams.page ?? 1;
+    const limit = queryParams.limit ?? 10;
+    const hasPrev = currentPage > 1;
+    const hasNext = questions.length === limit;
+
+    const goToPage = (page: number) => {
+        setQueryParams(prev => ({ ...prev, page }));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleDifficultyFilter = (difficulty: 'EASY' | 'MEDIUM' | 'HARD' | null) => {
         setQueryParams(prev => ({ ...prev, difficulty, page: 1 }));
@@ -164,13 +175,12 @@ const FilterQuestions = ({ questions, queryParams, setQueryParams }: FilterQuest
                                         )}
 
                                         {/* Difficulty badge */}
-                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                            question.difficulty === 'EASY'
+                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${question.difficulty === 'EASY'
                                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                                 : question.difficulty === 'MEDIUM'
-                                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                        }`}>
+                                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                            }`}>
                                             {question.difficulty.charAt(0) + question.difficulty.slice(1).toLowerCase()}
                                         </span>
                                     </div>
@@ -178,6 +188,33 @@ const FilterQuestions = ({ questions, queryParams, setQueryParams }: FilterQuest
                             </div>
                         </Link>
                     ))}
+                </div>
+            )}
+
+            {/* Pagination */}
+            {(hasPrev || hasNext) && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                    <button
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={!hasPrev || isLoading}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                    </button>
+                    <span className="text-sm text-muted-foreground">Page {currentPage}</span>
+                    <button
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={!hasNext || isLoading}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
             )}
         </div>

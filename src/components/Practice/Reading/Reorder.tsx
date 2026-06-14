@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
 
 interface Paragraph {
     id: string
@@ -77,7 +78,7 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                 {index + 1}
             </div>
             <p className="flex-1 text-sm text-foreground leading-relaxed pt-0.5">
-                {paragraph.text}
+                <MeaningfulParagraph paragraph={paragraph.text} />
             </p>
             <svg className="shrink-0 w-4 h-4 text-muted-foreground mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
@@ -94,11 +95,10 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
-                                className={`space-y-3 min-h-[300px] p-4 rounded-lg border-2 border-dashed transition-colors ${
-                                    snapshot.isDraggingOver
+                                className={`space-y-3 min-h-[300px] p-4 rounded-lg border-2 border-dashed transition-colors ${snapshot.isDraggingOver
                                         ? 'border-primary/50 bg-primary/5'
                                         : 'border-border bg-muted/20'
-                                }`}
+                                    }`}
                             >
                                 {orderedParagraphs.map((paragraph, index) => (
                                     <Draggable
@@ -112,11 +112,10 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`p-4 bg-card border rounded-lg cursor-move transition-all ${
-                                                    snapshot.isDragging
+                                                className={`p-4 bg-card border rounded-lg cursor-move transition-all ${snapshot.isDragging
                                                         ? 'shadow-md border-primary/40 bg-primary/5 rotate-1'
                                                         : 'shadow-sm border-border hover:border-primary/30 hover:shadow-md'
-                                                }`}
+                                                    }`}
                                             >
                                                 <ParagraphCard paragraph={paragraph} index={index} />
                                             </div>

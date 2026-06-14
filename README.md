@@ -6,7 +6,7 @@ A comprehensive online platform for PTE (Pearson Test of English) exam preparati
 
 Acepte is a full-stack web application designed to help students prepare for the PTE Academic exam. The platform provides structured practice sessions, mock tests, and performance tracking across all PTE question types.
 
-## ✨ Features
+## ✨ Features 
 
 ### 📝 Practice Modules 
 - **Speaking**: Read Aloud, Repeat Sentence, Describe Image, Re-tell Lecture, Answer Short Question, Summarize Group Discussion, Respond to a Situation
@@ -37,7 +37,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Deployment**: Vercel-ready
 
 ## 📁 Project Structure
-
+ 
 ```
 src/
 ├── app/                     # Next.js App Router

@@ -11,6 +11,7 @@ import {
   Zap,
   Globe,
 } from "lucide-react"
+import MeaningfulParagraph from "@/components/Dictionary/MeaningfulParagraph"
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -267,7 +268,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
     </div>
   )
 }
