@@ -31,10 +31,38 @@ const buildObjectUrl = (key: string): string => {
 }
 
 export async function uploadAudioToS3(audioDir: string, audioFile: string, s3Subdir: string): Promise<string> {
-  const filePath = path.join(audioDir, audioFile)
-  const ext = path.extname(audioFile).toLowerCase()
+  const tryFetch = async (source: string) => {
+    const response = await fetch(source)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch audio from ${source}: ${response.status} ${response.statusText}`)
+    }
+
+    const arrayBuffer = await response.arrayBuffer()
+    return Buffer.from(arrayBuffer)
+  }
+
+  let buffer: Buffer
+  let ext = path.extname(audioFile).toLowerCase()
+
+  if (/^https?:\/\//i.test(audioFile)) {
+    buffer = await tryFetch(audioFile)
+
+    const url = new URL(audioFile)
+    const urlExt = path.extname(url.pathname).toLowerCase()
+    if (urlExt) ext = urlExt
+  } else {
+    const filePath = path.join(audioDir, audioFile)
+
+    try {
+      buffer = fs.readFileSync(filePath)
+    } catch (error) {
+      const fallbackUrl = `https://cdn-alfastorage.alfapte.com/question-files/${audioFile}`
+      console.warn(`Local audio not found at ${filePath}, falling back to ${fallbackUrl}`)
+      buffer = await tryFetch(fallbackUrl)
+    }
+  }
+
   const contentType = CONTENT_TYPES[ext] ?? "audio/mpeg"
-  const buffer = fs.readFileSync(filePath)
   const key = `${s3Subdir}/${uuid()}${ext}`
 
   await s3Client.send(

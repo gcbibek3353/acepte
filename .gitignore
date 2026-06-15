@@ -51,3 +51,4 @@ MultipleChoiceSingle
 selectMissingword
 summarizeSpokenText
 writeFromDictation
+repeatSentence
