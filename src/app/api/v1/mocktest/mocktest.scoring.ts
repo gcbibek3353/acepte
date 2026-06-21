@@ -1,5 +1,15 @@
 import prisma from "@/lib/prisma";
 import { MockTestQuestionType } from "@/generated/prisma";
+import {
+  evaluateWriteEssay,
+  evalueteSummarizationWrittenText,
+  evaluateSummarizeSpokenTextAnswer,
+} from "@/lib/ai/google";
+import {
+  evaluateReadALoud,
+  evaluateAudioWithAudio,
+  evaluateAudioWithImage,
+} from "@/lib/ai/google-voice";
 
 // Maps each question type to its PTE section for score aggregation
 export const questionTypeToSection: Record<MockTestQuestionType, string> = {
@@ -230,4 +240,126 @@ async function scoreWriteFromDictation(questionId: string, answerData: any): Pro
     if (userWords[i] === correctWords[i]) correct++;
   }
   return correct;
+}
+
+// ── AI-scored (subjective) types — speaking & writing ──────────────────────────
+// These mirror the per-question evaluation used in practice mode. Returns the
+// total plus whatever sub-scores apply, or null if it cannot be evaluated
+// (missing answer/question, or the AI call fails — caller keeps isEvaluated=false).
+
+export interface AiScoreResult {
+  totalScore: number;
+  contentScore?: number | null;
+  formScore?: number | null;
+  grammarScore?: number | null;
+  vocabularyScore?: number | null;
+  spellingScore?: number | null;
+  oralFluencyScore?: number | null;
+  pronunciationScore?: number | null;
+}
+
+// Speaking tasks all return { contentScore, fluencyScore, pronunciationScore }
+function speakingResult(s: { contentScore: number; fluencyScore: number; pronunciationScore: number }): AiScoreResult {
+  return {
+    totalScore: (s.contentScore + s.fluencyScore + s.pronunciationScore) / 3,
+    contentScore: s.contentScore,
+    oralFluencyScore: s.fluencyScore,
+    pronunciationScore: s.pronunciationScore,
+  };
+}
+
+export async function aiScore(
+  questionType: MockTestQuestionType,
+  questionId: string,
+  answerData: any,
+  audioUrl?: string | null
+): Promise<AiScoreResult | null> {
+  try {
+    switch (questionType) {
+      // ── Speaking ──────────────────────────────────────────────────────────
+      case "READ_ALOUD": {
+        if (!audioUrl) return null;
+        const q = await prisma.speakingReadAloudQuestion.findUnique({ where: { id: questionId }, select: { passage: true } });
+        if (!q) return null;
+        return speakingResult(await evaluateReadALoud(audioUrl, q.passage));
+      }
+      case "REPEAT_SENTENCE": {
+        if (!audioUrl) return null;
+        const q = await prisma.speakingRepeatSentenceQuestion.findUnique({ where: { id: questionId }, select: { audioUrl: true } });
+        if (!q?.audioUrl) return null;
+        return speakingResult(await evaluateAudioWithAudio(audioUrl, q.audioUrl));
+      }
+      case "DESCRIBE_IMAGE": {
+        if (!audioUrl) return null;
+        const q = await prisma.speakingDescribeImageQuestion.findUnique({ where: { id: questionId }, select: { imageUrl: true } });
+        if (!q?.imageUrl) return null;
+        return speakingResult(await evaluateAudioWithImage(audioUrl, q.imageUrl));
+      }
+      case "RETELL_LECTURE": {
+        if (!audioUrl) return null;
+        const q = await prisma.speakingRetellLectureQuestion.findUnique({ where: { id: questionId }, select: { audioUrl: true } });
+        if (!q?.audioUrl) return null;
+        return speakingResult(await evaluateAudioWithAudio(audioUrl, q.audioUrl));
+      }
+      case "ANSWER_SHORT_QUESTION": {
+        if (!audioUrl) return null;
+        const q = await prisma.speakingAnswerShortQuestion.findUnique({ where: { id: questionId }, select: { audioUrl: true } });
+        if (!q?.audioUrl) return null;
+        return speakingResult(await evaluateAudioWithAudio(audioUrl, q.audioUrl));
+      }
+
+      // ── Writing ───────────────────────────────────────────────────────────
+      case "WRITE_ESSAY": {
+        const text = answerData?.text;
+        if (!text) return null;
+        const q = await prisma.writeEssayQuestion.findUnique({ where: { id: questionId }, select: { essay_description: true } });
+        if (!q) return null;
+        const e = await evaluateWriteEssay(text, q.essay_description);
+        return {
+          totalScore: e.totalScore,
+          contentScore: e.contentScore,
+          formScore: e.formScore,
+          grammarScore: e.grammarScore,
+          vocabularyScore: e.vocabScore,
+          spellingScore: e.spellingScore,
+        };
+      }
+      case "SUMMARIZE_WRITTEN_TEXT": {
+        const text = answerData?.text;
+        if (!text) return null;
+        const q = await prisma.summarizeWrittenTextQuestion.findUnique({ where: { id: questionId }, select: { passage: true } });
+        if (!q) return null;
+        const e = await evalueteSummarizationWrittenText(text, q.passage);
+        return {
+          totalScore: e.totalScore,
+          contentScore: e.contentScore,
+          formScore: e.formScore,
+          vocabularyScore: e.vocabScore,
+        };
+      }
+
+      // ── Listening (AI-scored summary) ────────────────────────────────────
+      case "SUMMARIZE_SPOKEN_TEXT": {
+        const text = answerData?.text;
+        if (!text) return null;
+        const q = await prisma.summarizeSpokenTextQuestion.findUnique({ where: { id: questionId }, select: { audioTranscribedText: true } });
+        if (!q) return null;
+        const e = await evaluateSummarizeSpokenTextAnswer(text, q.audioTranscribedText);
+        return {
+          totalScore: e.totalScore,
+          contentScore: e.contentScore,
+          formScore: e.formScore,
+          grammarScore: e.grammarScore,
+          vocabularyScore: e.vocabularyScore,
+          spellingScore: e.spellingScore,
+        };
+      }
+
+      default:
+        return null;
+    }
+  } catch (err) {
+    console.error(`aiScore failed for ${questionType} (${questionId}):`, err);
+    return null;
+  }
 }

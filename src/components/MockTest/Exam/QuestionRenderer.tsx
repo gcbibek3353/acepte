@@ -326,49 +326,82 @@ function ReorderParagraphs({ data, savedAnswer, onAnswerChange }: { data: any; s
 }
 
 function FibDragDrop({ data, savedAnswer, onAnswerChange }: { data: any; savedAnswer: any; onAnswerChange: Props["onAnswerChange"] }) {
-  const [blankContents, setBlankContents] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    (savedAnswer ?? []).forEach((a: any) => { init[String(a.pos)] = String(a.index); });
+  const options: string[] = data.options ?? [];
+  const passage: string = data.content ?? "";
+
+  // pos (string) → original index into the `options` pool
+  const [blankContents, setBlankContents] = useState<Record<string, number>>(() => {
+    const init: Record<string, number> = {};
+    (savedAnswer ?? []).forEach((a: any) => { init[String(a.pos)] = Number(a.index); });
     return init;
   });
-  const [available, setAvailable] = useState<string[]>(() => {
-    const used = new Set((savedAnswer ?? []).map((a: any) => String(a.index)));
-    return (data.options ?? []).filter((_: string, i: number) => !used.has(String(i)));
+  // original option indices still sitting in the word bank
+  const [available, setAvailable] = useState<number[]>(() => {
+    const used = new Set((savedAnswer ?? []).map((a: any) => Number(a.index)));
+    return options.map((_, i) => i).filter((i) => !used.has(i));
   });
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  function dropOnBlank(result: DropResult) {
-    if (!result.destination) return;
-    const destId = result.destination.droppableId;
-    if (!destId.startsWith("blank-")) return;
-    const pos = destId.replace("blank-", "");
-    const optIdx = result.draggableId.replace("opt-", "");
-    const newContents = { ...blankContents, [pos]: optIdx };
-    setBlankContents(newContents);
-    setAvailable((prev) => prev.filter((_, i) => String(i) !== optIdx));
-    onAnswerChange(Object.entries(newContents).map(([p, idx]) => ({ pos: p, index: Number(idx) })));
+  function emit(next: Record<string, number>) {
+    onAnswerChange(Object.entries(next).map(([p, idx]) => ({ pos: p, index: idx })));
   }
 
-  const parts = (data.passage ?? "").split(/(\{\d+\})/g);
+  function onDragEnd(result: DropResult) {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+    const srcId = source.droppableId;
+    const dstId = destination.droppableId;
+    if (srcId === dstId) return;
+
+    // Resolve the original option index being dragged.
+    let optIdx: number;
+    if (draggableId.startsWith("opt-")) optIdx = Number(draggableId.slice(4));
+    else if (draggableId.startsWith("placed-")) optIdx = blankContents[draggableId.slice(7)];
+    else return;
+    if (optIdx === undefined || Number.isNaN(optIdx)) return;
+
+    const next = { ...blankContents };
+    let nextAvail = [...available];
+
+    // Remove from source.
+    if (srcId.startsWith("blank-")) delete next[srcId.replace("blank-", "")];
+    else nextAvail = nextAvail.filter((i) => i !== optIdx);
+
+    // Place into destination.
+    if (dstId.startsWith("blank-")) {
+      const toPos = dstId.replace("blank-", "");
+      if (next[toPos] !== undefined) nextAvail.push(next[toPos]); // bump the displaced word back to the bank
+      next[toPos] = optIdx;
+    } else if (!nextAvail.includes(optIdx)) {
+      nextAvail.push(optIdx); // dropped back into the bank
+    }
+
+    setBlankContents(next);
+    setAvailable(nextAvail);
+    emit(next);
+  }
+
+  const parts = passage.split(/(\{\d+\})/g);
 
   if (!mounted) return <div className="h-48 bg-muted/20 rounded-lg animate-pulse" />;
   return (
     <div>
       <SectionLabel label="Reading: Fill in the Blanks (Drag & Drop)" />
-      <p className="text-xs text-muted-foreground mb-4">Drag words from the box below into the correct blanks in the text.</p>
-      <DragDropContext onDragEnd={dropOnBlank}>
+      <p className="text-xs text-muted-foreground mb-4">Drag words from the box below into the correct blanks in the text. Drag a placed word back to the box to remove it.</p>
+      <DragDropContext onDragEnd={onDragEnd}>
         {/* Word bank */}
         <Droppable droppableId="wordbank" direction="horizontal">
-          {(provided) => (
+          {(provided, snapshot) => (
             <div ref={provided.innerRef} {...provided.droppableProps}
-              className="flex flex-wrap gap-2 rounded-lg border border-dashed border-border bg-muted/20 p-3 mb-5 min-h-12">
-              {available.map((word, i) => (
-                <Draggable key={`opt-${i}`} draggableId={`opt-${i}`} index={i}>
+              className={cn("flex flex-wrap gap-2 rounded-lg border border-dashed p-3 mb-5 min-h-12 transition-colors",
+                snapshot.isDraggingOver ? "border-primary/50 bg-primary/5" : "border-border bg-muted/20")}>
+              {available.map((optIdx, i) => (
+                <Draggable key={`opt-${optIdx}`} draggableId={`opt-${optIdx}`} index={i}>
                   {(p) => (
                     <span ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
                       className="rounded-md border border-border bg-card px-3 py-1 text-sm text-foreground shadow-sm cursor-move">
-                      {word}
+                      {options[optIdx]}
                     </span>
                   )}
                 </Draggable>
@@ -384,16 +417,25 @@ function FibDragDrop({ data, savedAnswer, onAnswerChange }: { data: any; savedAn
             if (!match) return <span key={i}>{part}</span>;
             const pos = match[1];
             const filledIdx = blankContents[pos];
-            const filledWord = filledIdx !== undefined ? data.options?.[Number(filledIdx)] : undefined;
+            const hasWord = filledIdx !== undefined;
             return (
               <Droppable key={i} droppableId={`blank-${pos}`} direction="horizontal">
                 {(provided, snapshot) => (
                   <span ref={provided.innerRef} {...provided.droppableProps}
-                    className={cn("inline-flex items-center mx-1 min-w-20 h-8 rounded border-b-2 px-2 text-sm transition-colors",
+                    className={cn("inline-flex items-center align-middle mx-1 min-w-20 h-8 rounded border-b-2 px-2 text-sm transition-colors",
                       snapshot.isDraggingOver ? "border-primary bg-primary/10" :
-                      filledWord ? "border-primary bg-primary/5 text-foreground font-medium" :
-                                   "border-muted-foreground/40 text-muted-foreground")}>
-                    {filledWord ?? "..."}
+                      hasWord ? "border-primary bg-primary/5" :
+                                "border-muted-foreground/40 text-muted-foreground")}>
+                    {hasWord ? (
+                      <Draggable draggableId={`placed-${pos}`} index={0}>
+                        {(p) => (
+                          <span ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
+                            className="text-foreground font-medium cursor-move">
+                            {options[filledIdx]}
+                          </span>
+                        )}
+                      </Draggable>
+                    ) : "..."}
                     {provided.placeholder}
                   </span>
                 )}
@@ -422,7 +464,7 @@ function FibDropdown({ data, savedAnswer, onAnswerChange }: { data: any; savedAn
       <SectionLabel label="Reading: Fill in the Blanks (Dropdown)" />
       <p className="text-xs text-muted-foreground mb-4">Select the correct word for each gap from the dropdown menus.</p>
       <div className="rounded-lg border border-border bg-muted/10 p-5 leading-loose">
-        {renderPassageWithBlanks(data.passage ?? "", data.blanks ?? [], answers, change, "dropdown")}
+        {renderPassageWithBlanks(data.content ?? "", data.blanks ?? [], answers, change, "dropdown")}
       </div>
     </div>
   );

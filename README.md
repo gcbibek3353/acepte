@@ -1,4 +1,4 @@
-# Acepte - PTE Practice Platform
+# Acepte - PTE Practice Platform 
 
 A comprehensive online platform for PTE (Pearson Test of English) exam preparation, offering practice tests and mock exams across all four language skills.
 
@@ -8,7 +8,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 
 ## ✨ Features 
 
-### 📝 Practice Modules 
+### 📝 Practice Modules
 - **Speaking**: Read Aloud, Repeat Sentence, Describe Image, Re-tell Lecture, Answer Short Question, Summarize Group Discussion, Respond to a Situation
 - **Writing**: Summarize Written Text, Write Essay
 - **Reading**: Fill in the Blanks (Dropdown & Drag-and-Drop), Multiple Choice (Single & Multiple), Re-order Paragraphs
@@ -25,7 +25,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with clear practice module organization
 - **Real-time Feedback**: Immediate scoring and feedback on practice attempts
-- **Audio Integration**: Built-in audio player for listening and speaking modules
+- **Audio Integration**: Built-in audio player for listening and speaking modules 
 
 ## 🛠️ Tech Stack
 

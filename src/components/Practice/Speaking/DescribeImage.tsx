@@ -48,9 +48,12 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
   return (
     <div className="space-y-6">
 
-      <div className="p-4 bg-gray-50 border rounded-lg text-gray-700 leading-relaxed">
-        {/* <img src={imageUrl} alt="" /> */}
-        <ImageWithFallback src={imageUrl} alt='' />
+      <div className="flex justify-center p-4 bg-gray-50 border rounded-lg">
+        <ImageWithFallback
+          src={imageUrl}
+          alt=''
+          className="w-full max-w-3xl h-auto rounded-md object-contain"
+        />
       </div>
 
       <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={25} />

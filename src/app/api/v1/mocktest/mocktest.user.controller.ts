@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { PteSection } from "@/generated/prisma";
-import { autoScore, questionTypeToSection } from "./mocktest.scoring";
+import { autoScore, aiScore, questionTypeToSection, type AiScoreResult } from "./mocktest.scoring";
 
 // ── List & Overview ────────────────────────────────────────────────────────────
 
@@ -204,8 +204,31 @@ async function submitResponse(
     throw new Error("Start the section before submitting answers");
   }
 
-  const score = await autoScore(mqQuestion.questionType, mqQuestion.questionId, data.answerData);
-  const isEvaluated = score !== null;
+  // Objective types score instantly; subjective (speaking/writing) types are
+  // sent through the AI evaluators. AI failures fall back to isEvaluated=false
+  // so the answer is still saved and can be re-evaluated later.
+  const objectiveScore = await autoScore(mqQuestion.questionType, mqQuestion.questionId, data.answerData);
+
+  let scores: AiScoreResult | { totalScore: number } | null =
+    objectiveScore !== null ? { totalScore: objectiveScore } : null;
+
+  if (objectiveScore === null) {
+    scores = await aiScore(mqQuestion.questionType, mqQuestion.questionId, data.answerData, data.audioUrl);
+  }
+
+  const isEvaluated = scores !== null;
+  const scoreFields = {
+    totalScore: scores?.totalScore ?? null,
+    contentScore: (scores as AiScoreResult)?.contentScore ?? null,
+    formScore: (scores as AiScoreResult)?.formScore ?? null,
+    grammarScore: (scores as AiScoreResult)?.grammarScore ?? null,
+    vocabularyScore: (scores as AiScoreResult)?.vocabularyScore ?? null,
+    spellingScore: (scores as AiScoreResult)?.spellingScore ?? null,
+    oralFluencyScore: (scores as AiScoreResult)?.oralFluencyScore ?? null,
+    pronunciationScore: (scores as AiScoreResult)?.pronunciationScore ?? null,
+    isEvaluated,
+    evaluatedAt: isEvaluated ? new Date() : null,
+  };
 
   return prisma.mockTestResponse.upsert({
     where: { attemptId_mockTestQuestionId: { attemptId, mockTestQuestionId: data.mockTestQuestionId } },
@@ -215,17 +238,13 @@ async function submitResponse(
       answerData: data.answerData ?? null,
       audioUrl: data.audioUrl,
       duration: data.duration,
-      totalScore: score,
-      isEvaluated,
-      evaluatedAt: isEvaluated ? new Date() : null,
+      ...scoreFields,
     },
     update: {
       answerData: data.answerData ?? null,
       audioUrl: data.audioUrl,
       duration: data.duration,
-      totalScore: score,
-      isEvaluated,
-      evaluatedAt: isEvaluated ? new Date() : null,
+      ...scoreFields,
     },
   });
 }
