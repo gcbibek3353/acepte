@@ -219,6 +219,53 @@ export default function ExamShell({ testId, attemptId }: Props) {
     if (audioFile) pendingAudioRef.current = audioFile;
   }
 
+  // ── Persist the current pending answer ────────────────────────────────────
+  // Returns the up-to-date answered map so callers (e.g. section completion)
+  // can see the just-saved answer without waiting for a re-render.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function saveCurrentAnswer(): Promise<Map<string, any>> {
+    if (!currentQuestion) return answeredMap;
+
+    let audioUrl: string | undefined;
+    const audioFile = pendingAudioRef.current;
+    if (audioFile) {
+      audioUrl = await uploadAudio(audioFile);
+      pendingAudioRef.current = null;
+    }
+
+    const hasAnswer = pendingAnswer !== null || audioUrl;
+    if (!hasAnswer) return answeredMap;
+
+    await fetch(`/api/v1/mocktest/attempt/${attemptId}/response`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mockTestQuestionId: currentQuestion.id,
+        answerData: pendingAnswer,
+        audioUrl,
+      }),
+    });
+    const updated = new Map(answeredMap).set(currentQuestion.id, pendingAnswer);
+    setAnsweredMap(updated);
+    return updated;
+  }
+
+  // ── Save the current answer without navigating (explicit Save button) ─────
+  async function handleSave() {
+    if (!currentQuestion) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await saveCurrentAnswer();
+      setPendingAnswer(null);
+      pendingAudioRef.current = null;
+    } catch (e: any) {
+      setSubmitError(e.message ?? "Failed to save answer. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   // ── Submit current answer and advance ─────────────────────────────────────
   async function handleNext(skip = false) {
     if (!currentQuestion || !currentSection) return;
@@ -227,32 +274,8 @@ export default function ExamShell({ testId, attemptId }: Props) {
 
     try {
       // Track locally so handleCompleteSection sees the updated map immediately
-      let latestAnsweredMap = answeredMap;
-
-      // Capture answer (skip means move without saving)
-      if (!skip) {
-        let audioUrl: string | undefined;
-        const audioFile = pendingAudioRef.current;
-        if (audioFile) {
-          audioUrl = await uploadAudio(audioFile);
-          pendingAudioRef.current = null;
-        }
-
-        const hasAnswer = pendingAnswer !== null || audioUrl;
-        if (hasAnswer) {
-          await fetch(`/api/v1/mocktest/attempt/${attemptId}/response`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              mockTestQuestionId: currentQuestion.id,
-              answerData: pendingAnswer,
-              audioUrl,
-            }),
-          });
-          latestAnsweredMap = new Map(answeredMap).set(currentQuestion.id, pendingAnswer);
-          setAnsweredMap(latestAnsweredMap);
-        }
-      }
+      // (skip means move without saving)
+      const latestAnsweredMap = skip ? answeredMap : await saveCurrentAnswer();
 
       // Reset pending
       setPendingAnswer(null);
@@ -448,10 +471,17 @@ export default function ExamShell({ testId, attemptId }: Props) {
                     Save & Next <ChevronRight size={14} />
                   </Button>
                 ) : (
-                  <Button onClick={() => handleNext(false)} disabled={submitting} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
-                    {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
-                    {sectionIdx < sortedSections.length - 1 ? "Complete Section →" : "Finish Test →"}
-                  </Button>
+                  <>
+                    {/* Explicit save for the last question so it isn't flagged as unanswered */}
+                    <Button variant="secondary" size="sm" onClick={handleSave} disabled={submitting} className="gap-2">
+                      {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
+                      Save
+                    </Button>
+                    <Button onClick={() => handleNext(false)} disabled={submitting} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                      {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
+                      {sectionIdx < sortedSections.length - 1 ? "Complete Section →" : "Finish Test →"}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

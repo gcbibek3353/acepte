@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, AlertCircle, Clock, CheckCircle, Loader } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,8 @@ interface Score {
 interface Response {
   id: string;
   mockTestQuestionId: string;
+  answerData: unknown;
+  audioUrl: string | null;
   totalScore: number | null;
   isEvaluated: boolean;
   mockTestQuestion: { questionType: string; order: number; sectionId: string };
@@ -54,16 +56,38 @@ const sectionPills: Record<PteSection, string> = {
   LISTENING: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
 };
 
-function ScoreChip({ label, score, colorClass }: { label: string; score: number | null; colorClass: string }) {
+const QUESTION_TYPE_SECTION: Record<string, PteSection> = {
+  READ_ALOUD: "SPEAKING", REPEAT_SENTENCE: "SPEAKING", DESCRIBE_IMAGE: "SPEAKING",
+  RETELL_LECTURE: "SPEAKING", ANSWER_SHORT_QUESTION: "SPEAKING",
+  WRITE_ESSAY: "WRITING", SUMMARIZE_WRITTEN_TEXT: "WRITING",
+  READING_MCM: "READING", READING_MCS: "READING", REORDER_PARAGRAPHS: "READING",
+  READING_FILL_BLANKS_DRAG_DROP: "READING", READING_FILL_BLANKS_DROPDOWN: "READING",
+  SUMMARIZE_SPOKEN_TEXT: "LISTENING", LISTENING_MCM: "LISTENING", LISTENING_MCS: "LISTENING",
+  LISTENING_FILL_BLANKS: "LISTENING", LISTENING_HIGHLIGHT_SUMMARY: "LISTENING",
+  LISTENING_SELECT_MISSING_WORD: "LISTENING", LISTENING_HIGHLIGHT_INCORRECT_WORDS: "LISTENING",
+  WRITE_FROM_DICTATION: "LISTENING",
+};
+
+// AI-scored (subjective) types — evaluated by the AI service at submit time.
+// On a completed attempt there is no later evaluation pass, so an answered one
+// of these that is still un-evaluated means the AI scoring failed.
+const AI_SCORED_TYPES = new Set([
+  "READ_ALOUD", "REPEAT_SENTENCE", "DESCRIBE_IMAGE", "RETELL_LECTURE", "ANSWER_SHORT_QUESTION",
+  "WRITE_ESSAY", "SUMMARIZE_WRITTEN_TEXT", "SUMMARIZE_SPOKEN_TEXT",
+]);
+
+function ScoreChip({ label, score, colorClass, failed }: { label: string; score: number | null; colorClass: string; failed?: boolean }) {
   return (
     <div className={cn("rounded-lg border border-border bg-card shadow-sm p-5 border-l-4", colorClass)}>
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
       {score !== null ? (
         <p className="mt-2 text-3xl font-bold text-foreground">{score.toFixed(1)}</p>
-      ) : (
-        <p className="mt-2 text-sm text-muted-foreground flex items-center gap-1.5">
-          <Loader size={13} className="animate-spin" /> Pending
+      ) : failed ? (
+        <p className="mt-2 text-sm text-destructive flex items-center gap-1.5">
+          <AlertCircle size={13} /> Evaluation failed
         </p>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">Not attempted</p>
       )}
     </div>
   );
@@ -118,8 +142,14 @@ export default function ResultPage() {
   }
 
   const { score, sectionAttempts, responses } = result;
-  const pending = responses.filter((r) => !r.isEvaluated);
-  const hasPending = pending.length > 0;
+  const isAnswered = (r: Response) => r.answerData != null || r.audioUrl != null;
+  // No background evaluation runs after completion, so an answered AI-scored
+  // response that was never evaluated means the AI scoring failed.
+  const failedResponses = responses.filter(
+    (r) => AI_SCORED_TYPES.has(r.mockTestQuestion.questionType) && isAnswered(r) && !r.isEvaluated
+  );
+  const failedSections = new Set(failedResponses.map((r) => QUESTION_TYPE_SECTION[r.mockTestQuestion.questionType]));
+  const hasFailures = failedResponses.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,16 +177,16 @@ export default function ResultPage() {
           )}
         </div>
 
-        {/* AI evaluation pending banner */}
-        {hasPending && (
-          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-4 flex items-start gap-3">
-            <Loader size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 animate-spin" />
+        {/* AI evaluation failure banner */}
+        {hasFailures && (
+          <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
+            <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                {pending.length} response{pending.length !== 1 ? "s" : ""} still being evaluated
+              <p className="text-sm font-medium text-destructive">
+                {failedResponses.length} response{failedResponses.length !== 1 ? "s" : ""} could not be evaluated
               </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                Speaking and writing responses are scored by AI. Scores will update once evaluation is complete.
+              <p className="text-xs text-destructive/80 mt-0.5">
+                The AI scoring service failed to evaluate {failedResponses.length !== 1 ? "these speaking/writing answers" : "this speaking/writing answer"}, so the affected scores are incomplete. Please retake the test or try again later — if the problem persists, contact support.
               </p>
             </div>
           </div>
@@ -166,19 +196,19 @@ export default function ResultPage() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">Communicative Skills</h2>
           {score === null ? (
-            <div className="rounded-lg border border-border bg-card shadow-sm p-6 flex flex-col items-center gap-3 text-center">
-              <AlertCircle size={28} className="text-muted-foreground opacity-60" />
-              <p className="text-sm font-medium text-foreground">Scores not available yet</p>
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 shadow-sm p-6 flex flex-col items-center gap-3 text-center">
+              <AlertCircle size={28} className="text-destructive opacity-80" />
+              <p className="text-sm font-medium text-foreground">Scores could not be generated</p>
               <p className="text-xs text-muted-foreground max-w-xs">
-                Your responses are still being processed. Please check back in a few minutes.
+                Something went wrong while evaluating your responses. Please retake the test, or contact support if the problem persists.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              <ScoreChip label="Speaking"  score={score.speakingScore}  colorClass="border-l-blue-500" />
-              <ScoreChip label="Writing"   score={score.writingScore}   colorClass="border-l-violet-500" />
-              <ScoreChip label="Reading"   score={score.readingScore}   colorClass="border-l-emerald-500" />
-              <ScoreChip label="Listening" score={score.listeningScore} colorClass="border-l-amber-500" />
+              <ScoreChip label="Speaking"  score={score.speakingScore}  colorClass="border-l-blue-500"    failed={failedSections.has("SPEAKING")} />
+              <ScoreChip label="Writing"   score={score.writingScore}   colorClass="border-l-violet-500"  failed={failedSections.has("WRITING")} />
+              <ScoreChip label="Reading"   score={score.readingScore}   colorClass="border-l-emerald-500" failed={failedSections.has("READING")} />
+              <ScoreChip label="Listening" score={score.listeningScore} colorClass="border-l-amber-500"   failed={failedSections.has("LISTENING")} />
             </div>
           )}
         </div>
@@ -198,22 +228,9 @@ export default function ResultPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {sectionAttempts.map((sa) => {
-                    const sectionResps = responses.filter((r) => {
-                      // responses don't carry section directly, use type prefix
-                      const type = r.mockTestQuestion.questionType;
-                      const sectionMap: Record<string, PteSection> = {
-                        READ_ALOUD: "SPEAKING", REPEAT_SENTENCE: "SPEAKING", DESCRIBE_IMAGE: "SPEAKING",
-                        RETELL_LECTURE: "SPEAKING", ANSWER_SHORT_QUESTION: "SPEAKING",
-                        WRITE_ESSAY: "WRITING", SUMMARIZE_WRITTEN_TEXT: "WRITING",
-                        READING_MCM: "READING", READING_MCS: "READING", REORDER_PARAGRAPHS: "READING",
-                        READING_FILL_BLANKS_DRAG_DROP: "READING", READING_FILL_BLANKS_DROPDOWN: "READING",
-                        SUMMARIZE_SPOKEN_TEXT: "LISTENING", LISTENING_MCM: "LISTENING", LISTENING_MCS: "LISTENING",
-                        LISTENING_FILL_BLANKS: "LISTENING", LISTENING_HIGHLIGHT_SUMMARY: "LISTENING",
-                        LISTENING_SELECT_MISSING_WORD: "LISTENING", LISTENING_HIGHLIGHT_INCORRECT_WORDS: "LISTENING",
-                        WRITE_FROM_DICTATION: "LISTENING",
-                      };
-                      return sectionMap[type] === sa.section;
-                    });
+                    const sectionResps = responses.filter(
+                      (r) => QUESTION_TYPE_SECTION[r.mockTestQuestion.questionType] === sa.section
+                    );
                     return (
                       <tr key={sa.section} className="hover:bg-muted/20 transition-colors">
                         <td className="px-5 py-3">

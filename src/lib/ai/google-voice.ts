@@ -3,7 +3,7 @@ import { generateObject } from "ai";
 import { SpeakingAnswerScoreSchema } from "./schema";
 
 const google = createGoogleGenerativeAI({
-  apiKey: "AIzaSyBLKFXYMQrfLQBcU4C_SdOh6d3IpYzUJ-4",
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 });
 
 const model = google("gemini-2.5-flash");
