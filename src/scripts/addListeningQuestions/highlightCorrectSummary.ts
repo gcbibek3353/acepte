@@ -27,9 +27,8 @@ const questions = [
     correctOptionIndex: 3,
     difficulty: "MEDIUM" as const,
   },
-  [
-    {
-      questionId: "HCS002",
+  {
+    questionId: "HCS002",
       title: "Mountains",
       audioFile: "audio-b23d06dd-5f59-4be5-8905-0e834783d08f.mp3",
       passage:
@@ -360,9 +359,8 @@ const questions = [
         "The researchers enlisted real mothers and infants and quantified their interactions, which fell into four categories. One: babies did not wanted to maximize the amount of time smiling at their mothers. Two: they did not wanted to maximize the time the mothers smiled at them.",
       ],
       correctOptionIndex: 0,
-      difficulty: "MEDIUM" as const,
-    },
-  ],
+    difficulty: "MEDIUM" as const,
+  },
 ];
 
 const createQuestions = async () => {

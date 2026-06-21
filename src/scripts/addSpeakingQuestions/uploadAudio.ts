@@ -55,7 +55,7 @@ export async function uploadAudioToS3(audioDir: string, audioFile: string, s3Sub
 
     try {
       buffer = fs.readFileSync(filePath)
-    } catch (error) {
+    } catch {
       const fallbackUrl = `https://cdn-alfastorage.alfapte.com/question-files/${audioFile}`
       console.warn(`Local audio not found at ${filePath}, falling back to ${fallbackUrl}`)
       buffer = await tryFetch(fallbackUrl)
