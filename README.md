@@ -25,7 +25,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Intuitive Navigation**: Easy-to-use interface with clear practice module organization
 - **Real-time Feedback**: Immediate scoring and feedback on practice attempts
-- **Audio Integration**: Built-in audio player for listening and speaking modules
+- **Audio Integration**: Built-in audio player for listening and speaking modules 
 
 ## 🛠️ Tech Stack
 
