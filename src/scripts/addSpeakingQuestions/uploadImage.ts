@@ -32,10 +32,38 @@ const buildObjectUrl = (key: string): string => {
 }
 
 export async function uploadImageToS3(imageDir: string, imageFile: string, s3Subdir: string): Promise<string> {
-  const filePath = path.join(imageDir, imageFile)
-  const ext = path.extname(imageFile).toLowerCase()
+  const tryFetch = async (source: string) => {
+    const response = await fetch(source)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image from ${source}: ${response.status} ${response.statusText}`)
+    }
+
+    const arrayBuffer = await response.arrayBuffer()
+    return Buffer.from(arrayBuffer)
+  }
+
+  let buffer: Buffer
+  let ext = path.extname(imageFile).toLowerCase()
+
+  if (/^https?:\/\//i.test(imageFile)) {
+    buffer = await tryFetch(imageFile)
+
+    const url = new URL(imageFile)
+    const urlExt = path.extname(url.pathname).toLowerCase()
+    if (urlExt) ext = urlExt
+  } else {
+    const filePath = path.join(imageDir, imageFile)
+
+    try {
+      buffer = fs.readFileSync(filePath)
+    } catch (error) {
+      const fallbackUrl = `https://cdn-alfastorage.alfapte.com/question-files/${imageFile}`
+      console.warn(`Local image not found at ${filePath}, falling back to ${fallbackUrl}`)
+      buffer = await tryFetch(fallbackUrl)
+    }
+  }
+
   const contentType = CONTENT_TYPES[ext] ?? "image/jpeg"
-  const buffer = fs.readFileSync(filePath)
   const key = `${s3Subdir}/${uuid()}${ext}`
 
   await s3Client.send(
