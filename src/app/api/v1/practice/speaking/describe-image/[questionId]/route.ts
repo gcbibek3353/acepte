@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import speakingController from "../../speaking.controller";
-import { SpeakingDescribeImageQuestion, SpeakingRepeatSentenceQuestion } from "@/generated/prisma";
+import { DescribeImageDetail } from "@/types/speaking";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<SpeakingDescribeImageQuestion | null>>> {
+): Promise<NextResponse<ApiResponse<DescribeImageDetail | null>>> {
     try {
         const { questionId } = await params;
         if (!questionId) {

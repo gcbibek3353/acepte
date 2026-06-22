@@ -2,6 +2,7 @@
 import { SpeakingAnswerShortAnswer, SpeakingAnswerShortBookmark, SpeakingAnswerShortQuestion, SpeakingDescribeImageAnswer, SpeakingDescribeImageBookmark, SpeakingDescribeImageQuestion, SpeakingGroupDiscussionAnswer, SpeakingGroupDiscussionBookmark, SpeakingGroupDiscussionQuestion, SpeakingReadAloudAnswer, SpeakingReadAloudBookmark, SpeakingReadAloudQuestion, SpeakingRepeatSentenceAnswer, SpeakingRepeatSentenceBookmark, SpeakingRepeatSentenceQuestion, SpeakingRespondSituationAnswer, SpeakingRespondSituationBookmark, SpeakingRespondSituationQuestion, SpeakingRetellLectureAnswer, SpeakingRetellLectureBookmark, SpeakingRetellLectureQuestion } from "@/generated/prisma";
 import { evaluateAudioWithAudio, evaluateAudioWithImage, evaluateaudioWithText, evaluateReadALoud } from "@/lib/ai/google-voice";
 import prisma from "@/lib/prisma";
+import { AnswerShortDetail, DescribeImageDetail, GroupDiscussionDetail, ReadAloudDetail, RepeatSentenceDetail, RespondSituationDetail, RetellLectureDetail } from "@/types/speaking";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -57,7 +58,7 @@ const getReadAloudQuestions = async (userId: string, query: QuestionQuery): Prom
         return null;
     }
 }
-const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingReadAloudQuestion | null> => {
+const getReadAloudQuestionById = async (questionId: string): Promise<ReadAloudDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingReadAloudQuestion.findUnique({
@@ -78,7 +79,16 @@ const getReadAloudQuestionById = async (questionId: string): Promise<SpeakingRea
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. RA019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingReadAloudQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -196,7 +206,7 @@ const getRepeatSentenceQuestions = async (userId: string, query: QuestionQuery):
         return null;
     }
 }
-const getRepeatSentenceQuestionById = async (questionId: string): Promise<SpeakingRepeatSentenceQuestion | null> => {
+const getRepeatSentenceQuestionById = async (questionId: string): Promise<RepeatSentenceDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingRepeatSentenceQuestion.findUnique({
@@ -217,7 +227,16 @@ const getRepeatSentenceQuestionById = async (questionId: string): Promise<Speaki
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. RS019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingRepeatSentenceQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -333,7 +352,7 @@ const getDescribeImageQuestions = async (userId: string, query: QuestionQuery): 
         return null;
     }
 }
-const getDescribeImageQuestionById = async (questionId: string): Promise<SpeakingDescribeImageQuestion | null> => {
+const getDescribeImageQuestionById = async (questionId: string): Promise<DescribeImageDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingDescribeImageQuestion.findUnique({
@@ -354,7 +373,16 @@ const getDescribeImageQuestionById = async (questionId: string): Promise<Speakin
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. DI019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingDescribeImageQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -471,7 +499,7 @@ const getRetellLectureQuestions = async (userId: string, query: QuestionQuery): 
         return null;
     }
 }
-const getRetellLectureQuestionById = async (questionId: string): Promise<SpeakingRetellLectureQuestion | null> => {
+const getRetellLectureQuestionById = async (questionId: string): Promise<RetellLectureDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingRetellLectureQuestion.findUnique({
@@ -492,7 +520,16 @@ const getRetellLectureQuestionById = async (questionId: string): Promise<Speakin
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. RL019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingRetellLectureQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -609,7 +646,7 @@ const getAnswerShortQuestions = async (userId: string, query: QuestionQuery): Pr
         return null;
     }
 }
-const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingAnswerShortQuestion | null> => {
+const getAnswerShortQuestionById = async (questionId: string): Promise<AnswerShortDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingAnswerShortQuestion.findUnique({
@@ -630,7 +667,16 @@ const getAnswerShortQuestionById = async (questionId: string): Promise<SpeakingA
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. ASQ019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingAnswerShortQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -747,7 +793,7 @@ const getSummarizeGroupDiscussionQuestions = async (userId: string, query: Quest
         return null;
     }
 }
-const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Promise<SpeakingGroupDiscussionQuestion | null> => {
+const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Promise<GroupDiscussionDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingGroupDiscussionQuestion.findUnique({
@@ -768,7 +814,16 @@ const getSummarizeGroupDiscussionQuestionById = async (questionId: string): Prom
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. SGD019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingGroupDiscussionQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -884,7 +939,7 @@ const getRespondToASituationQuestions = async (userId: string, query: QuestionQu
         return null;
     }
 }
-const getRespondToASituationQuestionById = async (questionId: string): Promise<SpeakingRespondSituationQuestion | null> => {
+const getRespondToASituationQuestionById = async (questionId: string): Promise<RespondSituationDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.speakingRespondSituationQuestion.findUnique({
@@ -905,7 +960,16 @@ const getRespondToASituationQuestionById = async (questionId: string): Promise<S
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. RS019 -> 19), ignoring the prefix.
+        const siblings = await prisma.speakingRespondSituationQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;

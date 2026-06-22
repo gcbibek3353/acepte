@@ -22,7 +22,9 @@ export type ReadAloudDetail = Prisma.SpeakingReadAloudQuestionGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type RepeatSentenceListItem = Prisma.SpeakingRepeatSentenceQuestionGetPayload<{
   include: {
@@ -46,7 +48,9 @@ export type RepeatSentenceDetail = Prisma.SpeakingRepeatSentenceQuestionGetPaylo
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type DescribeImageListItem = Prisma.SpeakingDescribeImageQuestionGetPayload<{
   include: {
@@ -70,7 +74,9 @@ export type DescribeImageDetail = Prisma.SpeakingDescribeImageQuestionGetPayload
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type RetellLectureListItem = Prisma.SpeakingRetellLectureQuestionGetPayload<{
   include: {
@@ -94,7 +100,9 @@ export type RetellLectureDetail = Prisma.SpeakingRetellLectureQuestionGetPayload
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type AnswerShortListItem = Prisma.SpeakingAnswerShortQuestionGetPayload<{
   include: {
@@ -118,7 +126,9 @@ export type AnswerShortDetail = Prisma.SpeakingAnswerShortQuestionGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type GroupDiscussionListItem = Prisma.SpeakingGroupDiscussionQuestionGetPayload<{
   include: {
@@ -142,7 +152,9 @@ export type GroupDiscussionDetail = Prisma.SpeakingGroupDiscussionQuestionGetPay
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type RespondSituationListItem = Prisma.SpeakingRespondSituationQuestionGetPayload<{
   include: {
@@ -166,7 +178,9 @@ export type RespondSituationDetail = Prisma.SpeakingRespondSituationQuestionGetP
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export interface ApiResponse<T> {
   success: boolean

@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import speakingController from "../../speaking.controller";
-import { SpeakingReadAloudQuestion } from "@/generated/prisma";
+import { ReadAloudDetail } from "@/types/speaking";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -16,7 +16,7 @@ interface ApiResponse<T> {
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<SpeakingReadAloudQuestion | null>>> {
+): Promise<NextResponse<ApiResponse<ReadAloudDetail | null>>> {
     try {
         const { questionId } = await params;
         if (!questionId) {
