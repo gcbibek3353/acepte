@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import exportFunctions from "../../writing.controller";
-import { WriteEssayQuestion } from "@/generated/prisma";
+import { WriteEssayDetail } from "@/types/writing";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<WriteEssayQuestion | null>>> {
+): Promise<NextResponse<ApiResponse<WriteEssayDetail | null>>> {
   try {
     const { questionId } = await params;
 

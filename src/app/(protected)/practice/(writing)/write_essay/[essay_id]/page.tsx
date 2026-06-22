@@ -62,6 +62,9 @@ const WriteEssayDetailPage = async ({ params }: { params: Promise<{ essay_id: st
           description={questionData.essay_description}
           bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
+          siblings={questionData.siblings}
+          currentId={essay_id}
+          baseRoute="/practice/write_essay"
         />
 
         <Timer countDownTime={20 * 60} title="Remaining time" />

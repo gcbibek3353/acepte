@@ -1,6 +1,7 @@
 import { SummarizeWrittenTextAnswer, SummarizeWrittenTextBookMark, SummarizeWrittenTextQuestion, WriteEssayAnswer, WriteEssayBookMark, WriteEssayQuestion } from "@/generated/prisma";
 import { evaluateWriteEssay, evalueteSummarizationWrittenText } from "@/lib/ai/google";
 import prisma from "@/lib/prisma";
+import { SummarizeWrittenTextDetail, WriteEssayDetail } from "@/types/writing";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -63,9 +64,9 @@ const getWriteEssayQuestions = async (userId: string, queryParams: QuestionQuery
     }
 }
 
-const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion | null> => {
+const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayDetail | null> => {
     try {
-        const question: WriteEssayQuestion | null = await prisma.writeEssayQuestion.findUnique({
+        const question = await prisma.writeEssayQuestion.findUnique({
             where: {
                 id: id
             },
@@ -87,7 +88,16 @@ const getWriteEssayQuestionById = async (id: string): Promise<WriteEssayQuestion
         if (!question) {
             return null;
         }
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. WE019 -> 19), ignoring the prefix.
+        const siblings = await prisma.writeEssayQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -224,10 +234,10 @@ const getSummarizeWrittenTextQuestions = async (userId: string, queryParams: Que
     }
 }
 
-const getSummarizeWrittenTextQuestionById = async (id: string): Promise<SummarizeWrittenTextQuestion | null> => {
+const getSummarizeWrittenTextQuestionById = async (id: string): Promise<SummarizeWrittenTextDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
-        const question = prisma.summarizeWrittenTextQuestion.findUnique({
+        const question = await prisma.summarizeWrittenTextQuestion.findUnique({
             where: {
                 id: id
             },
@@ -249,7 +259,16 @@ const getSummarizeWrittenTextQuestionById = async (id: string): Promise<Summariz
         if (!question) {
             return null;
         }
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId (e.g. SWT019 -> 19), ignoring the prefix.
+        const siblings = await prisma.summarizeWrittenTextQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;

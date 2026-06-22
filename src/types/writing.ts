@@ -22,7 +22,9 @@ export type WriteEssayDetail = Prisma.WriteEssayQuestionGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type SummarizeWrittenTextListItem = Prisma.SummarizeWrittenTextQuestionGetPayload<{
   include: {
@@ -46,7 +48,9 @@ export type SummarizeWrittenTextDetail = Prisma.SummarizeWrittenTextQuestionGetP
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export interface ApiResponse<T> {
   success: boolean

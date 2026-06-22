@@ -61,6 +61,9 @@ const SummarizeWrittenTextDetailPage = async ({ params }: { params: Promise<{ te
           title={questionData.textTitle}
           bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
+          siblings={questionData.siblings}
+          currentId={text_id}
+          baseRoute="/practice/summarize-written-text"
         />
 
         <Timer countDownTime={10 * 60} title="Remaining time" />
