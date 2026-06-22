@@ -89,7 +89,7 @@ const questions = [
     audioTranscribedText:
       "Speaker 1: Works as an orientation leader, enjoys helping new students, but finds it stressful during busy events. Gains leadership and communication skills. \nSpeaker 2: Volunteers at a library, enjoys organizing and giving back to the community, but finds shelving books and standing tiring. Learns problem-solving and analytical skills. \nSpeaker 3: Volunteers at an animal shelter, enjoys helping animals but finds the work emotionally and physically tiring. Develops multitasking and teamwork skills. \nAll agree volunteering builds useful life skills and is rewarding despite challenges.",
     topic: "Different student volunteering experiences and skills gained",
-    difficulty: "MEDIUM",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "GD009",
@@ -98,7 +98,7 @@ const questions = [
     audioTranscribedText:
       "Speaker 1 supports allowing small pets in dorms, saying they reduce stress and are quiet. Speaker 2 opposes due to hygiene issues, smell, and allergies. Speaker 3 suggests a compromise with strict rules, hygiene checks, and pet supervisors. They discuss supervision problems and agree on structured rules for approval.",
     topic: "Whether small pets should be allowed in university dormitories",
-    difficulty: "MEDIUM",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "GD010",
@@ -107,7 +107,7 @@ const questions = [
     audioTranscribedText:
       "Speaker 1 supports canceling evening self-study to improve focus and flexibility. Speaker 2 agrees, saying it helps group work and reduces stress. Speaker 3 is initially concerned about discipline but suggests a trial period. All agree on testing the idea with workshops and optional study groups.",
     topic: "Debate on canceling compulsory evening self-study sessions",
-    difficulty: "MEDIUM",
+    difficulty: "MEDIUM" as const,
   },
   {
     questionId: "GD011",
@@ -116,7 +116,7 @@ const questions = [
     audioTranscribedText:
       "Students discuss replacing expensive textbooks with open-source alternatives. They highlight affordability, accessibility, and flexibility, while concerns include quality, copyright issues, and lack of supplementary materials. They suggest university review and pilot programs.",
     topic: "Using open-source textbooks instead of traditional ones",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD012",
@@ -125,7 +125,7 @@ const questions = [
     audioTranscribedText:
       "A student, professor, and alumni officer discuss improving alumni engagement. Ideas include mentorship programs, internships, guest talks, and online platforms. Challenges include maintaining long-term interest. They suggest pilot mentorship programs and stronger university-alumni connections.",
     topic: "Strengthening university alumni networks and student support",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD013",
@@ -134,7 +134,7 @@ const questions = [
     audioTranscribedText:
       "Students and a professor discuss interdisciplinary degrees. They highlight benefits like innovation, employability, and broader skills. Challenges include curriculum design, workload, and accreditation. They suggest starting with minors, certificates, and industry collaboration.",
     topic: "Interdisciplinary and collaborative university degree programs",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD014",
@@ -143,7 +143,7 @@ const questions = [
     audioTranscribedText:
       "Students and staff discuss free public transportation for students. Benefits include affordability, sustainability, and equal access. Challenges include cost and implementation. Suggestions include subsidies, partial discounts, or opt-in systems.",
     topic: "Free or discounted public transport for university students",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD015",
@@ -152,7 +152,7 @@ const questions = [
     audioTranscribedText:
       "Students and a professor debate making communication skills mandatory. They agree it improves confidence, employability, and presentation ability. Concerns include student anxiety and curriculum load. They suggest starting as an elective or first-year course.",
     topic: "Making communication and public speaking mandatory in university",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD016",
@@ -161,7 +161,7 @@ const questions = [
     audioTranscribedText:
       "Students discuss attending extracurricular workshops and seminars. They highlight benefits like career skills, networking, and certificates. Issues include time constraints and lack of awareness. Suggestions include better promotion and partial course credit.",
     topic: "Value of extracurricular academic workshops and seminars",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD017",
@@ -170,7 +170,7 @@ const questions = [
     audioTranscribedText:
       "Students and a professor discuss making assignments more industry-based. They support real-world projects, case studies, and collaborations. Concerns include feasibility and grading difficulty. Suggestions include pilot projects and public data-based tasks.",
     topic: "Using real-world industry problems in university assignments",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
   {
     questionId: "GD018",
@@ -179,7 +179,7 @@ const questions = [
     audioTranscribedText:
       "Students and admin discuss improving campus accessibility for disabled students. Topics include physical infrastructure, learning support, and faculty training. Solutions include universal design, awareness campaigns, and student inclusion in planning.",
     topic: "Improving accessibility and inclusion on university campuses",
-    difficulty: "HARD",
+    difficulty: "HARD" as const,
   },
 ];
 

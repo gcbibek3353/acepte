@@ -1,7 +1,7 @@
 'use client';
 import useFilteredAPI from '@/hooks/useFilteredAPI';
 import FilterQuestions from './FilterQuestions';
-import { QuestionListLoading, QuestionListError } from './QuestionListState';
+import { QuestionListError } from './QuestionListState';
 
 interface RawQuestion {
     id: string;
@@ -31,7 +31,6 @@ const FilterQuestions2 = ({ apiPath, initialData }: FilterQuestions2Props) => {
         answered: q.answers.length > 0,
     })) ?? [];
 
-    if (loading) return <QuestionListLoading />;
     if (error) return <QuestionListError error={error} />;
 
     return <FilterQuestions questions={questions} queryParams={queryParams} setQueryParams={setQueryParams} isLoading={loading} />;
