@@ -61,6 +61,9 @@ const Page = async ({ params }: { params: Promise<{ passageId: string }> }) => {
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
+          siblings={questionData.siblings}
+          currentId={passageId}
+          baseRoute="/practice/summarize_spoken_text"
         />
 
         <Timer countDownTime={10 * 60} title="Remaining" />

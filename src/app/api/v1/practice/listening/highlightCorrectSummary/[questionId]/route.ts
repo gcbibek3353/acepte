@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import listeningController from "../../listening.controller";
-import { ListeningHighlightSummaryPassage } from "@/generated/prisma";
+import { ListeningHcsDetail } from "@/types/listening";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -11,7 +11,7 @@ interface ApiResponse<T> {
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<ListeningHighlightSummaryPassage | null>>> {
+): Promise<NextResponse<ApiResponse<ListeningHcsDetail | null>>> {
     try {
         const { questionId } = await params;
         if (!questionId) {

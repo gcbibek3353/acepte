@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import listeningController from "../../listening.controller";
-import { ListeningWriteFromDictationPassage } from "@/generated/prisma";
+import { ListeningWfdDetail } from "@/types/listening";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -11,7 +11,7 @@ interface ApiResponse<T> {
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<ListeningWriteFromDictationPassage | null>>> {
+): Promise<NextResponse<ApiResponse<ListeningWfdDetail | null>>> {
     try {
         const { questionId } = await params;
         if (!questionId) {

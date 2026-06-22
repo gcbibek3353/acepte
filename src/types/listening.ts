@@ -22,7 +22,9 @@ export type SstDetail = Prisma.SummarizeSpokenTextQuestionGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningMcmListItem = Prisma.ListeningMCMPassageGetPayload<{
   include: {
@@ -47,7 +49,9 @@ export type ListeningMcmDetail = Prisma.ListeningMCMPassageGetPayload<{
     options: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningFibListItem = Prisma.ListeningFillBlankPassageGetPayload<{
   include: {
@@ -72,7 +76,9 @@ export type ListeningFibDetail = Prisma.ListeningFillBlankPassageGetPayload<{
     blanks: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningHcsListItem = Prisma.ListeningHighlightSummaryPassageGetPayload<{
   include: {
@@ -96,7 +102,9 @@ export type ListeningHcsDetail = Prisma.ListeningHighlightSummaryPassageGetPaylo
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningMcsListItem = Prisma.ListeningMCSPassageGetPayload<{
   include: {
@@ -120,7 +128,9 @@ export type ListeningMcsDetail = Prisma.ListeningMCSPassageGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningSmwListItem = Prisma.ListeningSelectMissingWordPassageGetPayload<{
   include: {
@@ -144,7 +154,9 @@ export type ListeningSmwDetail = Prisma.ListeningSelectMissingWordPassageGetPayl
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningHiwListItem = Prisma.ListeningHighlightIncorrectWordsPassageGetPayload<{
   include: {
@@ -169,7 +181,9 @@ export type ListeningHiwDetail = Prisma.ListeningHighlightIncorrectWordsPassageG
     incorrectWords: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ListeningWfdListItem = Prisma.ListeningWriteFromDictationPassageGetPayload<{
   include: {
@@ -193,7 +207,9 @@ export type ListeningWfdDetail = Prisma.ListeningWriteFromDictationPassageGetPay
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export interface ApiResponse<T> {
   success: boolean

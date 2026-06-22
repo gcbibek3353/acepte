@@ -1,6 +1,7 @@
 import { ListeningFillBlankAnswer, ListeningFillBlankBookmark, ListeningFillBlankPassage, ListeningHighlightIncorrectWordsAnswer, ListeningHighlightIncorrectWordsBookmark, ListeningHighlightIncorrectWordsPassage, ListeningHighlightSummaryAnswer, ListeningHighlightSummaryBookmark, ListeningHighlightSummaryPassage, ListeningMCMAnswer, ListeningMCMBookmark, ListeningMCMPassage, ListeningMCSAnswer, ListeningMCSBookmark, ListeningMCSPassage, ListeningSelectMissingWordAnswer, ListeningSelectMissingWordBookmark, ListeningSelectMissingWordPassage, ListeningWriteFromDictationAnswer, ListeningWriteFromDictationBookmark, ListeningWriteFromDictationPassage, SummarizeSpokenTextAnswer, SummarizeSpokenTextBookmark, SummarizeSpokenTextQuestion } from "@/generated/prisma";
 import { evaluateSummarizeSpokenTextAnswer } from "@/lib/ai/google";
 import prisma from "@/lib/prisma";
+import { ListeningFibDetail, ListeningHcsDetail, ListeningHiwDetail, ListeningMcmDetail, ListeningMcsDetail, ListeningSmwDetail, ListeningWfdDetail, SstDetail } from "@/types/listening";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -57,7 +58,7 @@ const getSummarizeSpokenTextQuestions = async (userId: string, queryParams: Ques
     }
 }
 
-const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<SummarizeSpokenTextQuestion | null> => {
+const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<SstDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.summarizeSpokenTextQuestion.findUnique({
@@ -78,7 +79,16 @@ const getSummarizeSpokenTextQuestionById = async (questionId: string): Promise<S
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.summarizeSpokenTextQuestion.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -206,7 +216,7 @@ const getMCMQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassage | null> => {
+const getMCMQuestionById = async (questionId: string): Promise<ListeningMcmDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.listeningMCMPassage.findUnique({
@@ -228,7 +238,16 @@ const getMCMQuestionById = async (questionId: string): Promise<ListeningMCMPassa
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningMCMPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -366,7 +385,7 @@ const getFIBQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 };
 
-const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlankPassage | null> => {
+const getFIBQuestionById = async (questionId: string): Promise<ListeningFibDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.listeningFillBlankPassage.findUnique({
@@ -383,11 +402,21 @@ const getFIBQuestionById = async (questionId: string): Promise<ListeningFillBlan
                         }
                     }
                 },
-                bookmarks: true
+                bookmarks: true,
+                blanks: true
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningFillBlankPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -533,7 +562,7 @@ const getHCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getHCSQuestionById = async (questionId: string): Promise<ListeningHighlightSummaryPassage | null> => {
+const getHCSQuestionById = async (questionId: string): Promise<ListeningHcsDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.listeningHighlightSummaryPassage.findUnique({
@@ -554,7 +583,16 @@ const getHCSQuestionById = async (questionId: string): Promise<ListeningHighligh
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningHighlightSummaryPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null
@@ -675,7 +713,7 @@ const getMCSQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getMCSQuestionById = async (questionId: string): Promise<ListeningMCSPassage | null> => {
+const getMCSQuestionById = async (questionId: string): Promise<ListeningMcsDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.listeningMCSPassage.findUnique({
@@ -696,7 +734,16 @@ const getMCSQuestionById = async (questionId: string): Promise<ListeningMCSPassa
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningMCSPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -813,7 +860,7 @@ const getSMWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMissingWordPassage | null> => {
+const getSMWQuestionById = async (questionId: string): Promise<ListeningSmwDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.listeningSelectMissingWordPassage.findUnique({
@@ -834,7 +881,16 @@ const getSMWQuestionById = async (questionId: string): Promise<ListeningSelectMi
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningSelectMissingWordPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -951,7 +1007,7 @@ const getHIWQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getHIWQuestionById = async (questionId: string): Promise<ListeningHighlightIncorrectWordsPassage | null> => {
+const getHIWQuestionById = async (questionId: string): Promise<ListeningHiwDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.listeningHighlightIncorrectWordsPassage.findUnique({
@@ -973,7 +1029,16 @@ const getHIWQuestionById = async (questionId: string): Promise<ListeningHighligh
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningHighlightIncorrectWordsPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -1117,7 +1182,7 @@ const getWFDQuestions = async (userId: string, queryParams: QuestionQuery): Prom
     }
 }
 
-const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFromDictationPassage | null> => {
+const getWFDQuestionById = async (questionId: string): Promise<ListeningWfdDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.listeningWriteFromDictationPassage.findUnique({
@@ -1138,7 +1203,16 @@ const getWFDQuestionById = async (questionId: string): Promise<ListeningWriteFro
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.listeningWriteFromDictationPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;

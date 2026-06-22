@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import listeningController from "../../listening.controller";
-import { SummarizeSpokenTextQuestion } from "@/generated/prisma";
+import { SstDetail } from "@/types/listening";
 import { auth_middleware } from "@/lib/auth-middleware";
 
 interface ApiResponse<T> {
@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<SummarizeSpokenTextQuestion | null>>> {
+): Promise<NextResponse<ApiResponse<SstDetail | null>>> {
   try {
     const { questionId } = await params;
 
