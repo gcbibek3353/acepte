@@ -14,7 +14,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 - **Reading**: Fill in the Blanks (Dropdown & Drag-and-Drop), Multiple Choice (Single & Multiple), Re-order Paragraphs
 - **Listening**: Summarize Spoken Text, Multiple Choice, Fill in the Blanks, Highlight Correct Summary, Select Missing Word, Highlight Incorrect Words, Write From Dictation
 
-### 🔧 Core Functionality
+### 🔧 Core Functionality 
 - **User Authentication**: Secure login/registration system
 - **Question Filtering**: Filter by difficulty (Easy/Medium/Hard), bookmark status, and completion status
 - **Progress Tracking**: Track answered questions and bookmark important ones
