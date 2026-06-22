@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
@@ -46,11 +47,11 @@ const SummarizeTextArea = ({ textId, text }: { textId: string, text: string }) =
             }
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
             setEssay('');
-            alert('Summary submitted and evaluated successfully!');
+            toast.success('Summary submitted and evaluated successfully!');
             router.refresh();
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast.error(error.message);
         },
     });
 

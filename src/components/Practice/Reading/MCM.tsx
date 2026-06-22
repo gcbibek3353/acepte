@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import MeaningfulParagraph from '@/components/Dictionary/MeaningfulParagraph';
@@ -44,7 +45,7 @@ const ReadingMCMComponent = ({ passageId, passage, options }: MCMProps) => {
             router.refresh();
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast.error(error.message);
         },
     });
 

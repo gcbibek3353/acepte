@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import AudioRecorder from './AudioRecorder'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -39,10 +40,10 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
       router.refresh();
-      alert('Answer submitted successfully!');
+      toast.success('Answer submitted successfully!');
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast.error(error.message);
     },
   });
 

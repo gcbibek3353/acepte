@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -40,10 +41,10 @@ const Reorder = ({ passageId, paragraphs }: ReorderProps) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
             router.refresh();
-            alert('Answer submitted successfully!');
+            toast.success('Answer submitted successfully!');
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast.error(error.message);
         },
     });
 

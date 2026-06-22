@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import AudioRecorder from './AudioRecorder';
 import PlayAudio from '../listening/PlayAudio';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -34,10 +35,10 @@ const Summarize_Group_Discussion = ({ audioUrl, questionId }: Summarize_Group_Di
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [detailUrl] });
       router.refresh();
-      alert('Answer submitted successfully!');
+      toast.success('Answer submitted successfully!');
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast.error(error.message);
     },
   });
 

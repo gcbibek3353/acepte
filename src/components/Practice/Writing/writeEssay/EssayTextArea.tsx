@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 
@@ -30,12 +31,12 @@ const EssayTextArea = ({ essayId, onSubmitted }: { essayId: string, onSubmitted?
                 // ignore
             }
             setEssay('');
-            alert('Essay submitted and evaluated successfully!');
+            toast.success('Essay submitted and evaluated successfully!');
             router.refresh();
             if (onSubmitted) await onSubmitted();
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast.error(error.message);
         },
     });
 

@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import PlayAudio from '../PlayAudio'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -33,10 +34,10 @@ const SummarizeSpokenTextComponent = ({ passageId, audioUrl }: SummarizeSpokenTe
             queryClient.invalidateQueries({ queryKey: [detailUrl] });
             router.refresh();
             setEssay('');
-            alert('Summary submitted successfully!');
+            toast.success('Summary submitted successfully!');
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast.error(error.message);
         },
     });
 

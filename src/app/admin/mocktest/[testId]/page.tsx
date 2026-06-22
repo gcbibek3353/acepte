@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Save, Plus, Archive, Globe, FileText } from "lucide-react";
@@ -154,7 +155,7 @@ export default function AdminMockTestEditPage() {
         body: JSON.stringify({ section, order, timeLimit: time }),
       });
       const json = await res.json();
-      if (!res.ok) { alert(json.message); return; }
+      if (!res.ok) { toast.error(json.message); return; }
       setAddingSection(null);
       setSectionTime("");
       fetchTest();
@@ -171,13 +172,13 @@ export default function AdminMockTestEditPage() {
       body: JSON.stringify(data),
     });
     if (res.ok) fetchTest();
-    else { const json = await res.json(); alert(json.message); }
+    else { const json = await res.json(); toast.error(json.message); }
   }
 
   async function handleDeleteSection(sectionId: string) {
     const res = await fetch(`/api/v1/admin/mocktest/${testId}/sections/${sectionId}`, { method: "DELETE" });
     if (res.ok) fetchTest();
-    else { const json = await res.json(); alert(json.message); }
+    else { const json = await res.json(); toast.error(json.message); }
   }
 
   async function handleAddQuestion(sectionId: string, questionType: string, questionId: string) {
@@ -198,7 +199,7 @@ export default function AdminMockTestEditPage() {
       { method: "DELETE" }
     );
     if (res.ok) fetchTest();
-    else { const json = await res.json(); alert(json.message); }
+    else { const json = await res.json(); toast.error(json.message); }
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────

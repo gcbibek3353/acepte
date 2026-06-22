@@ -1,4 +1,5 @@
 'use client';
+import { toast } from 'sonner'
 import { userContext } from '@/context/userContext'
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useRef } from 'react'
@@ -77,7 +78,7 @@ const Header = ({ questionType, instruction, bookMarkURL, questionUniqueId, titl
             });
             if (res.ok) {
                 const data = await res.json();
-                alert(data.message);
+                toast.success(data.message);
                 setIsBookmarked(!isBookmarked);
             } else {
                 console.error('Failed to toggle bookmark');

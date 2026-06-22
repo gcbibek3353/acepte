@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
@@ -58,7 +59,7 @@ const FibDropDownComponent = ({ passage, passageId, blanks }: FIBDropDownProps) 
       router.refresh();
     },
     onError: (error) => {
-      alert(`Error: ${error.message}`);
+      toast.error(error.message);
     },
   });
 
