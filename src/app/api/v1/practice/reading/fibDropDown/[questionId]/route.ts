@@ -1,4 +1,4 @@
-import { FillBlanksDropdownPassage } from "@/generated/prisma";
+import { FibDropdownDetail } from "@/types/reading";
 import { auth_middleware } from "@/lib/auth-middleware";
 import { NextRequest, NextResponse } from "next/server";
 import readingController from "../../reading.controller";
@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ questionId: string }> }
-): Promise<NextResponse<ApiResponse<FillBlanksDropdownPassage | null>>> {
+): Promise<NextResponse<ApiResponse<FibDropdownDetail | null>>> {
   try {
     const { questionId } = await params;
 

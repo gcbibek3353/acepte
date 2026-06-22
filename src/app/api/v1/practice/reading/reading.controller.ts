@@ -1,5 +1,6 @@
 import { FillBlanksDragDropAnswer, FillBlanksDragDropBookmark, FillBlanksDragDropPassage, FillBlanksDropdownAnswer, FillBlanksDropdownBookmark, FillBlanksDropdownPassage, MultipleChoiceMultipleAnswer, MultipleChoiceMultipleBookmark, MultipleChoiceMultiplePassage, MultipleChoiceSingleAnswer, MultipleChoiceSingleBookmark, MultipleChoiceSinglePassage, ReorderParagraphAnswer, ReorderParagraphBookmark, ReorderParagraphPassage } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
+import { FibDragDropDetail, FibDropdownDetail, McmDetail, McsDetail, ReorderDetail } from "@/types/reading";
 
 interface QuestionQuery {
     page?: number;       // default 1
@@ -56,7 +57,7 @@ const getFibDropdownQuestions = async (userId: string, queryParams: QuestionQuer
     }
 }
 
-const getFibDropdownQuestionById = async (questionId: string): Promise<FillBlanksDropdownPassage | null> => {
+const getFibDropdownQuestionById = async (questionId: string): Promise<FibDropdownDetail | null> => {
     // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
     try {
         const question = await prisma.fillBlanksDropdownPassage.findUnique({
@@ -78,7 +79,16 @@ const getFibDropdownQuestionById = async (questionId: string): Promise<FillBlank
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.fillBlanksDropdownPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -213,7 +223,7 @@ const getMcmqQuestions = async (userId: string, queryParams: QuestionQuery): Pro
     }
 }
 
-const getMcmqQuestionById = async (questionId: string): Promise<MultipleChoiceMultiplePassage | null> => {
+const getMcmqQuestionById = async (questionId: string): Promise<McmDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.multipleChoiceMultiplePassage.findUnique({
@@ -235,7 +245,16 @@ const getMcmqQuestionById = async (questionId: string): Promise<MultipleChoiceMu
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.multipleChoiceMultiplePassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -368,7 +387,7 @@ const getReorderParagraphQuestions = async (userId: string, queryParams: Questio
     }
 }
 
-const getReorderParagraphQuestionById = async (questionId: string): Promise<ReorderParagraphPassage | null> => {
+const getReorderParagraphQuestionById = async (questionId: string): Promise<ReorderDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.reorderParagraphPassage.findUnique({
@@ -390,7 +409,16 @@ const getReorderParagraphQuestionById = async (questionId: string): Promise<Reor
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.reorderParagraphPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -520,7 +548,7 @@ const getFibDragDropQuestions = async (userId: string, queryParams: QuestionQuer
     }
 }
 
-const getFibDragDropQuestionById = async (questionId: string): Promise<FillBlanksDragDropPassage | null> => {
+const getFibDragDropQuestionById = async (questionId: string): Promise<FibDragDropDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.fillBlanksDragDropPassage.findUnique({
@@ -542,7 +570,16 @@ const getFibDragDropQuestionById = async (questionId: string): Promise<FillBlank
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.fillBlanksDragDropPassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;
@@ -674,7 +711,7 @@ const getMcsqQuestions = async (userId: string, queryParams: QuestionQuery): Pro
     }
 }
 
-const getMcsqQuestionById = async (questionId: string): Promise<MultipleChoiceSinglePassage | null> => {
+const getMcsqQuestionById = async (questionId: string): Promise<McsDetail | null> => {
     try {
         // TODO : Either include answers of user requesting the question only or return all answers with pagination. get user from middleware from parent function
         const question = await prisma.multipleChoiceSinglePassage.findUnique({
@@ -695,7 +732,16 @@ const getMcsqQuestionById = async (questionId: string): Promise<MultipleChoiceSi
             }
         });
         if (!question) return null;
-        return question;
+
+        // Sibling questions of this section for the header navigation dropdown.
+        // Ordered by the numeric suffix of questionId, ignoring the prefix.
+        const siblings = await prisma.multipleChoiceSinglePassage.findMany({
+            select: { id: true, questionId: true }
+        });
+        const numericSuffix = (qid: string) => parseInt(qid.replace(/^\D+/, ''), 10) || 0;
+        siblings.sort((a, b) => numericSuffix(a.questionId) - numericSuffix(b.questionId));
+
+        return { ...question, siblings };
     } catch (error) {
         console.log(error);
         return null;

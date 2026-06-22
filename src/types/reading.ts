@@ -23,7 +23,9 @@ export type FibDropdownDetail = Prisma.FillBlanksDropdownPassageGetPayload<{
     bookmarks: true
     blanks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type FibDragDropListItem = Prisma.FillBlanksDragDropPassageGetPayload<{
   include: {
@@ -48,7 +50,9 @@ export type FibDragDropDetail = Prisma.FillBlanksDragDropPassageGetPayload<{
     blanks: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type McmListItem = Prisma.MultipleChoiceMultiplePassageGetPayload<{
   include: {
@@ -73,7 +77,9 @@ export type McmDetail = Prisma.MultipleChoiceMultiplePassageGetPayload<{
     options: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type McsListItem = Prisma.MultipleChoiceSinglePassageGetPayload<{
   include: {
@@ -97,7 +103,9 @@ export type McsDetail = Prisma.MultipleChoiceSinglePassageGetPayload<{
     }
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export type ReorderListItem = Prisma.ReorderParagraphPassageGetPayload<{
   include: {
@@ -122,7 +130,9 @@ export type ReorderDetail = Prisma.ReorderParagraphPassageGetPayload<{
     paragraphs: true
     bookmarks: true
   }
-}>
+}> & {
+  siblings: { id: string; questionId: string }[]
+}
 
 export interface ApiResponse<T> {
   success: boolean

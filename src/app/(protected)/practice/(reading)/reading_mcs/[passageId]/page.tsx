@@ -60,6 +60,9 @@ const ReadingMCSPage = async ({ params }: { params: Promise<{ passageId: string 
           bookMarkURL={`${URL}/bookmark`}
           bookmarks={questionData.bookmarks}
           difficulty={questionData.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard'}
+          siblings={questionData.siblings}
+          currentId={passageId}
+          baseRoute="/practice/reading_mcs"
         />
 
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm mb-6">
