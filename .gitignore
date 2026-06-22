@@ -52,3 +52,8 @@ selectMissingword
 summarizeSpokenText
 writeFromDictation
 repeatSentence
+describeImage
+retellLecture
+answerShortQuestion
+groupDiscussion
+respondToSituation
