@@ -1,7 +1,15 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 
-const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
+interface PlayAudioProps {
+    audioUrl: string;
+    /** Attempt to play automatically once the audio is ready. */
+    autoPlay?: boolean;
+    /** Called when playback reaches the end (whether started manually or via autoPlay). */
+    onEnded?: () => void;
+}
+
+const PlayAudio = ({ audioUrl, autoPlay = false, onEnded }: PlayAudioProps) => {
     const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
@@ -19,24 +27,34 @@ const PlayAudio = ({ audioUrl }: { audioUrl: string }) => {
             setDuration(audio.duration)
             setError(null)
         }
-        const handleEnded = () => setIsPlaying(false)
+        const handleEnded = () => {
+            setIsPlaying(false)
+            onEnded?.()
+        }
         const handleError = () => {
             setError('Failed to load audio')
             setIsPlaying(false)
+        }
+        const tryAutoPlay = () => {
+            audio.play().then(() => setIsPlaying(true)).catch(() => {
+                // Autoplay blocked by the browser — user can press play manually.
+            })
         }
 
         audio.addEventListener('timeupdate', updateTime)
         audio.addEventListener('loadedmetadata', updateDuration)
         audio.addEventListener('ended', handleEnded)
         audio.addEventListener('error', handleError)
+        if (autoPlay) audio.addEventListener('canplay', tryAutoPlay, { once: true })
 
         return () => {
             audio.removeEventListener('timeupdate', updateTime)
             audio.removeEventListener('loadedmetadata', updateDuration)
             audio.removeEventListener('ended', handleEnded)
             audio.removeEventListener('error', handleError)
+            audio.removeEventListener('canplay', tryAutoPlay)
         }
-    }, [audioUrl])
+    }, [audioUrl, autoPlay, onEnded])
 
     const togglePlayPause = () => {
         const audio = audioRef.current

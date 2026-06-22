@@ -12,6 +12,7 @@ interface Describe_imageProps {
 
 const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [recordingKey, setRecordingKey] = useState(0);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -56,9 +57,19 @@ const Describe_image = ({ imageUrl, questionId }: Describe_imageProps) => {
         />
       </div>
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={25} />
+      <AudioRecorder maxRecordTime={40} key={recordingKey} audioFile={audioFile} setAudioFile={setAudioFile} prepTime={25} />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => { setAudioFile(null); setRecordingKey(k => k + 1); }}
+          disabled={!audioFile || isSubmitting}
+          className="px-6 py-2 rounded-lg font-medium
+                     border border-gray-300 text-gray-700
+                     hover:bg-gray-50
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Redo
+        </button>
         <button
           onClick={() => audioFile && submitAnswer(audioFile)}
           disabled={!audioFile || isSubmitting}

@@ -52,7 +52,7 @@ const Read_Aloud = ({ passage, questionId }: Read_AloudProps) => {
         {/* <p className="text-base leading-relaxed text-foreground">{passage}</p> */}
       </div>
 
-      <AudioRecorder key={recordingKey} audioFile={audioFile} setAudioFile={setAudioFile} prepTime={40} />
+      <AudioRecorder key={recordingKey} maxRecordTime={40} audioFile={audioFile} setAudioFile={setAudioFile} prepTime={40} />
 
       <div className="flex justify-end gap-3">
         <button

@@ -13,6 +13,7 @@ interface AnswerShortQuestionProps {
 
 const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [recordingKey, setRecordingKey] = useState(0);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -44,9 +45,16 @@ const AnswerShortQuestion = ({ audioUrl, questionId }: AnswerShortQuestionProps)
     <div className="space-y-6">
       <PlayAudio audioUrl={audioUrl} />
 
-      <AudioRecorder audioFile={audioFile} setAudioFile={setAudioFile} prepTime={3} />
+      <AudioRecorder key={recordingKey} audioFile={audioFile} setAudioFile={setAudioFile} prepTime={3} />
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => { setAudioFile(null); setRecordingKey(k => k + 1); }}
+          disabled={!audioFile || isSubmitting}
+          className="px-5 py-2 text-sm font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+        >
+          Redo
+        </button>
         <button
           onClick={() => audioFile && submitAnswer(audioFile)}
           disabled={!audioFile || isSubmitting}

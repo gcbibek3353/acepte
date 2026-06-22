@@ -8,6 +8,8 @@ interface AudioRecorderProps {
   setAudioFile: (file: File) => void;
   prepTime?: number;
   maxRecordTime?: number;
+  /** Gate the prep countdown — recording flow won't begin until this is true. Defaults to true (starts on mount). */
+  start?: boolean;
 }
 
 function playBeep() {
@@ -30,13 +32,15 @@ export default function AudioRecorder({
   setAudioFile,
   prepTime = 0,
   maxRecordTime = 30,
+  start = true,
 }: AudioRecorderProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const prepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prepStartedRef = useRef(false);
 
-  const [phase, setPhase] = useState<Phase>(prepTime > 0 ? 'preparing' : 'idle');
+  const [phase, setPhase] = useState<Phase>(prepTime > 0 && start ? 'preparing' : 'idle');
   const [prepCountdown, setPrepCountdown] = useState(prepTime);
   const [recordRemaining, setRecordRemaining] = useState(maxRecordTime);
   const [audioURL, setAudioURL] = useState<string | null>(null);
@@ -88,9 +92,13 @@ export default function AudioRecorder({
     }
   };
 
-  // Prep countdown — runs once on mount
+  // Prep countdown — begins once `start` is true (immediately on mount when start defaults to true)
   useEffect(() => {
-    if (prepTime <= 0) return;
+    if (!start || prepStartedRef.current || prepTime <= 0) return;
+    prepStartedRef.current = true;
+
+    setPhase('preparing');
+    setPrepCountdown(prepTime);
 
     let remaining = prepTime;
     prepTimerRef.current = setInterval(() => {
@@ -103,12 +111,8 @@ export default function AudioRecorder({
         startRecordingAsync();
       }
     }, 1000);
-
-    return () => {
-      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
-    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [start]);
 
   // Cleanup on unmount
   useEffect(() => {
