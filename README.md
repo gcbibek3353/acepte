@@ -8,7 +8,7 @@ Acepte is a full-stack web application designed to help students prepare for the
 
 ## ✨ Features 
 
-### 📝 Practice Modules
+### 📝 Practice Modules 
 - **Speaking**: Read Aloud, Repeat Sentence, Describe Image, Re-tell Lecture, Answer Short Question, Summarize Group Discussion, Respond to a Situation
 - **Writing**: Summarize Written Text, Write Essay
 - **Reading**: Fill in the Blanks (Dropdown & Drag-and-Drop), Multiple Choice (Single & Multiple), Re-order Paragraphs
