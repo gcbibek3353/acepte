@@ -13,7 +13,7 @@ export const auth = betterAuth({
     },
     plugins: [admin(), expo()],
     // Allow the Expo mobile app (deep-link scheme "mobile") to authenticate.
-    trustedOrigins: ["mobile://"],
+    trustedOrigins: ["mobile://", "exp://"],
     session: {
         cookieCache: {
             enabled: true,
