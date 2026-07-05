@@ -51,13 +51,34 @@ export async function POST(request: NextRequest) {
         }
 
         const buffer = Buffer.from(await audioFile.arrayBuffer());
-        const key = `${subdir}/${uuid()}.webm`;
+
+        // Respect the uploaded file's real format (web sends audio/webm, mobile
+        // sends audio/m4a etc.) instead of hardcoding webm, so the stored object
+        // and its content-type match the actual bytes.
+        const contentType = audioFile.type || "audio/webm";
+        const EXT_BY_TYPE: Record<string, string> = {
+            "audio/webm": "webm",
+            "audio/mp4": "m4a",
+            "audio/m4a": "m4a",
+            "audio/x-m4a": "m4a",
+            "audio/aac": "aac",
+            "audio/mpeg": "mp3",
+            "audio/wav": "wav",
+            "audio/x-wav": "wav",
+            "audio/3gpp": "3gp",
+            "audio/ogg": "ogg",
+        };
+        const nameExt = (audioFile.name?.split(".").pop() || "").toLowerCase();
+        const ext = /^[a-z0-9]{1,5}$/.test(nameExt)
+            ? nameExt
+            : EXT_BY_TYPE[contentType] || "webm";
+        const key = `${subdir}/${uuid()}.${ext}`;
 
         const command = new PutObjectCommand({
             Bucket: bucketName,
             Key: key,
             Body: buffer,
-            ContentType: "audio/webm",
+            ContentType: contentType,
         });
 
         await s3Client.send(command);
